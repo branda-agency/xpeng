@@ -13,8 +13,8 @@
       display: flex;
       align-items: center;
       justify-content: center;
-      background: #0a0a0a;
-      color: #fff;
+      background: #fff;
+      color: #1a1a1a;
       padding: 1.5rem;
     }
 
@@ -24,15 +24,20 @@
       text-align: center;
     }
 
+    .logo {
+      width: 160px;
+      margin-bottom: 2.5rem;
+    }
+
     h1 {
-      font-size: 2rem;
-      font-weight: 700;
+      font-size: 2.6rem;
+      font-weight: 400;
       margin-bottom: 0.5rem;
       letter-spacing: -0.02em;
     }
 
     .subtitle {
-      color: #888;
+      color: #666;
       font-size: 1rem;
       margin-bottom: 2.5rem;
       line-height: 1.5;
@@ -47,25 +52,25 @@
     input {
       width: 100%;
       padding: 0.85rem 1rem;
-      border: 1px solid #2a2a2a;
+      border: 1px solid #d9d9d9;
       border-radius: 8px;
-      background: #141414;
-      color: #fff;
+      background: #f5f5f5;
+      color: #1a1a1a;
       font-size: 1rem;
       outline: none;
       transition: border-color 0.2s;
     }
 
-    input::placeholder { color: #555; }
-    input:focus { border-color: #fff; }
+    input::placeholder { color: #999; }
+    input:focus { border-color: #1a1a1a; }
 
     button {
       width: 100%;
       padding: 0.85rem 1rem;
       border: none;
       border-radius: 8px;
-      background: #fff;
-      color: #0a0a0a;
+      background: #1a1a1a;
+      color: #fff;
       font-size: 1rem;
       font-weight: 600;
       cursor: pointer;
@@ -75,25 +80,15 @@
     button:hover { opacity: 0.85; }
     button:disabled { opacity: 0.5; cursor: not-allowed; }
 
-    .consent {
-      display: flex;
-      align-items: flex-start;
-      gap: 0.5rem;
-      text-align: left;
-      font-size: 0.8rem;
-      color: #888;
+    .disclaimer {
+      font-size: 0.75rem;
+      color: #999;
       line-height: 1.4;
+      text-align: center;
     }
 
-    .consent input[type="checkbox"] {
-      width: auto;
-      margin-top: 0.15rem;
-      flex-shrink: 0;
-      accent-color: #fff;
-    }
-
-    .consent a { color: #ccc; text-decoration: underline; }
-    .consent a:hover { color: #fff; }
+    .disclaimer a { color: #666; text-decoration: underline; }
+    .disclaimer a:hover { color: #000; }
 
     .message {
       margin-top: 1rem;
@@ -101,22 +96,20 @@
       min-height: 1.4em;
     }
 
-    .message.success { color: #4ade80; }
-    .message.error { color: #f87171; }
+    .message.success { color: #16a34a; }
+    .message.error { color: #dc2626; }
   </style>
 </head>
 <body>
   <div class="container">
+    <img src="/logo.png" alt="XPeng" class="logo">
     <h1>Join the Waitlist</h1>
-    <p class="subtitle">Be the first to know when we launch. Drop your details below.</p>
+    <p class="subtitle">Sign up to receive exclusive offers, updates and news about our vehicles.</p>
 
     <form id="lead-form">
       <input type="text" name="name" placeholder="Your name" required autocomplete="name">
       <input type="email" name="email" placeholder="Your email" required autocomplete="email">
-      <label class="consent">
-        <input type="checkbox" id="consent" required>
-        I agree to receive marketing emails and offers. View our <a href="/privacy.html" target="_blank">Privacy Policy</a>.
-      </label>
+      <p class="disclaimer">By signing up, you agree to receive marketing emails and offers. See our <a href="/privacy.html" target="_blank">Privacy Policy</a>.</p>
       <button type="submit">Sign Up</button>
     </form>
 
