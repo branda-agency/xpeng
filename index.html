@@ -1,0 +1,148 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>XPeng — Join the Waitlist</title>
+  <style>
+    *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
+
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      background: #0a0a0a;
+      color: #fff;
+      padding: 1.5rem;
+    }
+
+    .container {
+      width: 100%;
+      max-width: 440px;
+      text-align: center;
+    }
+
+    h1 {
+      font-size: 2rem;
+      font-weight: 700;
+      margin-bottom: 0.5rem;
+      letter-spacing: -0.02em;
+    }
+
+    .subtitle {
+      color: #888;
+      font-size: 1rem;
+      margin-bottom: 2.5rem;
+      line-height: 1.5;
+    }
+
+    form {
+      display: flex;
+      flex-direction: column;
+      gap: 1rem;
+    }
+
+    input {
+      width: 100%;
+      padding: 0.85rem 1rem;
+      border: 1px solid #2a2a2a;
+      border-radius: 8px;
+      background: #141414;
+      color: #fff;
+      font-size: 1rem;
+      outline: none;
+      transition: border-color 0.2s;
+    }
+
+    input::placeholder { color: #555; }
+    input:focus { border-color: #fff; }
+
+    button {
+      width: 100%;
+      padding: 0.85rem 1rem;
+      border: none;
+      border-radius: 8px;
+      background: #fff;
+      color: #0a0a0a;
+      font-size: 1rem;
+      font-weight: 600;
+      cursor: pointer;
+      transition: opacity 0.2s;
+    }
+
+    button:hover { opacity: 0.85; }
+    button:disabled { opacity: 0.5; cursor: not-allowed; }
+
+    .message {
+      margin-top: 1rem;
+      font-size: 0.9rem;
+      min-height: 1.4em;
+    }
+
+    .message.success { color: #4ade80; }
+    .message.error { color: #f87171; }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1>Join the Waitlist</h1>
+    <p class="subtitle">Be the first to know when we launch. Drop your details below.</p>
+
+    <form id="lead-form">
+      <input type="text" name="name" placeholder="Your name" required autocomplete="name">
+      <input type="email" name="email" placeholder="Your email" required autocomplete="email">
+      <button type="submit">Sign Up</button>
+    </form>
+
+    <p class="message" id="message"></p>
+  </div>
+
+  <!-- Supabase JS (lightweight CDN bundle) -->
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
+
+  <script>
+    // ──────────────────────────────────────────────
+    // CONFIGURE THESE — grab from your Supabase dashboard:
+    //   Settings → API → Project URL + anon/public key
+    // ──────────────────────────────────────────────
+    const SUPABASE_URL  = 'https://cfuhehympgwojnqupyan.supabase.co';
+    const SUPABASE_ANON = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImNmdWhlaHltcGd3b2pucXVweWFuIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzczNTUzNDgsImV4cCI6MjA5MjkzMTM0OH0.8pUV6I7ri-Ucfrb0xMd_mNV67da9AGSQpAO5aWgtBQM';
+
+    const db = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON);
+
+    const form = document.getElementById('lead-form');
+    const msg  = document.getElementById('message');
+
+    form.addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const btn = form.querySelector('button');
+      btn.disabled = true;
+      btn.textContent = 'Submitting…';
+      msg.textContent = '';
+      msg.className = 'message';
+
+      const name  = form.name.value.trim();
+      const email = form.email.value.trim();
+
+      const { error } = await db
+        .from('leads')
+        .insert([{ name, email }]);
+
+      if (error) {
+        msg.textContent = 'Something went wrong. Please try again.';
+        msg.classList.add('error');
+        console.error(error);
+      } else {
+        msg.textContent = 'You\'re on the list! We\'ll be in touch.';
+        msg.classList.add('success');
+        form.reset();
+      }
+
+      btn.disabled = false;
+      btn.textContent = 'Sign Up';
+    });
+  </script>
+</body>
+</html>
