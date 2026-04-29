@@ -1,9 +1,9 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="bg">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>XPeng — Join the Waitlist</title>
+  <title>XPENG — Запишете се</title>
   <style>
     *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
 
@@ -30,7 +30,7 @@
     }
 
     h1 {
-      font-size: 2.6rem;
+      font-size: 2rem;
       font-weight: 400;
       margin-bottom: 0.5rem;
       letter-spacing: -0.02em;
@@ -103,14 +103,14 @@
 <body>
   <div class="container">
     <img src="/logo.png" alt="XPeng" class="logo">
-    <h1>Join the Waitlist</h1>
-    <p class="subtitle">Sign up to receive exclusive offers, updates and news about our vehicles.</p>
+    <h1>Бъдете сред първите, които ще се срещнат с XPENG в България</h1>
+    <p class="subtitle">Запишете се тук за ексклузивен достъп до цени и информация преди официалното им обявяване.</p>
 
     <form id="lead-form">
-      <input type="text" name="name" placeholder="Your name" required autocomplete="name">
-      <input type="email" name="email" placeholder="Your email" required autocomplete="email">
-      <p class="disclaimer">By signing up, you agree to receive marketing emails and offers. See our <a href="/privacy.html" target="_blank">Privacy Policy</a>.</p>
-      <button type="submit">Sign Up</button>
+      <input type="text" name="name" placeholder="Вашето име" required autocomplete="name">
+      <input type="email" name="email" placeholder="Вашият имейл" required autocomplete="email">
+      <p class="disclaimer">С регистрацията си се съгласявате да получавате информация, свързана с XPENG в България. Можете да се отпишете по всяко време. <a href="/privacy.html" target="_blank">Политика за поверителност</a>.</p>
+      <button type="submit">Запишете се</button>
     </form>
 
     <p class="message" id="message"></p>
@@ -136,7 +136,7 @@
       e.preventDefault();
       const btn = form.querySelector('button');
       btn.disabled = true;
-      btn.textContent = 'Submitting…';
+      btn.textContent = 'Изпращане…';
       msg.textContent = '';
       msg.className = 'message';
 
@@ -148,17 +148,17 @@
         .insert([{ name, email }]);
 
       if (error) {
-        msg.textContent = 'Something went wrong. Please try again.';
+        msg.textContent = 'Нещо се обърка. Моля, опитайте отново.';
         msg.classList.add('error');
         console.error(error);
       } else {
-        msg.textContent = 'You\'re on the list! We\'ll be in touch.';
+        msg.textContent = 'Успешна регистрация! Ще се свържем с вас скоро.';
         msg.classList.add('success');
         form.reset();
       }
 
       btn.disabled = false;
-      btn.textContent = 'Sign Up';
+      btn.textContent = 'Запишете се';
     });
   </script>
 </body>
