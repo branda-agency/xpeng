@@ -1,0 +1,52 @@
+/* ============================================================
+   XPENG Bulgaria — Motion CSS
+   ONLY for animation/transition styles. Layout lives in Webflow.
+   ============================================================ */
+
+/* --- Color picker active swatch --- */
+[data-color-swatch] {
+  cursor: pointer;
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+[data-color-swatch]:hover {
+  transform: scale(1.15);
+}
+
+[data-color-swatch][data-color-active] {
+  box-shadow: 0 0 0 2px #000;
+  transform: scale(1.15);
+}
+
+/* --- Color images stacking --- */
+[data-color-image] {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+}
+
+/* --- Specs tabs --- */
+[data-specs-tab] {
+  cursor: pointer;
+}
+
+[data-specs-panel] {
+  display: none;
+}
+
+[data-specs-panel].is-active,
+[data-specs-panel]:first-child {
+  display: block;
+}
+
+/* --- Form consent disabled state --- */
+[data-consent-submit][disabled] {
+  cursor: not-allowed;
+}
+
+/* --- Nav transition --- */
+[data-menu-wrap] {
+  will-change: transform;
+}

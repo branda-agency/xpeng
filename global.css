@@ -1,0 +1,84 @@
+/* ============================================================
+   XPENG Bulgaria — Global CSS
+   Paste in Webflow Site Settings → Custom Code → Head
+   Fluid scaling system + reset. NOT for component styles.
+   ============================================================ */
+
+/* --- Responsive Fluid Scaling --- */
+
+:root {
+  --size-unit: 16;
+  --size-container-ideal: 1920;
+  --size-container-min: 992px;
+  --size-container-max: 1920px;
+  --size-container: clamp(var(--size-container-min), 100vw, var(--size-container-max));
+  --size-font: calc(var(--size-container) / (var(--size-container-ideal) / var(--size-unit)));
+}
+
+@media screen and (max-width: 991px) {
+  :root {
+    --size-container-ideal: 834;
+    --size-container-min: 768px;
+    --size-container-max: 991px;
+  }
+}
+
+@media screen and (max-width: 767px) {
+  :root {
+    --size-container-ideal: 390;
+    --size-container-min: 480px;
+    --size-container-max: 767px;
+  }
+}
+
+@media screen and (max-width: 479px) {
+  :root {
+    --size-container-ideal: 390;
+    --size-container-min: 320px;
+    --size-container-max: 479px;
+  }
+}
+
+/* --- Reset --- */
+
+*, *:after, *:before {
+  -webkit-box-sizing: border-box;
+  -moz-box-sizing: border-box;
+  box-sizing: border-box;
+}
+
+html { scroll-behavior: initial; }
+
+html, body {
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  text-rendering: optimizeLegibility;
+}
+
+body {
+  font-size: var(--size-font);
+  margin: 0;
+  min-height: 100vh;
+}
+
+/* Hidden scrollbar (Lenis handles scroll) */
+body::-webkit-scrollbar, body ::-webkit-scrollbar { display: none; }
+body { -ms-overflow-style: none; }
+html { scrollbar-width: none; }
+
+svg {
+  max-width: none;
+  height: auto;
+  box-sizing: border-box;
+  vertical-align: middle;
+}
+
+/* --- FOUC Prevention --- */
+
+[data-split="heading"] { visibility: hidden; }
+[data-reveal-group] > * { visibility: hidden; }
+
+.wf-design-mode [data-split="heading"],
+.w-editor [data-split="heading"],
+.wf-design-mode [data-reveal-group] > *,
+.w-editor [data-reveal-group] > * { visibility: visible !important; }
