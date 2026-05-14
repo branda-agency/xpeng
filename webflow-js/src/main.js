@@ -448,9 +448,10 @@ function initHeroSlider() {
       ease: 'power2.in',
     });
 
-    // 2. Slide bg: prev exits, next enters
+    // 2. Slide bg: prev exits from current position (no snap), next enters
     tl.to(slides[prev], {
       xPercent: dir * -100,
+      x: 0,
       duration: crossfadeDuration,
       ease,
     }, 0.3);
@@ -459,6 +460,7 @@ function initHeroSlider() {
       xPercent: dir * 100,
     }, {
       xPercent: 0,
+      x: 0,
       duration: crossfadeDuration,
       ease,
     }, 0.3);
@@ -528,8 +530,7 @@ function initHeroSlider() {
     const rawDelta = e.clientX - dragStartX;
 
     if (Math.abs(rawDelta) > COMMIT_THRESHOLD) {
-      // Snap current slide back to x:0 before full transition
-      gsap.set(slides[current], { x: 0 });
+      // Continue from dragged position — goToSlide animates x back to 0
       if (rawDelta < 0) nextSlide();
       else prevSlide();
     } else {
