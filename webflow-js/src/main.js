@@ -415,6 +415,7 @@ function initHeroSlider() {
   let current = 0;
   let progressTween = null;
   let isAnimating = false;
+  let peekIndex = -1;
 
   // Initial state: all slides off-screen right, first slide centered
   gsap.set(slides, { xPercent: 100, autoAlpha: 1 });
@@ -426,7 +427,6 @@ function initHeroSlider() {
 
     const prev = current;
     current = index;
-    // Auto-detect direction: positive = next (left), negative = prev (right)
     const dir = direction !== undefined ? direction : (index > prev || (prev === slides.length - 1 && index === 0)) ? 1 : -1;
 
     if (progressTween) progressTween.kill();
@@ -435,37 +435,50 @@ function initHeroSlider() {
     const tl = gsap.timeline({
       onComplete: () => {
         isAnimating = false;
+        peekIndex = -1;
         startProgress();
       },
     });
 
-    // 1. Content out: stagger children up and fade
-    tl.to(contentChildren[prev], {
-      y: '-1.5em',
-      autoAlpha: 0,
-      duration: 0.4,
-      stagger: 0.05,
-      ease: 'power2.in',
-    });
+    // Everything runs together — one fluid motion
 
-    // 2. Slide bg: prev exits from current position (no snap), next enters
+    // Slides move (continue from current x position if dragged)
     tl.to(slides[prev], {
       xPercent: dir * -100,
       x: 0,
       duration: crossfadeDuration,
       ease,
-    }, 0.3);
+    }, 0);
 
-    tl.fromTo(slides[current], {
-      xPercent: dir * 100,
-    }, {
-      xPercent: 0,
-      x: 0,
-      duration: crossfadeDuration,
-      ease,
-    }, 0.3);
+    // Next slide: skip fromTo if already peeking from drag
+    if (peekIndex === index) {
+      tl.to(slides[current], {
+        xPercent: 0,
+        x: 0,
+        duration: crossfadeDuration,
+        ease,
+      }, 0);
+    } else {
+      tl.fromTo(slides[current], {
+        xPercent: dir * 100,
+      }, {
+        xPercent: 0,
+        x: 0,
+        duration: crossfadeDuration,
+        ease,
+      }, 0);
+    }
 
-    // 3. Content in: stagger children from bottom
+    // Content out: fast stagger, runs alongside slide
+    tl.to(contentChildren[prev], {
+      y: '-1.5em',
+      autoAlpha: 0,
+      duration: 0.3,
+      stagger: 0.04,
+      ease: 'power2.in',
+    }, 0);
+
+    // Content in: starts at 40% of slide duration
     tl.fromTo(contentChildren[current], {
       y: '1.5em',
       autoAlpha: 0,
@@ -473,9 +486,9 @@ function initHeroSlider() {
       y: 0,
       autoAlpha: 1,
       duration: 0.5,
-      stagger: 0.08,
+      stagger: 0.06,
       ease: 'power2.out',
-    }, 0.3 + crossfadeDuration * 0.5);
+    }, crossfadeDuration * 0.4);
   }
 
   function nextSlide() {
@@ -506,7 +519,6 @@ function initHeroSlider() {
   // Drag / swipe to switch slides
   let dragStartX = 0;
   let isDragging = false;
-  let peekIndex = -1;
   const COMMIT_THRESHOLD = 80;
   const DRAG_RESISTANCE = 0.4;
   const wrapperWidth = () => wrapper.offsetWidth;
