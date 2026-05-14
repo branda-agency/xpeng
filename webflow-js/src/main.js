@@ -506,21 +506,41 @@ function initHeroSlider() {
   // Drag / swipe to switch slides
   let dragStartX = 0;
   let isDragging = false;
+  let peekIndex = -1;
   const COMMIT_THRESHOLD = 80;
   const DRAG_RESISTANCE = 0.4;
+  const wrapperWidth = () => wrapper.offsetWidth;
 
   wrapper.addEventListener('pointerdown', (e) => {
     if (isAnimating) return;
     dragStartX = e.clientX;
     isDragging = true;
+    peekIndex = -1;
     wrapper.setPointerCapture(e.pointerId);
     if (progressTween) progressTween.pause();
   });
 
   wrapper.addEventListener('pointermove', (e) => {
     if (!isDragging) return;
-    const delta = (e.clientX - dragStartX) * DRAG_RESISTANCE;
+    const rawDelta = e.clientX - dragStartX;
+    const delta = rawDelta * DRAG_RESISTANCE;
+    const dir = rawDelta < 0 ? 1 : -1;
+    const nextIdx = dir === 1
+      ? (current + 1) % slides.length
+      : (current - 1 + slides.length) % slides.length;
+
+    // Position peek slide adjacent to current
+    if (peekIndex !== nextIdx) {
+      // Hide old peek if direction changed
+      if (peekIndex >= 0 && peekIndex !== nextIdx) {
+        gsap.set(slides[peekIndex], { xPercent: dir === 1 ? 100 : -100, x: 0 });
+      }
+      peekIndex = nextIdx;
+      gsap.set(slides[peekIndex], { xPercent: dir === 1 ? 100 : -100, x: 0 });
+    }
+
     gsap.set(slides[current], { x: delta });
+    gsap.set(slides[peekIndex], { x: delta });
   });
 
   wrapper.addEventListener('pointerup', (e) => {
@@ -530,16 +550,23 @@ function initHeroSlider() {
     const rawDelta = e.clientX - dragStartX;
 
     if (Math.abs(rawDelta) > COMMIT_THRESHOLD) {
-      // Continue from dragged position — goToSlide animates x back to 0
       if (rawDelta < 0) nextSlide();
       else prevSlide();
     } else {
-      // Rubber-band back
-      gsap.to(slides[current], {
+      // Rubber-band both slides back
+      const tweenTargets = [slides[current]];
+      if (peekIndex >= 0) tweenTargets.push(slides[peekIndex]);
+
+      gsap.to(tweenTargets, {
         x: 0,
         duration: 0.4,
         ease: 'power3.out',
         onComplete: () => {
+          // Reset peek slide off-screen
+          if (peekIndex >= 0 && peekIndex !== current) {
+            gsap.set(slides[peekIndex], { xPercent: 100, x: 0 });
+          }
+          peekIndex = -1;
           if (progressTween) progressTween.resume();
         },
       });
