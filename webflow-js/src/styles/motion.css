@@ -50,3 +50,13 @@
 [data-menu-wrap] {
   will-change: transform;
 }
+
+/* --- Hero slider --- */
+[data-hero-slide] {
+  will-change: opacity;
+}
+
+.hero-slider__bar-fill {
+  transform-origin: left center;
+  transform: scaleX(0);
+}

@@ -10,8 +10,8 @@
    DATA ATTRIBUTES (add in Webflow Designer)
    ============================================================
 
-   BODY (per page):
-     data-page="home"             → Page slug for routing
+   ROUTING:
+     URL pathname slug used for page routing (automatic, no attributes needed)
 
    NAV:
      data-menu-wrap               → Nav wrapper for hide/show on scroll
@@ -96,6 +96,12 @@ const CONFIG = {
     showEase: 'power2.out',
     velocityThreshold: 0.1,
     topThreshold: 50,
+  },
+
+  heroSlider: {
+    interval: 6000,
+    crossfadeDuration: 1,
+    ease: 'ease-xpeng',
   },
 };
 
@@ -370,18 +376,13 @@ function initFormConsent() {
    9. PAGE ROUTER
    ============================================================ */
 
-const PAGES = {
-  'home': initHomePage,
-  'g9': initProductPage,
-  'g6': initProductPage,
-  'p7-plus': initProductPage,
-};
+const PRODUCT_SLUGS = ['g9', 'g6', 'p7-plus'];
 
 function routePage() {
-  const slug = document.body.dataset.page;
-  if (slug && PAGES[slug]) {
-    PAGES[slug]();
-  }
+  const slug = window.location.pathname.replace(/^\/|\/$/g, '') || 'home';
+
+  if (slug === 'home') initHomePage();
+  else if (PRODUCT_SLUGS.includes(slug)) initProductPage();
 }
 
 
@@ -390,8 +391,77 @@ function routePage() {
    ============================================================ */
 
 function initHomePage() {
-  // Home-specific initializations
-  // Model carousel, 360 drag, etc.
+  initHeroSlider();
+}
+
+
+/* ============================================================
+   10a. HERO SLIDER
+   ============================================================ */
+
+function initHeroSlider() {
+  const wrapper = document.querySelector('[data-hero-slider]');
+  if (!wrapper) return;
+
+  const slides = wrapper.querySelectorAll('[data-hero-slide]');
+  const bars = wrapper.querySelectorAll('[data-hero-bar]');
+  if (slides.length < 2) return;
+
+  const fills = Array.from(bars).map((bar) => bar.querySelector('.hero-slider__bar-fill'));
+  const { interval, crossfadeDuration, ease } = CONFIG.heroSlider;
+  let current = 0;
+  let progressTween = null;
+
+  // Initial state: hide all slides, show first
+  gsap.set(slides, { autoAlpha: 0 });
+  gsap.set(slides[0], { autoAlpha: 1 });
+
+  function goToSlide(index) {
+    if (index === current) return;
+    const prev = current;
+    current = index;
+
+    if (progressTween) progressTween.kill();
+    gsap.set(fills, { scaleX: 0 });
+
+    // Crossfade
+    gsap.to(slides[prev], {
+      autoAlpha: 0,
+      duration: crossfadeDuration,
+      ease,
+    });
+    gsap.to(slides[current], {
+      autoAlpha: 1,
+      duration: crossfadeDuration,
+      ease,
+    });
+
+    startProgress();
+  }
+
+  function nextSlide() {
+    goToSlide((current + 1) % slides.length);
+  }
+
+  function startProgress() {
+    if (progressTween) progressTween.kill();
+    gsap.set(fills, { scaleX: 0 });
+
+    progressTween = gsap.to(fills[current], {
+      scaleX: 1,
+      duration: interval / 1000,
+      ease: 'none',
+      onComplete: nextSlide,
+    });
+  }
+
+  // Click on progress bars to jump
+  bars.forEach((bar, i) => {
+    bar.addEventListener('click', () => goToSlide(i));
+  });
+
+  // Start autoplay
+  startProgress();
 }
 
 function initProductPage() {
