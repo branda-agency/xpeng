@@ -408,39 +408,80 @@ function initHeroSlider() {
   if (slides.length < 2) return;
 
   const fills = Array.from(bars).map((bar) => bar.querySelector('.hero-slider__bar-fill'));
+  const contents = Array.from(slides).map((s) => s.querySelector('.hero-slider__content'));
+  const contentChildren = contents.map((c) => c ? Array.from(c.children) : []);
+
   const { interval, crossfadeDuration, ease } = CONFIG.heroSlider;
   let current = 0;
   let progressTween = null;
+  let isAnimating = false;
 
-  // Initial state: hide all slides, show first
-  gsap.set(slides, { autoAlpha: 0 });
-  gsap.set(slides[0], { autoAlpha: 1 });
+  // Initial state: all slides off-screen right, first slide centered
+  gsap.set(slides, { xPercent: 100, autoAlpha: 1 });
+  gsap.set(slides[0], { xPercent: 0 });
 
-  function goToSlide(index) {
-    if (index === current) return;
+  function goToSlide(index, direction) {
+    if (index === current || isAnimating) return;
+    isAnimating = true;
+
     const prev = current;
     current = index;
+    // Auto-detect direction: positive = next (left), negative = prev (right)
+    const dir = direction !== undefined ? direction : (index > prev || (prev === slides.length - 1 && index === 0)) ? 1 : -1;
 
     if (progressTween) progressTween.kill();
     gsap.set(fills, { scaleX: 0 });
 
-    // Crossfade
-    gsap.to(slides[prev], {
-      autoAlpha: 0,
-      duration: crossfadeDuration,
-      ease,
-    });
-    gsap.to(slides[current], {
-      autoAlpha: 1,
-      duration: crossfadeDuration,
-      ease,
+    const tl = gsap.timeline({
+      onComplete: () => {
+        isAnimating = false;
+        startProgress();
+      },
     });
 
-    startProgress();
+    // 1. Content out: stagger children up and fade
+    tl.to(contentChildren[prev], {
+      y: '-1.5em',
+      autoAlpha: 0,
+      duration: 0.4,
+      stagger: 0.05,
+      ease: 'power2.in',
+    });
+
+    // 2. Slide bg: prev exits, next enters
+    tl.to(slides[prev], {
+      xPercent: dir * -100,
+      duration: crossfadeDuration,
+      ease,
+    }, 0.3);
+
+    tl.fromTo(slides[current], {
+      xPercent: dir * 100,
+    }, {
+      xPercent: 0,
+      duration: crossfadeDuration,
+      ease,
+    }, 0.3);
+
+    // 3. Content in: stagger children from bottom
+    tl.fromTo(contentChildren[current], {
+      y: '1.5em',
+      autoAlpha: 0,
+    }, {
+      y: 0,
+      autoAlpha: 1,
+      duration: 0.5,
+      stagger: 0.08,
+      ease: 'power2.out',
+    }, 0.3 + crossfadeDuration * 0.5);
   }
 
   function nextSlide() {
-    goToSlide((current + 1) % slides.length);
+    goToSlide((current + 1) % slides.length, 1);
+  }
+
+  function prevSlide() {
+    goToSlide((current - 1 + slides.length) % slides.length, -1);
   }
 
   function startProgress() {
@@ -453,10 +494,6 @@ function initHeroSlider() {
       ease: 'none',
       onComplete: nextSlide,
     });
-  }
-
-  function prevSlide() {
-    goToSlide((current - 1 + slides.length) % slides.length);
   }
 
   // Click on progress bars to jump
