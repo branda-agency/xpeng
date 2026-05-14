@@ -619,6 +619,12 @@ function initModelsCarousel() {
   gsap.set(watermarks, { autoAlpha: 0, y: '0.5em' });
   gsap.set(watermarks[0], { autoAlpha: 1, y: 0 });
 
+  function updateArrows() {
+    if (prevBtn) gsap.to(prevBtn, { autoAlpha: current === 0 ? 0.4 : 1, duration: 0.3 });
+    if (nextBtn) gsap.to(nextBtn, { autoAlpha: current === slides.length - 1 ? 0.4 : 1, duration: 0.3 });
+  }
+  updateArrows();
+
   function goTo(index, dir) {
     if (index === current || isAnimating) return;
     isAnimating = true;
@@ -632,7 +638,10 @@ function initModelsCarousel() {
     tabs[current].classList.add('is-active');
 
     const tl = gsap.timeline({
-      onComplete: () => { isAnimating = false; },
+      onComplete: () => {
+        isAnimating = false;
+        updateArrows();
+      },
     });
 
     // Slides move

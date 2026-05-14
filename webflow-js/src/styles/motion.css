@@ -79,5 +79,6 @@
 }
 
 .models__arrow svg path {
+  stroke: #000000;
   transition: stroke 0.3s ease;
 }
