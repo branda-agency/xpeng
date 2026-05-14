@@ -74,14 +74,6 @@
   will-change: transform;
 }
 
-.models__viewport {
-  cursor: grab;
-}
-
-.models__viewport:active {
-  cursor: grabbing;
-}
-
 .models__tab {
   transition: color 0.3s ease;
 }
