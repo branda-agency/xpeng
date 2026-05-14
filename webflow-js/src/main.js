@@ -455,9 +455,38 @@ function initHeroSlider() {
     });
   }
 
+  function prevSlide() {
+    goToSlide((current - 1 + slides.length) % slides.length);
+  }
+
   // Click on progress bars to jump
   bars.forEach((bar, i) => {
     bar.addEventListener('click', () => goToSlide(i));
+  });
+
+  // Drag / swipe to switch slides
+  let dragStartX = 0;
+  let isDragging = false;
+  const DRAG_THRESHOLD = 50;
+
+  wrapper.addEventListener('pointerdown', (e) => {
+    dragStartX = e.clientX;
+    isDragging = true;
+    wrapper.setPointerCapture(e.pointerId);
+  });
+
+  wrapper.addEventListener('pointermove', (e) => {
+    if (!isDragging) return;
+    const delta = e.clientX - dragStartX;
+    if (Math.abs(delta) > DRAG_THRESHOLD) {
+      isDragging = false;
+      if (delta < 0) nextSlide();
+      else prevSlide();
+    }
+  });
+
+  wrapper.addEventListener('pointerup', () => {
+    isDragging = false;
   });
 
   // Start autoplay

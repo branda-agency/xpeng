@@ -52,6 +52,14 @@
 }
 
 /* --- Hero slider --- */
+[data-hero-slider] {
+  cursor: grab;
+}
+
+[data-hero-slider]:active {
+  cursor: grabbing;
+}
+
 [data-hero-slide] {
   will-change: opacity;
 }
