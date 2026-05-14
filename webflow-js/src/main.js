@@ -504,26 +504,45 @@ function initHeroSlider() {
   // Drag / swipe to switch slides
   let dragStartX = 0;
   let isDragging = false;
-  const DRAG_THRESHOLD = 50;
+  const COMMIT_THRESHOLD = 80;
+  const DRAG_RESISTANCE = 0.4;
 
   wrapper.addEventListener('pointerdown', (e) => {
+    if (isAnimating) return;
     dragStartX = e.clientX;
     isDragging = true;
     wrapper.setPointerCapture(e.pointerId);
+    if (progressTween) progressTween.pause();
   });
 
   wrapper.addEventListener('pointermove', (e) => {
     if (!isDragging) return;
-    const delta = e.clientX - dragStartX;
-    if (Math.abs(delta) > DRAG_THRESHOLD) {
-      isDragging = false;
-      if (delta < 0) nextSlide();
-      else prevSlide();
-    }
+    const delta = (e.clientX - dragStartX) * DRAG_RESISTANCE;
+    gsap.set(slides[current], { x: delta });
   });
 
-  wrapper.addEventListener('pointerup', () => {
+  wrapper.addEventListener('pointerup', (e) => {
+    if (!isDragging) return;
     isDragging = false;
+
+    const rawDelta = e.clientX - dragStartX;
+
+    if (Math.abs(rawDelta) > COMMIT_THRESHOLD) {
+      // Snap current slide back to x:0 before full transition
+      gsap.set(slides[current], { x: 0 });
+      if (rawDelta < 0) nextSlide();
+      else prevSlide();
+    } else {
+      // Rubber-band back
+      gsap.to(slides[current], {
+        x: 0,
+        duration: 0.4,
+        ease: 'power3.out',
+        onComplete: () => {
+          if (progressTween) progressTween.resume();
+        },
+      });
+    }
   });
 
   // Start autoplay
