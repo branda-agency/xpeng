@@ -607,6 +607,7 @@ function initModelsCarousel() {
   if (slides.length < 2) return;
 
   const infoChildren = Array.from(infos).map((info) => Array.from(info.children));
+  const watermarks = Array.from(slides).map((s) => s.querySelector('.models__watermark'));
   let current = 0;
   let isAnimating = false;
 
@@ -615,6 +616,8 @@ function initModelsCarousel() {
   gsap.set(slides[0], { xPercent: 0 });
   gsap.set(infos, { autoAlpha: 0, position: 'absolute', left: 0, right: 0 });
   gsap.set(infos[0], { autoAlpha: 1 });
+  gsap.set(watermarks, { autoAlpha: 0, y: '0.5em' });
+  gsap.set(watermarks[0], { autoAlpha: 1, y: 0 });
 
   function goTo(index, dir) {
     if (index === current || isAnimating) return;
@@ -646,6 +649,25 @@ function initModelsCarousel() {
       duration: 0.8,
       ease: 'ease-xpeng',
     }, 0);
+
+    // Watermark out
+    tl.to(watermarks[prev], {
+      y: '-0.5em',
+      autoAlpha: 0,
+      duration: 0.4,
+      ease: 'power2.in',
+    }, 0);
+
+    // Watermark in
+    tl.fromTo(watermarks[current], {
+      y: '0.5em',
+      autoAlpha: 0,
+    }, {
+      y: 0,
+      autoAlpha: 1,
+      duration: 0.6,
+      ease: 'power2.out',
+    }, 0.4);
 
     // Info out
     tl.to(infoChildren[prev], {
