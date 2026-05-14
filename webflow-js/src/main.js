@@ -669,14 +669,14 @@ function initModelsCarousel() {
 
     // Watermark in
     tl.fromTo(watermarks[current], {
-      y: '0.5em',
+      y: '1.5em',
       autoAlpha: 0,
     }, {
       y: 0,
       autoAlpha: 1,
       duration: 0.6,
       ease: 'power2.out',
-    }, 0.4);
+    }, 0.6);
 
     // Info out
     tl.to(infoChildren[prev], {
