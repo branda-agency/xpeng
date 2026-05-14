@@ -392,6 +392,7 @@ function routePage() {
 
 function initHomePage() {
   initHeroSlider();
+  initModelsCarousel();
 }
 
 
@@ -587,6 +588,171 @@ function initHeroSlider() {
 
   // Start autoplay
   startProgress();
+}
+
+
+/* ============================================================
+   10b. MODELS CAROUSEL
+   ============================================================ */
+
+function initModelsCarousel() {
+  const section = document.querySelector('[data-models]');
+  if (!section) return;
+
+  const tabs = section.querySelectorAll('[data-models-tab]');
+  const slides = section.querySelectorAll('[data-models-slide]');
+  const infos = section.querySelectorAll('[data-models-info]');
+  const prevBtn = section.querySelector('[data-models-prev]');
+  const nextBtn = section.querySelector('[data-models-next]');
+  if (slides.length < 2) return;
+
+  const infoChildren = Array.from(infos).map((info) => Array.from(info.children));
+  let current = 0;
+  let isAnimating = false;
+
+  // Initial state
+  gsap.set(slides, { xPercent: 100, autoAlpha: 1 });
+  gsap.set(slides[0], { xPercent: 0 });
+  gsap.set(infos, { autoAlpha: 0, position: 'absolute', left: 0, right: 0 });
+  gsap.set(infos[0], { autoAlpha: 1 });
+
+  function goTo(index, dir) {
+    if (index === current || isAnimating) return;
+    isAnimating = true;
+
+    const prev = current;
+    current = index;
+    if (dir === undefined) dir = index > prev ? 1 : -1;
+
+    // Update tabs
+    tabs.forEach((t) => t.classList.remove('is-active'));
+    tabs[current].classList.add('is-active');
+
+    const tl = gsap.timeline({
+      onComplete: () => { isAnimating = false; },
+    });
+
+    // Slides move
+    tl.to(slides[prev], {
+      xPercent: dir * -100,
+      duration: 0.8,
+      ease: 'ease-xpeng',
+    }, 0);
+
+    tl.fromTo(slides[current], {
+      xPercent: dir * 100,
+    }, {
+      xPercent: 0,
+      duration: 0.8,
+      ease: 'ease-xpeng',
+    }, 0);
+
+    // Info out
+    tl.to(infoChildren[prev], {
+      y: '-1em',
+      autoAlpha: 0,
+      duration: 0.3,
+      stagger: 0.04,
+      ease: 'power2.in',
+    }, 0);
+
+    tl.set(infos[prev], { autoAlpha: 0 }, 0.3);
+
+    // Info in
+    tl.set(infos[current], { autoAlpha: 1 }, 0.3);
+
+    tl.fromTo(infoChildren[current], {
+      y: '1em',
+      autoAlpha: 0,
+    }, {
+      y: 0,
+      autoAlpha: 1,
+      duration: 0.4,
+      stagger: 0.06,
+      ease: 'power2.out',
+    }, 0.4);
+  }
+
+  // Tab clicks
+  tabs.forEach((tab, i) => {
+    tab.addEventListener('click', () => goTo(i));
+  });
+
+  // Arrow clicks
+  if (prevBtn) prevBtn.addEventListener('click', () => {
+    goTo((current - 1 + slides.length) % slides.length, -1);
+  });
+  if (nextBtn) nextBtn.addEventListener('click', () => {
+    goTo((current + 1) % slides.length, 1);
+  });
+
+  // Drag support on viewport
+  const viewport = section.querySelector('.models__viewport');
+  if (!viewport) return;
+
+  let dragStartX = 0;
+  let isDragging = false;
+  let peekIdx = -1;
+  const THRESHOLD = 60;
+  const RESISTANCE = 0.4;
+
+  viewport.addEventListener('pointerdown', (e) => {
+    if (isAnimating) return;
+    dragStartX = e.clientX;
+    isDragging = true;
+    peekIdx = -1;
+    viewport.setPointerCapture(e.pointerId);
+  });
+
+  viewport.addEventListener('pointermove', (e) => {
+    if (!isDragging) return;
+    const rawDelta = e.clientX - dragStartX;
+    const delta = rawDelta * RESISTANCE;
+    const dir = rawDelta < 0 ? 1 : -1;
+    const nextIdx = dir === 1
+      ? (current + 1) % slides.length
+      : (current - 1 + slides.length) % slides.length;
+
+    if (peekIdx !== nextIdx) {
+      if (peekIdx >= 0 && peekIdx !== nextIdx) {
+        gsap.set(slides[peekIdx], { xPercent: 100, x: 0 });
+      }
+      peekIdx = nextIdx;
+      gsap.set(slides[peekIdx], { xPercent: dir === 1 ? 100 : -100, x: 0 });
+    }
+
+    gsap.set(slides[current], { x: delta });
+    gsap.set(slides[peekIdx], { x: delta });
+  });
+
+  viewport.addEventListener('pointerup', (e) => {
+    if (!isDragging) return;
+    isDragging = false;
+    const rawDelta = e.clientX - dragStartX;
+
+    if (Math.abs(rawDelta) > THRESHOLD) {
+      const dir = rawDelta < 0 ? 1 : -1;
+      const nextIdx = dir === 1
+        ? (current + 1) % slides.length
+        : (current - 1 + slides.length) % slides.length;
+      peekIdx = -1;
+      goTo(nextIdx, dir);
+    } else {
+      const targets = [slides[current]];
+      if (peekIdx >= 0) targets.push(slides[peekIdx]);
+      gsap.to(targets, {
+        x: 0,
+        duration: 0.4,
+        ease: 'power3.out',
+        onComplete: () => {
+          if (peekIdx >= 0 && peekIdx !== current) {
+            gsap.set(slides[peekIdx], { xPercent: 100, x: 0 });
+          }
+          peekIdx = -1;
+        },
+      });
+    }
+  });
 }
 
 function initProductPage() {

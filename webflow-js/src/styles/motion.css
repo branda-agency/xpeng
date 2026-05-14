@@ -68,3 +68,24 @@
   transform-origin: left center;
   transform: scaleX(0);
 }
+
+/* --- Models carousel --- */
+[data-models-slide] {
+  will-change: transform;
+}
+
+.models__viewport {
+  cursor: grab;
+}
+
+.models__viewport:active {
+  cursor: grabbing;
+}
+
+.models__tab {
+  transition: color 0.3s ease;
+}
+
+.models__arrow svg path {
+  transition: stroke 0.3s ease;
+}
