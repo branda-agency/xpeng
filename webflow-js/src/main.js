@@ -848,9 +848,41 @@ function initPeekSlider() {
 }
 
 
+/* ============================================================
+   10d. TABBED CAROUSEL
+   ============================================================ */
+
+function initTabbedCarousel() {
+  const sections = document.querySelectorAll('[data-tabbed-carousel]');
+  if (!sections.length) return;
+
+  sections.forEach((section) => {
+    const images = section.querySelectorAll('[data-tabbed-image]');
+    const tabLinks = section.querySelectorAll('.tabbed-carousel__tab');
+    if (!images.length || !tabLinks.length) return;
+
+    // Stack images and show only the first
+    gsap.set(images, { autoAlpha: 0 });
+    gsap.set(images[0], { autoAlpha: 1 });
+
+    let currentImage = 0;
+
+    tabLinks.forEach((tab, i) => {
+      tab.addEventListener('click', () => {
+        if (i === currentImage) return;
+        gsap.to(images[currentImage], { autoAlpha: 0, duration: 0.5, ease: 'power2.inOut' });
+        gsap.to(images[i], { autoAlpha: 1, duration: 0.5, ease: 'power2.inOut' });
+        currentImage = i;
+      });
+    });
+  });
+}
+
+
 function initProductPage() {
-  initColorPicker();
-  initSpecsTabs();
+  try { initColorPicker(); } catch (e) { console.error('colorPicker:', e); }
+  try { initSpecsTabs(); } catch (e) { console.error('specsTabs:', e); }
+  try { initTabbedCarousel(); } catch (e) { console.error('tabbedCarousel:', e); }
 }
 
 

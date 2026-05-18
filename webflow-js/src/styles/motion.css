@@ -171,6 +171,15 @@
   transform: scaleX(0);
 }
 
+/* --- Tabbed carousel image stacking --- */
+[data-tabbed-image] {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+}
+
 /* --- Element reveals (prevent FOUC before JS) --- */
 [data-reveal-group] > * {
   opacity: 0;
