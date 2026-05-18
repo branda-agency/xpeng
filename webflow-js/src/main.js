@@ -207,28 +207,37 @@ function initTextReveals() {
             : ['lines', 'words', 'chars'];
       const config = CONFIG.textReveal[type];
 
-      SplitText.create(heading, {
-        type: typesToSplit.join(', '),
-        mask: 'lines',
-        autoSplit: true,
-        linesClass: 'line',
-        wordsClass: 'word',
-        charsClass: 'char',
-        onSplit(instance) {
-          return gsap.from(instance[type], {
-            yPercent: 110,
-            duration: config.duration,
-            stagger: config.stagger,
-            ease: config.ease,
-            scrollTrigger: {
-              trigger: heading,
-              start: 'clamp(top 80%)',
-              once: true,
-            },
-          });
-        },
-      });
+      try {
+        SplitText.create(heading, {
+          type: typesToSplit.join(', '),
+          mask: 'lines',
+          autoSplit: true,
+          linesClass: 'line',
+          wordsClass: 'word',
+          charsClass: 'char',
+          onSplit(instance) {
+            return gsap.from(instance[type], {
+              yPercent: 110,
+              duration: config.duration,
+              stagger: config.stagger,
+              ease: config.ease,
+              scrollTrigger: {
+                trigger: heading,
+                start: 'clamp(top 80%)',
+                once: true,
+              },
+            });
+          },
+        });
+      } catch (e) {
+        // If SplitText fails, ensure text is visible
+        heading.style.visibility = 'visible';
+        console.error('SplitText error:', e);
+      }
     });
+
+    // Refresh triggers after all splits are created
+    ScrollTrigger.refresh();
   });
 }
 
