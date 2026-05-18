@@ -46,9 +46,99 @@
   cursor: not-allowed;
 }
 
-/* --- Nav transition --- */
+/* --- Nav transitions --- */
 [data-menu-wrap] {
   will-change: transform;
+  transition: background-color 0.35s ease, box-shadow 0.35s ease;
+}
+
+/* Nav dropdown hover */
+.nav__dropdown-menu {
+  opacity: 0;
+  pointer-events: none;
+  transform: translateX(-50%) translateY(0.5em);
+  transition: opacity 0.25s ease, transform 0.25s ease;
+}
+
+.nav__dropdown:hover .nav__dropdown-menu {
+  display: flex;
+  flex-direction: column;
+  opacity: 1;
+  pointer-events: auto;
+  transform: translateX(-50%) translateY(0);
+}
+
+.nav__dropdown-link {
+  transition: opacity 0.2s ease;
+}
+
+.nav__dropdown-link:hover {
+  opacity: 0.6;
+}
+
+/* Nav link hover */
+.nav__link {
+  transition: opacity 0.2s ease;
+}
+
+.nav__link:hover {
+  opacity: 0.7;
+}
+
+/* Nav CTA hover */
+.nav__cta {
+  transition: background-color 0.2s ease, border-color 0.2s ease, color 0.2s ease;
+}
+
+.nav__cta:hover {
+  background-color: rgba(255, 255, 255, 0.1);
+  border-color: rgba(255, 255, 255, 0.6);
+}
+
+/* Nav hamburger lines (for mobile menu animation) */
+.nav__hamburger-line {
+  transition: transform 0.3s ease, opacity 0.3s ease;
+}
+
+[data-menu-open="true"] .nav__hamburger-line:first-child {
+  transform: translateY(0.2em) rotate(45deg);
+}
+
+[data-menu-open="true"] .nav__hamburger-line:last-child {
+  transform: translateY(-0.2em) rotate(-45deg);
+}
+
+/* --- Peek slider --- */
+[data-peek-slide] {
+  will-change: transform, opacity;
+}
+
+.peek-slider__arrow {
+  transition: opacity 0.2s ease, color 0.2s ease;
+}
+
+.peek-slider__arrow:hover {
+  color: rgba(0, 0, 0, 0.6);
+}
+
+/* Arrow chevrons via CSS borders */
+.peek-slider__arrow::after {
+  content: '';
+  display: block;
+  width: 0.625em;
+  height: 0.625em;
+  border-top: 1.5px solid currentColor;
+  border-right: 1.5px solid currentColor;
+}
+
+.peek-slider__arrow.is-prev::after {
+  transform: rotate(-135deg);
+  margin-left: 0.25em;
+}
+
+.peek-slider__arrow.is-next::after {
+  transform: rotate(45deg);
+  margin-right: 0.25em;
 }
 
 /* --- Hero slider --- */
@@ -67,6 +157,11 @@
 .hero-slider__bar-fill {
   transform-origin: left center;
   transform: scaleX(0);
+}
+
+/* --- Element reveals (prevent FOUC before JS) --- */
+[data-reveal-group] > * {
+  opacity: 0;
 }
 
 /* --- Models carousel --- */

@@ -265,7 +265,7 @@ function initElementReveals() {
           duration: defaults.duration,
           ease: defaults.ease,
           stagger: stagger,
-          onComplete: () => gsap.set(children, { clearProps: 'all' }),
+          onComplete: () => gsap.set(children, { clearProps: 'transform' }),
         });
       },
     });
@@ -393,6 +393,7 @@ function routePage() {
 function initHomePage() {
   initHeroSlider();
   initModelsCarousel();
+  initPeekSlider();
 }
 
 
@@ -718,6 +719,78 @@ function initModelsCarousel() {
   });
 
 }
+
+/* ============================================================
+   10c. PEEK SLIDER
+   ============================================================ */
+
+function initPeekSlider() {
+  const section = document.querySelector('[data-peek-slider]');
+  if (!section) return;
+
+  const slides = section.querySelectorAll('[data-peek-slide]');
+  const prevBtn = section.querySelector('[data-peek-prev]');
+  const nextBtn = section.querySelector('[data-peek-next]');
+  if (slides.length < 2) return;
+
+  let current = 0;
+  let isAnimating = false;
+
+  function positionSlide(slide, offset, animate) {
+    const props = {
+      xPercent: offset * 110,
+      autoAlpha: offset === 0 ? 1 : 0.4,
+      zIndex: offset === 0 ? 2 : 1,
+      scale: offset === 0 ? 1 : 0.95,
+    };
+
+    if (animate) {
+      return gsap.to(slide, {
+        ...props,
+        duration: 0.8,
+        ease: 'ease-xpeng',
+      });
+    }
+    gsap.set(slide, props);
+  }
+
+  // Initial layout
+  slides.forEach((slide, i) => positionSlide(slide, i - current, false));
+
+  function updateArrows() {
+    if (prevBtn) gsap.to(prevBtn, { autoAlpha: current === 0 ? 0.3 : 1, duration: 0.3 });
+    if (nextBtn) gsap.to(nextBtn, { autoAlpha: current === slides.length - 1 ? 0.3 : 1, duration: 0.3 });
+  }
+  updateArrows();
+
+  function goTo(index) {
+    if (index === current || isAnimating || index < 0 || index >= slides.length) return;
+    isAnimating = true;
+    current = index;
+
+    const tl = gsap.timeline({
+      onComplete: () => {
+        isAnimating = false;
+        updateArrows();
+      },
+    });
+
+    slides.forEach((slide, i) => {
+      tl.to(slide, {
+        xPercent: (i - current) * 110,
+        autoAlpha: i === current ? 1 : 0.4,
+        zIndex: i === current ? 2 : 1,
+        scale: i === current ? 1 : 0.95,
+        duration: 0.8,
+        ease: 'ease-xpeng',
+      }, 0);
+    });
+  }
+
+  if (prevBtn) prevBtn.addEventListener('click', () => goTo(current - 1));
+  if (nextBtn) nextBtn.addEventListener('click', () => goTo(current + 1));
+}
+
 
 function initProductPage() {
   initColorPicker();
