@@ -216,6 +216,9 @@ function initTextReveals() {
           wordsClass: 'word',
           charsClass: 'char',
           onSplit(instance) {
+            // Override FOUC-prevention CSS — masks control visibility now
+            gsap.set(heading, { visibility: 'visible' });
+
             return gsap.from(instance[type], {
               yPercent: 110,
               duration: config.duration,
@@ -230,7 +233,6 @@ function initTextReveals() {
           },
         });
       } catch (e) {
-        // If SplitText fails, ensure text is visible
         heading.style.visibility = 'visible';
         console.error('SplitText error:', e);
       }
