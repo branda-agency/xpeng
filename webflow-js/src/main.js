@@ -379,9 +379,10 @@ function initFormConsent() {
 const PRODUCT_SLUGS = ['g9', 'g6', 'p7-plus'];
 
 function routePage() {
-  const slug = window.location.pathname.replace(/^\/|\/$/g, '') || 'home';
+  const path = window.location.pathname.replace(/^\/|\/$/g, '') || 'home';
+  const slug = path.split('/').pop();
 
-  if (slug === 'home') initHomePage();
+  if (path === 'home') initHomePage();
   else if (PRODUCT_SLUGS.includes(slug)) initProductPage();
 }
 
