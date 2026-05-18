@@ -109,6 +109,14 @@
 }
 
 /* --- Peek slider --- */
+.peek-slider__viewport {
+  cursor: grab;
+}
+
+.peek-slider__viewport:active {
+  cursor: grabbing;
+}
+
 [data-peek-slide] {
   will-change: transform, opacity;
 }

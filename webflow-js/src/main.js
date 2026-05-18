@@ -789,6 +789,62 @@ function initPeekSlider() {
 
   if (prevBtn) prevBtn.addEventListener('click', () => goTo(current - 1));
   if (nextBtn) nextBtn.addEventListener('click', () => goTo(current + 1));
+
+  // Drag / swipe
+  const viewport = section.querySelector('.peek-slider__viewport');
+  let dragStartX = 0;
+  let isDragging = false;
+  const COMMIT_THRESHOLD = 80;
+  const DRAG_RESISTANCE = 0.35;
+
+  viewport.addEventListener('pointerdown', (e) => {
+    if (isAnimating) return;
+    dragStartX = e.clientX;
+    isDragging = true;
+    viewport.setPointerCapture(e.pointerId);
+  });
+
+  viewport.addEventListener('pointermove', (e) => {
+    if (!isDragging) return;
+    const delta = (e.clientX - dragStartX) * DRAG_RESISTANCE;
+    const deltaPercent = (delta / viewport.offsetWidth) * 100;
+
+    slides.forEach((slide, i) => {
+      gsap.set(slide, {
+        xPercent: (i - current) * 110 + deltaPercent,
+      });
+    });
+  });
+
+  viewport.addEventListener('pointerup', (e) => {
+    if (!isDragging) return;
+    isDragging = false;
+
+    const rawDelta = e.clientX - dragStartX;
+
+    if (Math.abs(rawDelta) > COMMIT_THRESHOLD) {
+      if (rawDelta < 0 && current < slides.length - 1) {
+        goTo(current + 1);
+      } else if (rawDelta > 0 && current > 0) {
+        goTo(current - 1);
+      } else {
+        // Snap back — at boundaries
+        snapBack();
+      }
+    } else {
+      snapBack();
+    }
+  });
+
+  function snapBack() {
+    slides.forEach((slide, i) => {
+      gsap.to(slide, {
+        xPercent: (i - current) * 110,
+        duration: 0.4,
+        ease: 'power3.out',
+      });
+    });
+  }
 }
 
 
