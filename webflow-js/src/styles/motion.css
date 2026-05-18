@@ -111,6 +111,8 @@
 /* --- Peek slider --- */
 .peek-slider__viewport {
   cursor: grab;
+  user-select: none;
+  -webkit-user-select: none;
 }
 
 .peek-slider__viewport:active {
