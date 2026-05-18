@@ -391,9 +391,9 @@ function routePage() {
    ============================================================ */
 
 function initHomePage() {
-  initHeroSlider();
-  initModelsCarousel();
-  initPeekSlider();
+  try { initHeroSlider(); } catch (e) { console.error('heroSlider:', e); }
+  try { initModelsCarousel(); } catch (e) { console.error('modelsCarousel:', e); }
+  try { initPeekSlider(); } catch (e) { console.error('peekSlider:', e); }
 }
 
 
