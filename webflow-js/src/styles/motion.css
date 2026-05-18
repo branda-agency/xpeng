@@ -154,6 +154,8 @@
 /* --- Hero slider --- */
 [data-hero-slider] {
   cursor: grab;
+  user-select: none;
+  -webkit-user-select: none;
 }
 
 [data-hero-slider]:active {
