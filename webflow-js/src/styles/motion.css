@@ -172,12 +172,13 @@
 }
 
 /* --- Tabbed carousel image stacking --- */
+.tabbed-carousel__image-wrap {
+  display: grid;
+}
+
 [data-tabbed-image] {
-  position: absolute;
-  top: 0;
-  left: 0;
-  width: 100%;
-  height: 100%;
+  grid-row: 1 / -1;
+  grid-column: 1 / -1;
 }
 
 /* --- Element reveals (prevent FOUC before JS) --- */
