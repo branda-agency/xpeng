@@ -6,16 +6,15 @@
 /* --- Color picker active swatch --- */
 [data-color-swatch] {
   cursor: pointer;
-  transition: transform 0.2s ease, box-shadow 0.2s ease;
-}
-
-[data-color-swatch]:hover {
-  transform: scale(1.15);
+  transition: background-color 0.3s ease;
 }
 
 [data-color-swatch][data-color-active] {
-  box-shadow: 0 0 0 2px #000;
-  transform: scale(1.15);
+  background-color: rgba(0, 0, 0, 0.03);
+}
+
+[data-color-swatch][data-color-active] .color-picker__label {
+  display: block;
 }
 
 /* --- Color images stacking --- */
