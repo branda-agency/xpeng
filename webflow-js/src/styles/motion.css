@@ -198,3 +198,99 @@
   stroke: #000000;
   transition: stroke 0.3s ease;
 }
+
+/* --- Configurator --- */
+[data-cfg-image] {
+  will-change: opacity;
+}
+
+[data-cfg-variant-card] {
+  transition: border-color 0.25s ease, box-shadow 0.25s ease;
+}
+
+[data-cfg-variant-card][data-cfg-active] {
+  border-color: #0a0a1a;
+  box-shadow: inset 0 0 0 1px #0a0a1a;
+}
+
+[data-cfg-swatch] {
+  transition: background-color 0.25s ease;
+}
+
+[data-cfg-swatch][data-color-active] {
+  background-color: rgba(0, 0, 0, 0.04);
+}
+
+[data-cfg-swatch][data-color-active] .configurator__swatch-dot::before {
+  content: '';
+  position: absolute;
+  top: -0.2em;
+  left: -0.2em;
+  right: -0.2em;
+  bottom: -0.2em;
+  border: 1.5px solid #0a0a1a;
+  border-radius: 50%;
+}
+
+.configurator__swatch-dot {
+  position: relative;
+}
+
+[data-cfg-interior-option],
+[data-cfg-wheel-option] {
+  transition: border-color 0.25s ease, box-shadow 0.25s ease;
+}
+
+[data-cfg-interior-option][data-cfg-active],
+[data-cfg-wheel-option][data-cfg-active] {
+  border-color: #0a0a1a;
+  box-shadow: inset 0 0 0 1px #0a0a1a;
+}
+
+[data-cfg-accessory][data-cfg-active] {
+  border-color: #0a0a1a;
+  box-shadow: inset 0 0 0 1px #0a0a1a;
+}
+
+[data-cfg-accessory-toggle] {
+  transition: background-color 0.2s ease, color 0.2s ease, border-color 0.2s ease;
+}
+
+[data-cfg-active] [data-cfg-accessory-toggle] {
+  background-color: #0a0a1a;
+  color: #ffffff;
+  border-color: #0a0a1a;
+}
+
+[data-cfg-dot] {
+  transition: background-color 0.25s ease;
+}
+
+[data-cfg-dot][data-cfg-dot-active] {
+  background-color: rgba(0, 0, 0, 0.6);
+}
+
+[data-cfg-loading] .configurator__options {
+  opacity: 0.4;
+  pointer-events: none;
+  transition: opacity 0.3s ease;
+}
+
+.configurator__gallery-arrow::after {
+  content: '';
+  display: block;
+  width: 0.5em;
+  height: 0.5em;
+  border-top: 1.5px solid currentColor;
+  border-right: 1.5px solid currentColor;
+}
+
+.configurator__gallery-arrow.is-prev::after {
+  transform: rotate(-135deg);
+  margin-left: 0.15em;
+}
+
+.configurator__gallery-arrow.is-next::after {
+  transform: rotate(45deg);
+  margin-right: 0.15em;
+}

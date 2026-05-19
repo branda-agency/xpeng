@@ -388,12 +388,17 @@ function initFormConsent() {
    ============================================================ */
 
 const PRODUCT_SLUGS = ['g9', 'g6', 'p7-plus'];
+const CONFIGURATOR_SLUGS = ['g9', 'g6', 'p7-plus'];
 
 function routePage() {
   const path = window.location.pathname.replace(/^\/|\/$/g, '') || 'home';
-  const slug = path.split('/').pop();
+  const segments = path.split('/');
+  const slug = segments[segments.length - 1];
 
   if (path === 'home') initHomePage();
+  else if (segments.includes('configurator') && CONFIGURATOR_SLUGS.includes(slug)) {
+    initConfiguratorPage(slug);
+  }
   else if (PRODUCT_SLUGS.includes(slug)) initProductPage();
 }
 
@@ -887,6 +892,594 @@ function initTabbedCarousel() {
         currentImage = i;
       });
     });
+  });
+}
+
+
+/* ============================================================
+   10e. CONFIGURATOR
+   ============================================================ */
+
+// TODO: Replace with Google Sheets Apps Script endpoint
+const CONFIGURATOR_API = null; // 'https://script.google.com/macros/s/.../exec'
+
+// Mock data for development (G9)
+const MOCK_DATA = {
+  g9: {
+    model: { model_slug: 'g9', model_name: 'XPENG G9', starting_price: 59600 },
+    variants: [
+      { variant_code: 'rwd-sr', variant_name: 'RWD Standard Range', price: 59600, is_default: true, range_km: 435, power_kw: 230, acceleration: '6.4s', delivery_time: 'Q4 2026', sort_order: 1 },
+      { variant_code: 'rwd-lr', variant_name: 'RWD Long Range', price: 63600, is_default: false, range_km: 570, power_kw: 230, acceleration: '6.4s', delivery_time: 'Q4 2026', sort_order: 2 },
+      { variant_code: 'awd', variant_name: 'AWD Performance', price: 71600, is_default: false, range_km: 460, power_kw: 405, acceleration: '3.9s', delivery_time: 'Q1 2027', sort_order: 3 },
+    ],
+    colors: [
+      { variant_code: 'all', color_code: 'arctic-white', color_name: 'Arctic White', color_hex: '#F0EDE8', price: 0, is_default: true, image_front: '', image_side: '', image_rear: '', sort_order: 1 },
+      { variant_code: 'all', color_code: 'silver-frost', color_name: 'Silver Frost', color_hex: '#B8B8B8', price: 1000, is_default: false, image_front: '', image_side: '', image_rear: '', sort_order: 2 },
+      { variant_code: 'all', color_code: 'midnight-black', color_name: 'Midnight Black', color_hex: '#2D2D2D', price: 1000, is_default: false, image_front: '', image_side: '', image_rear: '', sort_order: 3 },
+      { variant_code: 'all', color_code: 'graphite-gray', color_name: 'Graphite Gray', color_hex: '#707070', price: 1500, is_default: false, image_front: '', image_side: '', image_rear: '', sort_order: 4 },
+    ],
+    interiors: [
+      { variant_code: 'all', interior_code: 'black', interior_name: 'Meteorite Black', price: 0, is_default: true, image_thumb: '', image_full: '', sort_order: 1 },
+      { variant_code: 'all', interior_code: 'coffee', interior_name: 'Coffee Brown', price: 0, is_default: false, image_thumb: '', image_full: '', sort_order: 2 },
+    ],
+    wheels: [
+      { variant_code: 'all', wheel_code: '20-standard', wheel_name: '20" Standard', price: 0, is_default: true, image_thumb: '', sort_order: 1 },
+    ],
+    accessories: [
+      { variant_code: 'all', accessory_code: 'tow-hitch', accessory_name: 'Електрически теглич', price: 1260, description: 'Електрически прибиращ се теглич с максимално теглително тегло 1500 кг.', image: '', sort_order: 1 },
+    ],
+  },
+  g6: {
+    model: { model_slug: 'g6', model_name: 'XPENG G6', starting_price: 43600 },
+    variants: [
+      { variant_code: 'rwd-sr', variant_name: 'RWD Standard Range', price: 43600, is_default: true, range_km: 435, power_kw: 218, acceleration: '6.7s', delivery_time: 'Q4 2026', sort_order: 1 },
+      { variant_code: 'rwd-lr', variant_name: 'RWD Long Range', price: 47600, is_default: false, range_km: 570, power_kw: 218, acceleration: '6.7s', delivery_time: 'Q4 2026', sort_order: 2 },
+      { variant_code: 'awd', variant_name: 'AWD Performance', price: 51600, is_default: false, range_km: 460, power_kw: 358, acceleration: '3.9s', delivery_time: 'Q1 2027', sort_order: 3 },
+    ],
+    colors: [
+      { variant_code: 'all', color_code: 'arctic-white', color_name: 'Arctic White', color_hex: '#F0EDE8', price: 0, is_default: true, sort_order: 1 },
+      { variant_code: 'all', color_code: 'silver-frost', color_name: 'Silver Frost', color_hex: '#B8B8B8', price: 800, is_default: false, sort_order: 2 },
+      { variant_code: 'all', color_code: 'graphite-gray', color_name: 'Graphite Gray', color_hex: '#707070', price: 800, is_default: false, sort_order: 3 },
+      { variant_code: 'all', color_code: 'midnight-black', color_name: 'Midnight Black', color_hex: '#2D2D2D', price: 800, is_default: false, sort_order: 4 },
+      { variant_code: 'all', color_code: 'fiery-orange', color_name: 'Fiery Orange', color_hex: '#C75B12', price: 800, is_default: false, sort_order: 5 },
+    ],
+    interiors: [
+      { variant_code: 'all', interior_code: 'black', interior_name: 'Black Leatherette', price: 0, is_default: true, sort_order: 1 },
+      { variant_code: 'all', interior_code: 'gray', interior_name: 'Gray Leatherette', price: 0, is_default: false, sort_order: 2 },
+    ],
+    wheels: [{ variant_code: 'all', wheel_code: '20-standard', wheel_name: '20" Standard', price: 0, is_default: true, sort_order: 1 }],
+    accessories: [{ variant_code: 'all', accessory_code: 'tow-hitch', accessory_name: 'Електрически теглич', price: 1160, description: 'Електрически прибиращ се теглич.', image: '', sort_order: 1 }],
+  },
+  'p7-plus': {
+    model: { model_slug: 'p7-plus', model_name: 'XPENG P7+', starting_price: 46600 },
+    variants: [
+      { variant_code: 'rwd-sr', variant_name: 'RWD Standard Range', price: 46600, is_default: true, range_km: 502, power_kw: 235, acceleration: '6.4s', delivery_time: 'Q4 2026', sort_order: 1 },
+      { variant_code: 'rwd-lr', variant_name: 'RWD Long Range', price: 49600, is_default: false, range_km: 710, power_kw: 235, acceleration: '6.4s', delivery_time: 'Q4 2026', sort_order: 2 },
+      { variant_code: 'awd', variant_name: 'AWD Performance', price: 53600, is_default: false, range_km: 610, power_kw: 430, acceleration: '3.6s', delivery_time: 'Q1 2027', sort_order: 3 },
+    ],
+    colors: [
+      { variant_code: 'all', color_code: 'arctic-white', color_name: 'Arctic White', color_hex: '#F0EDE8', price: 0, is_default: true, sort_order: 1 },
+      { variant_code: 'all', color_code: 'silver-frost', color_name: 'Silver Frost', color_hex: '#B8B8B8', price: 800, is_default: false, sort_order: 2 },
+      { variant_code: 'all', color_code: 'graphite-gray', color_name: 'Graphite Gray', color_hex: '#707070', price: 800, is_default: false, sort_order: 3 },
+      { variant_code: 'all', color_code: 'midnight-black', color_name: 'Midnight Black', color_hex: '#2D2D2D', price: 800, is_default: false, sort_order: 4 },
+    ],
+    interiors: [
+      { variant_code: 'all', interior_code: 'black', interior_name: 'Black Nappa', price: 0, is_default: true, sort_order: 1 },
+      { variant_code: 'all', interior_code: 'white', interior_name: 'White Nappa', price: 0, is_default: false, sort_order: 2 },
+    ],
+    wheels: [{ variant_code: 'all', wheel_code: '19-aero', wheel_name: '19" Aero', price: 0, is_default: true, sort_order: 1 }],
+    accessories: [{ variant_code: 'all', accessory_code: 'tow-hitch', accessory_name: 'Електрически теглич', price: 1190, description: 'Електрически прибиращ се теглич.', image: '', sort_order: 1 }],
+  },
+};
+
+const EUR_TO_BGN = 1.95583;
+
+function formatPrice(num) {
+  return num.toLocaleString('de-DE');
+}
+
+function resolveDeliveryTime(raw) {
+  if (!raw) return '';
+  if (raw.startsWith('+')) {
+    const days = parseInt(raw.replace('+', '').replace('days', ''), 10);
+    const date = new Date();
+    date.setDate(date.getDate() + days);
+    const quarter = Math.ceil((date.getMonth() + 1) / 3);
+    return 'Q' + quarter + ' ' + date.getFullYear();
+  }
+  return raw;
+}
+
+function getOptionsForVariant(items, variantCode) {
+  return items
+    .filter((o) => o.variant_code === 'all' || o.variant_code === variantCode)
+    .sort((a, b) => (a.sort_order || 0) - (b.sort_order || 0));
+}
+
+async function fetchModelData(modelSlug) {
+  // Use mock data for now; swap to API fetch when ready
+  if (CONFIGURATOR_API) {
+    const res = await fetch(CONFIGURATOR_API + '?model=' + modelSlug);
+    return res.json();
+  }
+  return MOCK_DATA[modelSlug] || null;
+}
+
+function initConfiguratorPage(modelSlug) {
+  const root = document.querySelector('[data-configurator]');
+  if (!root) return;
+
+  // State
+  const state = {
+    data: null,
+    selectedVariant: null,
+    selectedColor: null,
+    selectedInterior: null,
+    selectedWheels: null,
+    selectedAccessories: [],
+    galleryIndex: 0,
+  };
+
+  const listeners = [];
+  function subscribe(fn) { listeners.push(fn); }
+  function notify(changeType) { listeners.forEach((fn) => fn(changeType, state)); }
+  function setState(updates, changeType) {
+    Object.assign(state, updates);
+    notify(changeType);
+  }
+
+  // Boot
+  fetchModelData(modelSlug).then((data) => {
+    if (!data) {
+      root.removeAttribute('data-cfg-loading');
+      return;
+    }
+
+    state.data = data;
+    applyDefaults(state, data);
+    renderAll(root, state, data, setState);
+    bindGalleryNav(root, state, setState);
+    bindContinueBtn(root, state);
+    subscribe((changeType) => handleStateChange(root, state, changeType));
+    root.removeAttribute('data-cfg-loading');
+    notify('init');
+  }).catch((e) => {
+    console.error('Configurator load error:', e);
+    root.removeAttribute('data-cfg-loading');
+  });
+}
+
+function applyDefaults(state, data) {
+  state.selectedVariant = data.variants.find((v) => v.is_default) || data.variants[0];
+
+  const colors = getOptionsForVariant(data.colors, state.selectedVariant.variant_code);
+  state.selectedColor = colors.find((c) => c.is_default) || colors[0];
+
+  const interiors = getOptionsForVariant(data.interiors, state.selectedVariant.variant_code);
+  state.selectedInterior = interiors.find((i) => i.is_default) || interiors[0];
+
+  const wheels = getOptionsForVariant(data.wheels, state.selectedVariant.variant_code);
+  state.selectedWheels = wheels.find((w) => w.is_default) || wheels[0];
+
+  state.selectedAccessories = [];
+  state.galleryIndex = 0;
+}
+
+function calculateTotal(state) {
+  const base = state.selectedVariant?.price || 0;
+  const color = state.selectedColor?.price || 0;
+  const interior = state.selectedInterior?.price || 0;
+  const wheels = state.selectedWheels?.price || 0;
+  const acc = state.selectedAccessories.reduce((sum, code) => {
+    const item = state.data.accessories.find((a) => a.accessory_code === code);
+    return sum + (item?.price || 0);
+  }, 0);
+  const totalEur = base + color + interior + wheels + acc;
+  return { totalEur, totalBgn: Math.round(totalEur * EUR_TO_BGN) };
+}
+
+// ---- Rendering ----
+
+function renderAll(root, state, data, setState) {
+  renderHeader(root, data);
+  renderVariants(root, state, data, setState);
+  renderColors(root, state, data, setState);
+  renderInteriors(root, state, data, setState);
+  renderWheels(root, state, data, setState);
+  renderAccessories(root, state, data, setState);
+}
+
+function renderHeader(root, data) {
+  const nameEl = root.querySelector('[data-cfg-model-name]');
+  const priceEl = root.querySelector('[data-cfg-starting-price]');
+  if (nameEl) nameEl.textContent = data.model.model_name;
+  if (priceEl) priceEl.textContent = 'от ' + formatPrice(data.model.starting_price) + ' EUR';
+}
+
+function renderVariants(root, state, data, setState) {
+  const container = root.querySelector('[data-cfg-cards]');
+  if (!container) return;
+  const template = container.querySelector('[data-cfg-variant-card]');
+  if (!template) return;
+
+  container.innerHTML = '';
+
+  data.variants.forEach((variant) => {
+    const card = template.cloneNode(true);
+    card.setAttribute('data-cfg-variant-card', variant.variant_code);
+
+    const name = card.querySelector('[data-cfg-variant-name]');
+    if (name) name.textContent = variant.variant_name;
+
+    const delivery = card.querySelector('[data-cfg-variant-delivery]');
+    if (delivery) delivery.textContent = resolveDeliveryTime(variant.delivery_time);
+
+    const specs = card.querySelector('[data-cfg-variant-specs]');
+    if (specs) specs.innerHTML = '<span>' + variant.range_km + ' km</span><span>' + variant.power_kw + ' kW</span><span>' + variant.acceleration + '</span>';
+
+    const price = card.querySelector('[data-cfg-variant-price]');
+    if (price) price.textContent = formatPrice(variant.price) + ' EUR';
+
+    if (variant.variant_code === state.selectedVariant?.variant_code) {
+      card.setAttribute('data-cfg-active', '');
+    }
+
+    card.addEventListener('click', () => {
+      const prevVariant = state.selectedVariant?.variant_code;
+      setState({ selectedVariant: variant }, 'variant');
+
+      // Re-filter options if variant changed
+      if (prevVariant !== variant.variant_code) {
+        const colors = getOptionsForVariant(data.colors, variant.variant_code);
+        const curColor = colors.find((c) => c.color_code === state.selectedColor?.color_code);
+        setState({ selectedColor: curColor || colors.find((c) => c.is_default) || colors[0] }, 'color');
+
+        const interiors = getOptionsForVariant(data.interiors, variant.variant_code);
+        const curInt = interiors.find((i) => i.interior_code === state.selectedInterior?.interior_code);
+        setState({ selectedInterior: curInt || interiors.find((i) => i.is_default) || interiors[0] }, 'interior');
+
+        const wheels = getOptionsForVariant(data.wheels, variant.variant_code);
+        const curWhl = wheels.find((w) => w.wheel_code === state.selectedWheels?.wheel_code);
+        setState({ selectedWheels: curWhl || wheels.find((w) => w.is_default) || wheels[0] }, 'wheels');
+
+        renderColors(root, state, data, setState);
+        renderInteriors(root, state, data, setState);
+        renderWheels(root, state, data, setState);
+      }
+    });
+
+    container.appendChild(card);
+  });
+}
+
+function renderColors(root, state, data, setState) {
+  const container = root.querySelector('[data-cfg-swatches]');
+  if (!container) return;
+  const template = container.querySelector('[data-cfg-swatch]') || container.lastElementChild;
+  if (!template) return;
+
+  const colors = getOptionsForVariant(data.colors, state.selectedVariant?.variant_code);
+  container.innerHTML = '';
+
+  colors.forEach((color) => {
+    const el = template.cloneNode(true);
+    el.setAttribute('data-cfg-swatch', color.color_code);
+
+    const dot = el.querySelector('[data-cfg-swatch-dot]') || el.querySelector('.configurator__swatch-dot');
+    if (dot) dot.style.backgroundColor = color.color_hex;
+
+    const name = el.querySelector('[data-cfg-swatch-name]');
+    if (name) name.textContent = color.color_name;
+
+    const price = el.querySelector('[data-cfg-swatch-price]');
+    if (price) price.textContent = color.price > 0 ? '+' + formatPrice(color.price) + ' EUR' : '';
+
+    if (color.color_code === state.selectedColor?.color_code) {
+      el.setAttribute('data-color-active', '');
+    } else {
+      el.removeAttribute('data-color-active');
+    }
+
+    el.addEventListener('click', () => {
+      setState({ selectedColor: color }, 'color');
+    });
+
+    container.appendChild(el);
+  });
+}
+
+function renderInteriors(root, state, data, setState) {
+  const container = root.querySelector('[data-cfg-interior-options]');
+  if (!container) return;
+  const template = container.querySelector('[data-cfg-interior-option]') || container.lastElementChild;
+  if (!template) return;
+
+  const interiors = getOptionsForVariant(data.interiors, state.selectedVariant?.variant_code);
+  container.innerHTML = '';
+
+  interiors.forEach((interior) => {
+    const el = template.cloneNode(true);
+    el.setAttribute('data-cfg-interior-option', interior.interior_code);
+
+    const thumb = el.querySelector('[data-cfg-interior-thumb]');
+    if (thumb && interior.image_thumb) thumb.src = interior.image_thumb;
+
+    const name = el.querySelector('[data-cfg-interior-name]');
+    if (name) name.textContent = interior.interior_name;
+
+    if (interior.interior_code === state.selectedInterior?.interior_code) {
+      el.setAttribute('data-cfg-active', '');
+    }
+
+    el.addEventListener('click', () => {
+      setState({ selectedInterior: interior }, 'interior');
+    });
+
+    container.appendChild(el);
+  });
+}
+
+function renderWheels(root, state, data, setState) {
+  const step = root.querySelector('[data-cfg-step="wheels"]');
+  const container = root.querySelector('[data-cfg-wheel-options]');
+  if (!container) return;
+  const template = container.querySelector('[data-cfg-wheel-option]') || container.lastElementChild;
+  if (!template) return;
+
+  const wheels = getOptionsForVariant(data.wheels, state.selectedVariant?.variant_code);
+
+  // Hide step if only 1 or 0 options
+  if (step && wheels.length <= 1) {
+    step.style.display = 'none';
+    return;
+  } else if (step) {
+    step.style.display = '';
+  }
+
+  container.innerHTML = '';
+
+  wheels.forEach((wheel) => {
+    const el = template.cloneNode(true);
+    el.setAttribute('data-cfg-wheel-option', wheel.wheel_code);
+
+    const thumb = el.querySelector('[data-cfg-wheel-thumb]');
+    if (thumb && wheel.image_thumb) thumb.src = wheel.image_thumb;
+
+    const name = el.querySelector('[data-cfg-wheel-name]');
+    if (name) name.textContent = wheel.wheel_name;
+
+    const price = el.querySelector('[data-cfg-wheel-price]');
+    if (price) price.textContent = wheel.price > 0 ? '+' + formatPrice(wheel.price) + ' EUR' : '';
+
+    if (wheel.wheel_code === state.selectedWheels?.wheel_code) {
+      el.setAttribute('data-cfg-active', '');
+    }
+
+    el.addEventListener('click', () => {
+      setState({ selectedWheels: wheel }, 'wheels');
+    });
+
+    container.appendChild(el);
+  });
+}
+
+function renderAccessories(root, state, data, setState) {
+  const container = root.querySelector('[data-cfg-accessories]');
+  if (!container) return;
+  const template = container.querySelector('[data-cfg-accessory]') || container.lastElementChild;
+  if (!template) return;
+
+  const accessories = getOptionsForVariant(data.accessories, state.selectedVariant?.variant_code);
+  container.innerHTML = '';
+
+  accessories.forEach((acc) => {
+    const el = template.cloneNode(true);
+    el.setAttribute('data-cfg-accessory', acc.accessory_code);
+
+    const img = el.querySelector('[data-cfg-accessory-image]');
+    if (img && acc.image) img.src = acc.image;
+
+    const name = el.querySelector('[data-cfg-accessory-name]');
+    if (name) name.textContent = acc.accessory_name;
+
+    const price = el.querySelector('[data-cfg-accessory-price]');
+    if (price) price.textContent = formatPrice(acc.price) + ' EUR';
+
+    const desc = el.querySelector('[data-cfg-accessory-desc]');
+    if (desc) desc.textContent = acc.description || '';
+
+    const toggle = el.querySelector('[data-cfg-accessory-toggle]');
+    const isActive = state.selectedAccessories.includes(acc.accessory_code);
+    if (toggle) {
+      toggle.textContent = isActive ? 'Премахни' : 'Добави';
+      if (isActive) el.setAttribute('data-cfg-active', '');
+    }
+
+    if (toggle) {
+      toggle.addEventListener('click', (e) => {
+        e.stopPropagation();
+        const list = [...state.selectedAccessories];
+        const idx = list.indexOf(acc.accessory_code);
+        if (idx >= 0) list.splice(idx, 1);
+        else list.push(acc.accessory_code);
+        setState({ selectedAccessories: list }, 'accessories');
+      });
+    }
+
+    container.appendChild(el);
+  });
+}
+
+// ---- State change handler ----
+
+function handleStateChange(root, state, changeType) {
+  updatePrice(root, state);
+  updateActiveStates(root, state);
+
+  if (changeType === 'color' || changeType === 'init') {
+    updateGallery(root, state);
+  }
+
+  if (changeType === 'interior') {
+    updateInteriorPreview(root, state);
+  }
+
+  if (changeType === 'accessories') {
+    updateAccessoryToggles(root, state);
+  }
+}
+
+function updatePrice(root, state) {
+  const { totalEur, totalBgn } = calculateTotal(state);
+  const eurEl = root.querySelector('[data-cfg-total-eur]');
+  const bgnEl = root.querySelector('[data-cfg-total-bgn]');
+  if (eurEl) eurEl.textContent = formatPrice(totalEur) + ' EUR';
+  if (bgnEl) bgnEl.textContent = formatPrice(totalBgn) + ' лв.';
+}
+
+function updateActiveStates(root, state) {
+  // Variant cards
+  root.querySelectorAll('[data-cfg-variant-card]').forEach((card) => {
+    const code = card.getAttribute('data-cfg-variant-card');
+    if (code === state.selectedVariant?.variant_code) card.setAttribute('data-cfg-active', '');
+    else card.removeAttribute('data-cfg-active');
+  });
+
+  // Color swatches
+  root.querySelectorAll('[data-cfg-swatch]').forEach((sw) => {
+    const code = sw.getAttribute('data-cfg-swatch');
+    if (code === state.selectedColor?.color_code) sw.setAttribute('data-color-active', '');
+    else sw.removeAttribute('data-color-active');
+  });
+
+  // Interior options
+  root.querySelectorAll('[data-cfg-interior-option]').forEach((opt) => {
+    const code = opt.getAttribute('data-cfg-interior-option');
+    if (code === state.selectedInterior?.interior_code) opt.setAttribute('data-cfg-active', '');
+    else opt.removeAttribute('data-cfg-active');
+  });
+
+  // Wheel options
+  root.querySelectorAll('[data-cfg-wheel-option]').forEach((opt) => {
+    const code = opt.getAttribute('data-cfg-wheel-option');
+    if (code === state.selectedWheels?.wheel_code) opt.setAttribute('data-cfg-active', '');
+    else opt.removeAttribute('data-cfg-active');
+  });
+}
+
+function updateGallery(root, state) {
+  const images = root.querySelectorAll('[data-cfg-image]');
+  const color = state.selectedColor;
+  if (!color || !images.length) return;
+
+  const urls = [color.image_front, color.image_side, color.image_rear];
+  images.forEach((img, i) => {
+    if (urls[i] && img.src !== urls[i]) {
+      gsap.to(img, {
+        autoAlpha: 0,
+        duration: 0.15,
+        onComplete: () => {
+          img.src = urls[i];
+          img.onload = () => gsap.to(img, { autoAlpha: 1, duration: 0.3 });
+        },
+      });
+    }
+  });
+
+  showGallerySlide(root, state.galleryIndex);
+}
+
+function showGallerySlide(root, index) {
+  root.querySelectorAll('[data-cfg-image]').forEach((img, i) => {
+    gsap.to(img, { autoAlpha: i === index ? 1 : 0, duration: 0.3 });
+  });
+  root.querySelectorAll('[data-cfg-dot]').forEach((dot, i) => {
+    if (i === index) dot.setAttribute('data-cfg-dot-active', '');
+    else dot.removeAttribute('data-cfg-dot-active');
+  });
+}
+
+function updateInteriorPreview(root, state) {
+  const img = root.querySelector('[data-cfg-interior-preview]');
+  if (!img || !state.selectedInterior?.image_full) return;
+  gsap.to(img, {
+    autoAlpha: 0,
+    duration: 0.15,
+    onComplete: () => {
+      img.src = state.selectedInterior.image_full;
+      img.onload = () => gsap.to(img, { autoAlpha: 1, duration: 0.3 });
+    },
+  });
+}
+
+function updateAccessoryToggles(root, state) {
+  root.querySelectorAll('[data-cfg-accessory]').forEach((el) => {
+    const code = el.getAttribute('data-cfg-accessory');
+    const isActive = state.selectedAccessories.includes(code);
+    const toggle = el.querySelector('[data-cfg-accessory-toggle]');
+    if (toggle) toggle.textContent = isActive ? 'Премахни' : 'Добави';
+    if (isActive) el.setAttribute('data-cfg-active', '');
+    else el.removeAttribute('data-cfg-active');
+  });
+}
+
+// ---- Gallery navigation ----
+
+function bindGalleryNav(root, state, setState) {
+  const dots = root.querySelectorAll('[data-cfg-dot]');
+  const prevBtn = root.querySelector('[data-cfg-gallery-prev]');
+  const nextBtn = root.querySelector('[data-cfg-gallery-next]');
+
+  dots.forEach((dot, i) => {
+    dot.addEventListener('click', () => {
+      setState({ galleryIndex: i }, 'gallery');
+      showGallerySlide(root, i);
+    });
+  });
+
+  if (prevBtn) prevBtn.addEventListener('click', () => {
+    const idx = Math.max(0, state.galleryIndex - 1);
+    setState({ galleryIndex: idx }, 'gallery');
+    showGallerySlide(root, idx);
+  });
+
+  if (nextBtn) nextBtn.addEventListener('click', () => {
+    const idx = Math.min(2, state.galleryIndex + 1);
+    setState({ galleryIndex: idx }, 'gallery');
+    showGallerySlide(root, idx);
+  });
+}
+
+// ---- Summary navigation ----
+
+function bindContinueBtn(root, state) {
+  const btn = root.querySelector('[data-cfg-continue]');
+  if (!btn) return;
+
+  btn.addEventListener('click', (e) => {
+    e.preventDefault();
+    const params = new URLSearchParams({
+      model: state.data.model.model_slug,
+      variant: state.selectedVariant?.variant_code || '',
+      color: state.selectedColor?.color_code || '',
+      interior: state.selectedInterior?.interior_code || '',
+      wheels: state.selectedWheels?.wheel_code || '',
+      accessories: state.selectedAccessories.join(','),
+    });
+
+    sessionStorage.setItem('xpeng-cfg', JSON.stringify({
+      model: state.data.model,
+      selectedVariant: state.selectedVariant,
+      selectedColor: state.selectedColor,
+      selectedInterior: state.selectedInterior,
+      selectedWheels: state.selectedWheels,
+      selectedAccessories: state.data.accessories.filter((a) =>
+        state.selectedAccessories.includes(a.accessory_code)
+      ),
+      totals: calculateTotal(state),
+    }));
+
+    window.location.href = '/configurator/summary?' + params.toString();
   });
 }
 
