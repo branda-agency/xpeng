@@ -270,6 +270,11 @@
   background-color: rgba(0, 0, 0, 0.6);
 }
 
+.configurator__options {
+  overflow-y: auto;
+  max-height: 100vh;
+}
+
 [data-cfg-loading] .configurator__options {
   opacity: 0.4;
   pointer-events: none;
