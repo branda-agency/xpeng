@@ -1016,7 +1016,6 @@ function initConfiguratorPage(modelSlug) {
     selectedInterior: null,
     selectedWheels: null,
     selectedAccessories: [],
-    galleryIndex: 0,
   };
 
   const listeners = [];
@@ -1037,7 +1036,6 @@ function initConfiguratorPage(modelSlug) {
     state.data = data;
     applyDefaults(state, data);
     renderAll(root, state, data, setState);
-    bindGalleryNav(root, state, setState);
     bindContinueBtn(root, state);
     subscribe((changeType) => handleStateChange(root, state, changeType));
     root.removeAttribute('data-cfg-loading');
@@ -1061,7 +1059,6 @@ function applyDefaults(state, data) {
   state.selectedWheels = wheels.find((w) => w.is_default) || wheels[0];
 
   state.selectedAccessories = [];
-  state.galleryIndex = 0;
 }
 
 function calculateTotal(state) {
@@ -1394,15 +1391,6 @@ function updateGallery(root, state) {
   }
 }
 
-function showGallerySlide(root, index) {
-  root.querySelectorAll('.configurator__gallery-img').forEach((img, i) => {
-    gsap.to(img, { autoAlpha: i === index ? 1 : 0, duration: 0.3 });
-  });
-  root.querySelectorAll('[data-cfg-dot]').forEach((dot, i) => {
-    if (i === index) dot.setAttribute('data-cfg-dot-active', '');
-    else dot.removeAttribute('data-cfg-dot-active');
-  });
-}
 
 function updateInteriorPreview(root, state) {
   const img = root.querySelector('.configurator__interior-img');
@@ -1425,33 +1413,6 @@ function updateAccessoryToggles(root, state) {
     if (toggle) toggle.textContent = isActive ? 'Премахни' : 'Добави';
     if (isActive) el.setAttribute('data-cfg-active', '');
     else el.removeAttribute('data-cfg-active');
-  });
-}
-
-// ---- Gallery navigation ----
-
-function bindGalleryNav(root, state, setState) {
-  const dots = root.querySelectorAll('[data-cfg-dot]');
-  const prevBtn = root.querySelector('[data-cfg-gallery-prev]');
-  const nextBtn = root.querySelector('[data-cfg-gallery-next]');
-
-  dots.forEach((dot, i) => {
-    dot.addEventListener('click', () => {
-      setState({ galleryIndex: i }, 'gallery');
-      showGallerySlide(root, i);
-    });
-  });
-
-  if (prevBtn) prevBtn.addEventListener('click', () => {
-    const idx = Math.max(0, state.galleryIndex - 1);
-    setState({ galleryIndex: idx }, 'gallery');
-    showGallerySlide(root, idx);
-  });
-
-  if (nextBtn) nextBtn.addEventListener('click', () => {
-    const idx = Math.min(2, state.galleryIndex + 1);
-    setState({ galleryIndex: idx }, 'gallery');
-    showGallerySlide(root, idx);
   });
 }
 
