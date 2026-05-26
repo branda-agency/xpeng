@@ -1,0 +1,4 @@
+model_slug,variant_code,variant_name,price,is_default,range_km,power_kw,torque_nm,acceleration,top_speed,battery_kwh,battery_type,dc_charge_power_kw,dc_charge_time,ac_charge_time,energy_consumption,drivetrain,delivery_time,sort_order
+g9,rwd-sr,RWD Standard Range,59600,TRUE,502,258,465,6.6s,200,79,LFP,445,12 min (10-80%),≥9h (5-100%),18.4 kWh/100km,RWD,Q4 2026,1
+g9,rwd-lr,RWD Long Range,63600,FALSE,585,258,465,6.4s,200,93.1,LFP,525,12 min (10-80%),≥10.5h (5-100%),18.6 kWh/100km,RWD,Q4 2026,2
+g9,awd,AWD Performance,71600,FALSE,540,423,695,4.2s,200,93.1,LFP,525,12 min (10-80%),≥10.5h (5-100%),20.1 kWh/100km,AWD,Q1 2027,3

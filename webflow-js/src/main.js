@@ -900,8 +900,7 @@ function initTabbedCarousel() {
    10e. CONFIGURATOR
    ============================================================ */
 
-// TODO: Replace with Google Sheets Apps Script endpoint
-const CONFIGURATOR_API = null; // 'https://script.google.com/macros/s/.../exec'
+const CONFIGURATOR_API = 'https://script.google.com/macros/s/AKfycby09JI5qCEfQVZhJOrFSf9340DYhXVOf5haskslT9U_Tcn11Mr7wgD60_gnBgKCbCR_BA/exec';
 
 // Mock data for development (G9)
 const MOCK_DATA = {
