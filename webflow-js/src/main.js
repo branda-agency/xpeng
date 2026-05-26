@@ -1376,15 +1376,13 @@ function updateGallery(root, state) {
   const mainImg = images[0];
 
   if (url && mainImg) {
-    if (mainImg.src !== url) {
-      gsap.to(mainImg, {
-        autoAlpha: 0,
-        duration: 0.15,
-        onComplete: () => {
-          mainImg.src = url;
-          mainImg.onload = () => gsap.to(mainImg, { autoAlpha: 1, duration: 0.3 });
-        },
-      });
+    const currentSrc = mainImg.getAttribute('src') || '';
+    if (currentSrc !== url) {
+      // Fade out, swap src, fade in on load
+      gsap.set(mainImg, { autoAlpha: 0 });
+      mainImg.onload = () => gsap.to(mainImg, { autoAlpha: 1, duration: 0.3 });
+      mainImg.onerror = () => gsap.set(mainImg, { autoAlpha: 0 });
+      mainImg.src = url;
     } else {
       gsap.set(mainImg, { autoAlpha: 1 });
     }
