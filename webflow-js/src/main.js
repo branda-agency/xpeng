@@ -1371,21 +1371,29 @@ function updateGallery(root, state) {
   const color = state.selectedColor;
   if (!color || !images.length) return;
 
-  const urls = [color.image_front, color.image_side, color.image_rear];
-  images.forEach((img, i) => {
-    if (urls[i] && img.src !== urls[i]) {
-      gsap.to(img, {
+  // Single image mode: use image_front for the first gallery image
+  const url = color.image_front || '';
+  const mainImg = images[0];
+
+  if (url && mainImg) {
+    if (mainImg.src !== url) {
+      gsap.to(mainImg, {
         autoAlpha: 0,
         duration: 0.15,
         onComplete: () => {
-          img.src = urls[i];
-          img.onload = () => gsap.to(img, { autoAlpha: 1, duration: 0.3 });
+          mainImg.src = url;
+          mainImg.onload = () => gsap.to(mainImg, { autoAlpha: 1, duration: 0.3 });
         },
       });
+    } else {
+      gsap.set(mainImg, { autoAlpha: 1 });
     }
-  });
+  }
 
-  showGallerySlide(root, state.galleryIndex);
+  // Hide remaining gallery images (no multi-angle for now)
+  for (let i = 1; i < images.length; i++) {
+    gsap.set(images[i], { autoAlpha: 0 });
+  }
 }
 
 function showGallerySlide(root, index) {
