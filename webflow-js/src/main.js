@@ -900,7 +900,7 @@ function initTabbedCarousel() {
    10e. CONFIGURATOR
    ============================================================ */
 
-const CONFIGURATOR_API = 'https://script.google.com/macros/s/AKfycby09JI5qCEfQVZhJOrFSf9340DYhXVOf5haskslT9U_Tcn11Mr7wgD60_gnBgKCbCR_BA/exec';
+const CONFIGURATOR_API = 'https://script.google.com/macros/s/AKfycbxDzXiIHLDm4I2sTaWMIBKK-zhQRjwtSuroX1BhnfdyRuua5GHDFDC4VUFAUQzMkdC6cA/exec';
 
 // Mock data for development (G9)
 const MOCK_DATA = {
