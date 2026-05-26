@@ -1200,7 +1200,7 @@ function renderInteriors(root, state, data, setState) {
     const el = template.cloneNode(true);
     el.setAttribute('data-cfg-interior-option', interior.interior_code);
 
-    const thumb = el.querySelector('[data-cfg-interior-thumb]');
+    const thumb = el.querySelector('.configurator__interior-thumb');
     if (thumb && interior.image_thumb) thumb.src = interior.image_thumb;
 
     const name = el.querySelector('[data-cfg-interior-name]');
@@ -1241,7 +1241,7 @@ function renderWheels(root, state, data, setState) {
     const el = template.cloneNode(true);
     el.setAttribute('data-cfg-wheel-option', wheel.wheel_code);
 
-    const thumb = el.querySelector('[data-cfg-wheel-thumb]');
+    const thumb = el.querySelector('.configurator__wheel-thumb');
     if (thumb && wheel.image_thumb) thumb.src = wheel.image_thumb;
 
     const name = el.querySelector('[data-cfg-wheel-name]');
@@ -1275,7 +1275,7 @@ function renderAccessories(root, state, data, setState) {
     const el = template.cloneNode(true);
     el.setAttribute('data-cfg-accessory', acc.accessory_code);
 
-    const img = el.querySelector('[data-cfg-accessory-image]');
+    const img = el.querySelector('.configurator__accessory-img');
     if (img && acc.image) img.src = acc.image;
 
     const name = el.querySelector('[data-cfg-accessory-name]');
@@ -1367,7 +1367,7 @@ function updateActiveStates(root, state) {
 }
 
 function updateGallery(root, state) {
-  const images = root.querySelectorAll('[data-cfg-image]');
+  const images = root.querySelectorAll('.configurator__gallery-img');
   const color = state.selectedColor;
   if (!color || !images.length) return;
 
@@ -1395,7 +1395,7 @@ function updateGallery(root, state) {
 }
 
 function showGallerySlide(root, index) {
-  root.querySelectorAll('[data-cfg-image]').forEach((img, i) => {
+  root.querySelectorAll('.configurator__gallery-img').forEach((img, i) => {
     gsap.to(img, { autoAlpha: i === index ? 1 : 0, duration: 0.3 });
   });
   root.querySelectorAll('[data-cfg-dot]').forEach((dot, i) => {
@@ -1405,7 +1405,7 @@ function showGallerySlide(root, index) {
 }
 
 function updateInteriorPreview(root, state) {
-  const img = root.querySelector('[data-cfg-interior-preview]');
+  const img = root.querySelector('.configurator__interior-img');
   if (!img || !state.selectedInterior?.image_full) return;
   gsap.to(img, {
     autoAlpha: 0,
