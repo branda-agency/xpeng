@@ -1358,7 +1358,7 @@ function handleStateChange(root, state, changeType) {
     updateGallery(root, state);
   }
 
-  if (changeType === 'interior') {
+  if (changeType === 'interior' || changeType === 'init') {
     updateInteriorPreview(root, state);
   }
 
@@ -1461,15 +1461,21 @@ function updateGallery(root, state) {
 
 function updateInteriorPreview(root, state) {
   const img = root.querySelector('.configurator__interior-img');
-  if (!img || !state.selectedInterior?.image_full) return;
-  gsap.to(img, {
-    autoAlpha: 0,
-    duration: 0.15,
-    onComplete: () => {
-      img.src = state.selectedInterior.image_full;
-      img.onload = () => gsap.to(img, { autoAlpha: 1, duration: 0.3 });
-    },
-  });
+  if (!img) return;
+  var url = state.selectedInterior?.image_full || state.selectedInterior?.image_thumb || '';
+  if (!url) {
+    gsap.set(img, { autoAlpha: 0 });
+    return;
+  }
+  var currentSrc = img.getAttribute('src') || '';
+  if (currentSrc !== url) {
+    gsap.set(img, { autoAlpha: 0 });
+    img.onload = function() { gsap.to(img, { autoAlpha: 1, duration: 0.3 }); };
+    img.onerror = function() { gsap.set(img, { autoAlpha: 0 }); };
+    img.src = url;
+  } else {
+    gsap.set(img, { autoAlpha: 1 });
+  }
 }
 
 function updateAccessoryToggles(root, state) {
