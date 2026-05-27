@@ -1030,6 +1030,7 @@ function initConfiguratorPage(modelSlug) {
     selectedInterior: null,
     selectedWheels: null,
     selectedAccessories: [],
+    galleryMode: 'exterior',
   };
 
   const listeners = [];
@@ -1367,12 +1368,19 @@ function handleStateChange(root, state, changeType) {
   updatePrice(root, state);
   updateActiveStates(root, state);
 
-  if (changeType === 'color' || changeType === 'init') {
+  if (changeType === 'color' || changeType === 'variant') {
+    state.galleryMode = 'exterior';
     updateGallery(root, state);
   }
 
-  if (changeType === 'interior' || changeType === 'init') {
-    updateInteriorPreview(root, state);
+  if (changeType === 'interior') {
+    state.galleryMode = 'interior';
+    updateGallery(root, state);
+  }
+
+  if (changeType === 'init') {
+    state.galleryMode = 'exterior';
+    updateGallery(root, state);
   }
 
   if (changeType === 'accessories') {
@@ -1444,50 +1452,39 @@ function updateActiveStates(root, state) {
 }
 
 function updateGallery(root, state) {
-  const images = root.querySelectorAll('.configurator__gallery-img');
-  const color = state.selectedColor;
-  if (!color || !images.length) return;
+  var mainImg = root.querySelector('.configurator__gallery-img');
+  if (!mainImg) return;
 
-  var url = color.image_front || '';
-  var mainImg = images[0];
-
-  if (url && mainImg) {
-    var currentSrc = mainImg.getAttribute('src') || '';
-    if (currentSrc !== url) {
-      gsap.set(mainImg, { autoAlpha: 0 });
-      mainImg.onload = function() { gsap.to(mainImg, { autoAlpha: 1, duration: 0.3 }); };
-      mainImg.onerror = function() { gsap.set(mainImg, { autoAlpha: 0 }); };
-      mainImg.src = url;
-    } else {
-      gsap.set(mainImg, { autoAlpha: 1 });
-    }
-  }
-
-  // Hide remaining gallery images (no multi-angle for now)
-  for (var i = 1; i < images.length; i++) {
-    gsap.set(images[i], { autoAlpha: 0 });
-  }
-}
-
-
-function updateInteriorPreview(root, state) {
-  const img = root.querySelector('.configurator__interior-img');
-  if (!img) return;
-  var url = state.selectedInterior?.image_full || state.selectedInterior?.image_thumb || '';
-  if (!url) {
-    gsap.set(img, { autoAlpha: 0 });
-    return;
-  }
-  var currentSrc = img.getAttribute('src') || '';
-  if (currentSrc !== url) {
-    gsap.set(img, { autoAlpha: 0 });
-    img.onload = function() { gsap.to(img, { autoAlpha: 1, duration: 0.3 }); };
-    img.onerror = function() { gsap.set(img, { autoAlpha: 0 }); };
-    img.src = url;
+  var url = '';
+  if (state.galleryMode === 'interior') {
+    // Show interior panorama
+    var interior = state.selectedInterior;
+    url = (interior && (interior.image_full || interior.image_thumb)) || '';
   } else {
-    gsap.set(img, { autoAlpha: 1 });
+    // Show exterior car render
+    var color = state.selectedColor;
+    url = (color && color.image_front) || '';
+  }
+
+  if (!url) return;
+
+  var currentSrc = mainImg.getAttribute('src') || '';
+  if (currentSrc !== url) {
+    gsap.to(mainImg, {
+      autoAlpha: 0,
+      duration: 0.15,
+      onComplete: function() {
+        mainImg.onload = function() { gsap.to(mainImg, { autoAlpha: 1, duration: 0.3 }); };
+        mainImg.onerror = function() { gsap.set(mainImg, { autoAlpha: 0 }); };
+        mainImg.src = url;
+      }
+    });
+  } else {
+    gsap.set(mainImg, { autoAlpha: 1 });
   }
 }
+
+
 
 function updateAccessoryToggles(root, state) {
   root.querySelectorAll('[data-cfg-accessory]').forEach((el) => {
