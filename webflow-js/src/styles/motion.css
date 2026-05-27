@@ -270,10 +270,25 @@
   background-color: rgba(0, 0, 0, 0.6);
 }
 
+.configurator {
+  height: 100vh;
+  overflow: hidden;
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  grid-template-rows: 1fr auto;
+}
+
+.configurator__gallery {
+  grid-row: 1 / -1;
+}
+
 .configurator__options {
   overflow-y: auto;
-  height: 100vh;
   -webkit-overflow-scrolling: touch;
+}
+
+.configurator__footer {
+  grid-column: 1 / -1;
 }
 
 /* --- Accordion --- */
