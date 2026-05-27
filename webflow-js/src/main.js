@@ -991,9 +991,22 @@ function resolveDeliveryTime(raw) {
 }
 
 function getOptionsForVariant(items, variantCode) {
-  return items
-    .filter((o) => o.variant_code === 'all' || o.variant_code === variantCode)
-    .sort((a, b) => (a.sort_order || 0) - (b.sort_order || 0));
+  var specific = items.filter(function(o) { return o.variant_code === variantCode; });
+  var general = items.filter(function(o) { return o.variant_code === 'all'; });
+
+  // Variant-specific rows override 'all' rows with the same code
+  var specificCodes = {};
+  specific.forEach(function(o) {
+    var key = o.color_code || o.interior_code || o.wheel_code || o.accessory_code || '';
+    if (key) specificCodes[key] = true;
+  });
+
+  var merged = specific.concat(general.filter(function(o) {
+    var key = o.color_code || o.interior_code || o.wheel_code || o.accessory_code || '';
+    return !specificCodes[key];
+  }));
+
+  return merged.sort(function(a, b) { return (a.sort_order || 0) - (b.sort_order || 0); });
 }
 
 async function fetchModelData(modelSlug) {
