@@ -1355,7 +1355,7 @@ function handleStateChange(root, state, changeType) {
   updateActiveStates(root, state);
 
   if (changeType === 'color' || changeType === 'variant' || changeType === 'init') {
-    updateGallery(root, state);
+    updateGallery(root, state, changeType === 'variant');
   }
 
   if (changeType === 'interior' || changeType === 'init') {
@@ -1430,7 +1430,7 @@ function updateActiveStates(root, state) {
   });
 }
 
-function updateGallery(root, state) {
+function updateGallery(root, state, forceTransition) {
   const images = root.querySelectorAll('.configurator__gallery-img');
   const color = state.selectedColor;
   if (!color || !images.length) return;
@@ -1442,18 +1442,20 @@ function updateGallery(root, state) {
   if (url && mainImg) {
     const currentSrc = mainImg.getAttribute('src') || '';
     if (currentSrc !== url) {
-      // Fade out, swap src, fade in on load
       gsap.set(mainImg, { autoAlpha: 0 });
-      mainImg.onload = () => gsap.to(mainImg, { autoAlpha: 1, duration: 0.3 });
-      mainImg.onerror = () => gsap.set(mainImg, { autoAlpha: 0 });
+      mainImg.onload = function() { gsap.to(mainImg, { autoAlpha: 1, duration: 0.3 }); };
+      mainImg.onerror = function() { gsap.set(mainImg, { autoAlpha: 0 }); };
       mainImg.src = url;
+    } else if (forceTransition) {
+      // Same image but variant changed — pulse to show feedback
+      gsap.fromTo(mainImg, { autoAlpha: 0.5 }, { autoAlpha: 1, duration: 0.4 });
     } else {
       gsap.set(mainImg, { autoAlpha: 1 });
     }
   }
 
   // Hide remaining gallery images (no multi-angle for now)
-  for (let i = 1; i < images.length; i++) {
+  for (var i = 1; i < images.length; i++) {
     gsap.set(images[i], { autoAlpha: 0 });
   }
 }
