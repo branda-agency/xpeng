@@ -1367,8 +1367,8 @@ function handleStateChange(root, state, changeType) {
   updatePrice(root, state);
   updateActiveStates(root, state);
 
-  if (changeType === 'color' || changeType === 'variant' || changeType === 'init') {
-    updateGallery(root, state, changeType === 'variant');
+  if (changeType === 'color' || changeType === 'init') {
+    updateGallery(root, state);
   }
 
   if (changeType === 'interior' || changeType === 'init') {
@@ -1443,25 +1443,21 @@ function updateActiveStates(root, state) {
   });
 }
 
-function updateGallery(root, state, forceTransition) {
+function updateGallery(root, state) {
   const images = root.querySelectorAll('.configurator__gallery-img');
   const color = state.selectedColor;
   if (!color || !images.length) return;
 
-  // Single image mode: use image_front for the first gallery image
-  const url = color.image_front || '';
-  const mainImg = images[0];
+  var url = color.image_front || '';
+  var mainImg = images[0];
 
   if (url && mainImg) {
-    const currentSrc = mainImg.getAttribute('src') || '';
+    var currentSrc = mainImg.getAttribute('src') || '';
     if (currentSrc !== url) {
       gsap.set(mainImg, { autoAlpha: 0 });
       mainImg.onload = function() { gsap.to(mainImg, { autoAlpha: 1, duration: 0.3 }); };
       mainImg.onerror = function() { gsap.set(mainImg, { autoAlpha: 0 }); };
       mainImg.src = url;
-    } else if (forceTransition) {
-      // Same image but variant changed — pulse to show feedback
-      gsap.fromTo(mainImg, { autoAlpha: 0.5 }, { autoAlpha: 1, duration: 0.4 });
     } else {
       gsap.set(mainImg, { autoAlpha: 1 });
     }
