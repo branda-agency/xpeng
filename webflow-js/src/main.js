@@ -1378,15 +1378,14 @@ function bindAccordions(root) {
     title.appendChild(icon);
     title.style.cursor = 'pointer';
 
-    // Start open
-    step.setAttribute('data-cfg-open', '');
+    // All sections start open (no data-cfg-closed attribute)
 
     title.addEventListener('click', function() {
-      var isOpen = step.hasAttribute('data-cfg-open');
-      if (isOpen) {
-        step.removeAttribute('data-cfg-open');
+      var isClosed = step.hasAttribute('data-cfg-closed');
+      if (isClosed) {
+        step.removeAttribute('data-cfg-closed');
       } else {
-        step.setAttribute('data-cfg-open', '');
+        step.setAttribute('data-cfg-closed', '');
       }
     });
   });

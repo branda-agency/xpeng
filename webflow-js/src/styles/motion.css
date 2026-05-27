@@ -272,23 +272,22 @@
 
 .configurator__options {
   overflow-y: auto;
-  max-height: 100vh;
+  height: 100vh;
+  -webkit-overflow-scrolling: touch;
 }
 
 /* --- Accordion --- */
 
 [data-cfg-step] > *:not(.configurator__step-title) {
-  overflow: hidden;
-  max-height: 0;
-  opacity: 0;
-  transition: max-height 0.4s ease, opacity 0.3s ease, margin 0.3s ease;
-  margin-top: 0;
+  transition: max-height 0.4s ease, opacity 0.3s ease;
 }
 
-[data-cfg-step][data-cfg-open] > *:not(.configurator__step-title) {
-  max-height: 200em;
-  opacity: 1;
-  margin-top: revert;
+[data-cfg-step][data-cfg-closed] > *:not(.configurator__step-title) {
+  max-height: 0 !important;
+  opacity: 0;
+  overflow: hidden;
+  margin: 0;
+  padding: 0;
 }
 
 .configurator__step-title {
@@ -329,7 +328,12 @@
   transform: translateX(-50%);
 }
 
-[data-cfg-open] .configurator__accordion-icon::after {
+[data-cfg-closed] .configurator__accordion-icon::after {
+  transform: translateX(-50%);
+  opacity: 1;
+}
+
+:not([data-cfg-closed]) > .configurator__step-title .configurator__accordion-icon::after {
   transform: translateX(-50%) rotate(90deg);
   opacity: 0;
 }
