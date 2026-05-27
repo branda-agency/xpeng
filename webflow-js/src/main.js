@@ -1177,27 +1177,35 @@ function renderVariants(root, state, data, setState) {
 
     card.addEventListener('click', function(e) {
       if (e.target.closest('[data-cfg-variant-expand]')) return;
-      const prevVariant = state.selectedVariant?.variant_code;
-      setState({ selectedVariant: variant }, 'variant');
+      var prevVariant = state.selectedVariant?.variant_code;
+      if (prevVariant === variant.variant_code) return;
 
-      // Re-filter options if variant changed
-      if (prevVariant !== variant.variant_code) {
-        const colors = getOptionsForVariant(data.colors, variant.variant_code);
-        const curColor = colors.find((c) => c.color_code === state.selectedColor?.color_code);
-        setState({ selectedColor: curColor || colors.find((c) => c.is_default) || colors[0] }, 'color');
+      // Update variant
+      state.selectedVariant = variant;
 
-        const interiors = getOptionsForVariant(data.interiors, variant.variant_code);
-        const curInt = interiors.find((i) => i.interior_code === state.selectedInterior?.interior_code);
-        setState({ selectedInterior: curInt || interiors.find((i) => i.is_default) || interiors[0] }, 'interior');
+      // Re-filter options silently (no notify — avoid triggering gallery mode changes)
+      var colors = getOptionsForVariant(data.colors, variant.variant_code);
+      var curColor = colors.find(function(c) { return c.color_code === state.selectedColor?.color_code; });
+      state.selectedColor = curColor || colors.find(function(c) { return c.is_default; }) || colors[0];
 
-        const wheels = getOptionsForVariant(data.wheels, variant.variant_code);
-        const curWhl = wheels.find((w) => w.wheel_code === state.selectedWheels?.wheel_code);
-        setState({ selectedWheels: curWhl || wheels.find((w) => w.is_default) || wheels[0] }, 'wheels');
+      var interiors = getOptionsForVariant(data.interiors, variant.variant_code);
+      var curInt = interiors.find(function(i) { return i.interior_code === state.selectedInterior?.interior_code; });
+      state.selectedInterior = curInt || interiors.find(function(i) { return i.is_default; }) || interiors[0];
 
-        renderColors(root, state, data, setState);
-        renderInteriors(root, state, data, setState);
-        renderWheels(root, state, data, setState);
-      }
+      var wheels = getOptionsForVariant(data.wheels, variant.variant_code);
+      var curWhl = wheels.find(function(w) { return w.wheel_code === state.selectedWheels?.wheel_code; });
+      state.selectedWheels = curWhl || wheels.find(function(w) { return w.is_default; }) || wheels[0];
+
+      // Re-render options with new filtered data
+      renderColors(root, state, data, setState);
+      renderInteriors(root, state, data, setState);
+      renderWheels(root, state, data, setState);
+
+      // Update gallery as exterior (variant change = exterior view)
+      state.galleryMode = 'exterior';
+      updateGallery(root, state);
+      updatePrice(root, state);
+      updateActiveStates(root, state);
     });
 
     container.appendChild(card);
