@@ -397,6 +397,7 @@ function routePage() {
 
   if (path === 'home') initHomePage();
   else if (segments.includes('configurator') && CONFIGURATOR_SLUGS.includes(slug)) {
+    if (lenis) lenis.destroy();
     initConfiguratorPage(slug);
   }
   else if (PRODUCT_SLUGS.includes(slug)) initProductPage();
