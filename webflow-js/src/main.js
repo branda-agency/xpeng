@@ -1037,6 +1037,7 @@ function initConfiguratorPage(modelSlug) {
     applyDefaults(state, data);
     renderAll(root, state, data, setState);
     bindContinueBtn(root, state);
+    bindAccordions(root);
     subscribe((changeType) => handleStateChange(root, state, changeType));
     root.removeAttribute('data-cfg-loading');
     notify('init');
@@ -1111,16 +1112,56 @@ function renderVariants(root, state, data, setState) {
     if (delivery) delivery.textContent = resolveDeliveryTime(variant.delivery_time);
 
     const specs = card.querySelector('[data-cfg-variant-specs]');
-    if (specs) specs.innerHTML = '<span>' + variant.range_km + ' km</span><span>' + variant.power_kw + ' kW</span><span>' + variant.acceleration + '</span>';
+    if (specs) {
+      var specParts = [];
+      if (variant.energy_consumption) specParts.push(variant.energy_consumption);
+      specParts.push('CO2: 0 g/km');
+      specs.innerHTML = specParts.join('; ');
+    }
 
     const price = card.querySelector('[data-cfg-variant-price]');
     if (price) price.textContent = formatPrice(variant.price) + ' EUR';
+
+    // Expandable details
+    const details = card.querySelector('[data-cfg-variant-details]');
+    const expandBtn = card.querySelector('[data-cfg-variant-expand]');
+    if (details && expandBtn) {
+      var detailRows = [
+        ['Обхват', variant.range_km + ' km'],
+        ['Мощност', variant.power_kw + ' kW'],
+        ['Ускорение 0-100', variant.acceleration],
+        ['Макс. скорост', variant.top_speed + ' km/h'],
+        ['Батерия', variant.battery_kwh + ' kWh ' + (variant.battery_type || '')],
+        ['DC зареждане', variant.dc_charge_power_kw + ' kW — ' + (variant.dc_charge_time || '')],
+        ['AC зареждане', variant.ac_charge_time || ''],
+        ['Задвижване', variant.drivetrain || ''],
+        ['Окачване', variant.suspension || ''],
+      ];
+      details.innerHTML = detailRows
+        .filter(function(r) { return r[1] && r[1] !== 'undefined' && r[1] !== 'undefined km/h'; })
+        .map(function(r) { return '<div class="configurator__detail-row"><span class="configurator__detail-label">' + r[0] + '</span><span class="configurator__detail-value">' + r[1] + '</span></div>'; })
+        .join('');
+
+      expandBtn.textContent = 'Повече';
+      expandBtn.addEventListener('click', function(e) {
+        e.stopPropagation();
+        var isOpen = card.hasAttribute('data-cfg-expanded');
+        if (isOpen) {
+          card.removeAttribute('data-cfg-expanded');
+          expandBtn.textContent = 'Повече';
+        } else {
+          card.setAttribute('data-cfg-expanded', '');
+          expandBtn.textContent = 'По-малко';
+        }
+      });
+    }
 
     if (variant.variant_code === state.selectedVariant?.variant_code) {
       card.setAttribute('data-cfg-active', '');
     }
 
-    card.addEventListener('click', () => {
+    card.addEventListener('click', function(e) {
+      if (e.target.closest('[data-cfg-variant-expand]')) return;
       const prevVariant = state.selectedVariant?.variant_code;
       setState({ selectedVariant: variant }, 'variant');
 
@@ -1312,7 +1353,7 @@ function handleStateChange(root, state, changeType) {
   updatePrice(root, state);
   updateActiveStates(root, state);
 
-  if (changeType === 'color' || changeType === 'init') {
+  if (changeType === 'color' || changeType === 'variant' || changeType === 'init') {
     updateGallery(root, state);
   }
 
@@ -1323,6 +1364,32 @@ function handleStateChange(root, state, changeType) {
   if (changeType === 'accessories') {
     updateAccessoryToggles(root, state);
   }
+}
+
+function bindAccordions(root) {
+  var steps = root.querySelectorAll('[data-cfg-step]');
+  steps.forEach(function(step) {
+    var title = step.querySelector('.configurator__step-title');
+    if (!title) return;
+
+    // Add toggle icon
+    var icon = document.createElement('span');
+    icon.className = 'configurator__accordion-icon';
+    title.appendChild(icon);
+    title.style.cursor = 'pointer';
+
+    // Start open
+    step.setAttribute('data-cfg-open', '');
+
+    title.addEventListener('click', function() {
+      var isOpen = step.hasAttribute('data-cfg-open');
+      if (isOpen) {
+        step.removeAttribute('data-cfg-open');
+      } else {
+        step.setAttribute('data-cfg-open', '');
+      }
+    });
+  });
 }
 
 function updatePrice(root, state) {

@@ -275,6 +275,106 @@
   max-height: 100vh;
 }
 
+/* --- Accordion --- */
+
+[data-cfg-step] > *:not(.configurator__step-title) {
+  overflow: hidden;
+  max-height: 0;
+  opacity: 0;
+  transition: max-height 0.4s ease, opacity 0.3s ease, margin 0.3s ease;
+  margin-top: 0;
+}
+
+[data-cfg-step][data-cfg-open] > *:not(.configurator__step-title) {
+  max-height: 200em;
+  opacity: 1;
+  margin-top: revert;
+}
+
+.configurator__step-title {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  user-select: none;
+}
+
+.configurator__accordion-icon {
+  position: relative;
+  width: 1em;
+  height: 1em;
+  flex-shrink: 0;
+}
+
+.configurator__accordion-icon::before,
+.configurator__accordion-icon::after {
+  content: '';
+  position: absolute;
+  background-color: currentColor;
+  transition: transform 0.3s ease;
+}
+
+.configurator__accordion-icon::before {
+  top: 50%;
+  left: 15%;
+  right: 15%;
+  height: 1.5px;
+  transform: translateY(-50%);
+}
+
+.configurator__accordion-icon::after {
+  left: 50%;
+  top: 15%;
+  bottom: 15%;
+  width: 1.5px;
+  transform: translateX(-50%);
+}
+
+[data-cfg-open] .configurator__accordion-icon::after {
+  transform: translateX(-50%) rotate(90deg);
+  opacity: 0;
+}
+
+/* --- Variant details expand --- */
+
+[data-cfg-variant-details] {
+  overflow: hidden;
+  max-height: 0;
+  opacity: 0;
+  transition: max-height 0.35s ease, opacity 0.25s ease;
+}
+
+[data-cfg-expanded] [data-cfg-variant-details] {
+  max-height: 50em;
+  opacity: 1;
+}
+
+.configurator__detail-row {
+  display: flex;
+  justify-content: space-between;
+  padding: 0.4em 0;
+  border-bottom: 1px solid rgba(0, 0, 0, 0.06);
+  font-size: 0.85em;
+}
+
+.configurator__detail-label {
+  color: #666;
+}
+
+.configurator__detail-value {
+  font-weight: 500;
+  text-align: right;
+}
+
+[data-cfg-variant-expand] {
+  color: #8B9A2D;
+  font-size: 0.85em;
+  text-decoration: none;
+  margin-top: 0.5em;
+  display: inline-block;
+}
+
+/* --- Loading --- */
+
 [data-cfg-loading] .configurator__options {
   opacity: 0.4;
   pointer-events: none;
