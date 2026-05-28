@@ -1324,6 +1324,18 @@ function renderWheels(root, state, data, setState) {
 }
 
 function renderAccessories(root, state, data, setState) {
+  // Rename section title to "Optional"
+  var accStep = root.querySelector('[data-cfg-step="accessories"]');
+  if (accStep) {
+    var stepTitle = accStep.querySelector('.configurator__step-title');
+    if (stepTitle) {
+      // Preserve accordion icon if present
+      var icon = stepTitle.querySelector('.configurator__accordion-icon');
+      stepTitle.textContent = 'Optional';
+      if (icon) stepTitle.appendChild(icon);
+    }
+  }
+
   const container = root.querySelector('[data-cfg-accessories]');
   if (!container) return;
   const template = container.querySelector('[data-cfg-accessory]') || container.lastElementChild;
@@ -1345,8 +1357,18 @@ function renderAccessories(root, state, data, setState) {
     const price = el.querySelector('[data-cfg-accessory-price]');
     if (price) price.textContent = formatPrice(acc.price) + ' EUR';
 
+    // Render description as bullet list
     const desc = el.querySelector('[data-cfg-accessory-desc]');
-    if (desc) desc.textContent = acc.description || '';
+    if (desc && acc.description) {
+      var bullets = acc.description.split('\n').filter(function(line) { return line.trim(); });
+      if (bullets.length > 1) {
+        desc.innerHTML = '<ul class="configurator__accessory-bullets">' +
+          bullets.map(function(b) { return '<li>' + b.trim() + '</li>'; }).join('') +
+          '</ul>';
+      } else {
+        desc.textContent = acc.description;
+      }
+    }
 
     const toggle = el.querySelector('[data-cfg-accessory-toggle]');
     const isActive = state.selectedAccessories.includes(acc.accessory_code);

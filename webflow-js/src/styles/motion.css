@@ -371,6 +371,24 @@
   display: inline-block;
 }
 
+/* --- Accessory bullets --- */
+
+.configurator__accessory-bullets {
+  list-style: none;
+  padding: 0;
+  margin: 0.5em 0 0;
+  font-size: 0.85em;
+  color: #666;
+}
+
+.configurator__accessory-bullets li::before {
+  content: '–  ';
+}
+
+.configurator__accessory-bullets li {
+  margin-bottom: 0.25em;
+}
+
 /* --- Loading --- */
 
 [data-cfg-loading] .configurator__options {
