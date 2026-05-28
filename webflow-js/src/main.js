@@ -1226,7 +1226,15 @@ function renderColors(root, state, data, setState) {
     el.setAttribute('data-cfg-swatch', color.color_code);
 
     const dot = el.querySelector('[data-cfg-swatch-dot]') || el.querySelector('.configurator__swatch-dot');
-    if (dot) dot.style.backgroundColor = color.color_hex;
+    if (dot) {
+      if (color.swatch_image) {
+        dot.style.backgroundImage = 'url(' + color.swatch_image + ')';
+        dot.style.backgroundSize = 'cover';
+        dot.style.backgroundPosition = 'center';
+      } else {
+        dot.style.backgroundColor = color.color_hex;
+      }
+    }
 
     const name = el.querySelector('[data-cfg-swatch-name]');
     if (name) name.textContent = color.color_name;
@@ -1398,7 +1406,7 @@ function handleStateChange(root, state, changeType) {
   updatePrice(root, state);
   updateActiveStates(root, state);
 
-  if (changeType === 'color' || changeType === 'variant') {
+  if (changeType === 'color' || changeType === 'variant' || changeType === 'wheels') {
     state.galleryMode = 'exterior';
     updateGallery(root, state);
   }
@@ -1491,9 +1499,14 @@ function updateGallery(root, state) {
     var interior = state.selectedInterior;
     url = (interior && (interior.image_full || interior.image_thumb)) || '';
   } else {
-    // Show exterior car render
+    // Show exterior car render — pick 21" image if 21" wheels selected
     var color = state.selectedColor;
-    url = (color && color.image_front) || '';
+    var is21 = state.selectedWheels && state.selectedWheels.wheel_code && state.selectedWheels.wheel_code.indexOf('21') >= 0;
+    if (is21 && color && color.image_front_21) {
+      url = color.image_front_21;
+    } else {
+      url = (color && color.image_front) || '';
+    }
   }
 
   if (!url) return;
