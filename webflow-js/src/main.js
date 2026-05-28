@@ -1349,6 +1349,7 @@ function renderAccessories(root, state, data, setState) {
     el.setAttribute('data-cfg-accessory', acc.accessory_code);
 
     const img = el.querySelector('.configurator__accessory-img');
+    console.log('[CFG] accessory', acc.accessory_code, 'image:', acc.image, 'img el:', !!img);
     if (img && acc.image) img.src = acc.image;
 
     const name = el.querySelector('[data-cfg-accessory-name]');
@@ -1371,6 +1372,7 @@ function renderAccessories(root, state, data, setState) {
     }
 
     const toggle = el.querySelector('[data-cfg-accessory-toggle]');
+    console.log('[CFG] toggle el:', !!toggle, toggle?.tagName, toggle?.className);
     const isActive = state.selectedAccessories.includes(acc.accessory_code);
     if (toggle) {
       toggle.textContent = isActive ? 'Премахни' : 'Добави';
