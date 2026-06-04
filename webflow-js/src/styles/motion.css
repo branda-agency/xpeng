@@ -420,6 +420,7 @@
 [data-btn-hover] {
   position: relative;
   overflow: hidden;
+  transition: border-color 0.4s ease;
 }
 
 [data-btn-hover] > * {
@@ -443,6 +444,10 @@
 }
 
 [data-btn-hover="green"]::after {
-  background-color: #8B9A2D;
+  background-color: #A4CE4C;
+}
+
+[data-btn-hover="green"]:hover {
+  border-color: #A4CE4C;
 }
 
