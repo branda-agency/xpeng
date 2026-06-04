@@ -1175,11 +1175,8 @@ function renderVariants(root, state, data, setState) {
     if (delivery) delivery.textContent = resolveDeliveryTime(variant.delivery_time);
 
     const specs = card.querySelector('[data-cfg-variant-specs]');
-    if (specs) {
-      var specParts = [];
-      if (variant.energy_consumption) specParts.push(variant.energy_consumption);
-      specParts.push('CO2: 0 g/km');
-      specs.innerHTML = specParts.join('; ');
+    if (specs && variant.energy_consumption) {
+      specs.textContent = 'Electricity consumption ' + variant.energy_consumption + '; CO2 emissions 0 g/km; CO2 class: A (combined values according to WLTP).';
     }
 
     const price = card.querySelector('[data-cfg-variant-price]');
