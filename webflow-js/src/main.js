@@ -57,6 +57,13 @@
      data-modal-target="example"          → Trigger button, value matches modal name
      data-modal-close                     → Close button (on backdrop + X icon)
 
+   DRAWER (right slide):
+     data-drawer-group-status="not-active" → Drawer overlay wrapper (fixed, covers viewport)
+     data-drawer-name="specs-rwd-sr"       → Drawer panel, value = unique name
+     data-drawer-status="not-active"       → Active state on panels & triggers
+     data-drawer-target="specs-rwd-sr"     → Trigger button, value matches drawer name
+     data-drawer-close                     → Close button (on backdrop + X icon)
+
    BUTTON HOVER:
      data-btn-hover="green"       → Left-to-right fill wipe on hover
 
@@ -422,6 +429,45 @@ function initModal() {
   });
 
   group.querySelectorAll('[data-modal-close]').forEach(function(btn) {
+    btn.addEventListener('click', closeAll);
+  });
+
+  document.addEventListener('keydown', function(e) {
+    if (e.key === 'Escape') closeAll();
+  });
+}
+
+
+/* ============================================================
+   8c. DRAWER (right slide)
+   ============================================================ */
+
+function initDrawer() {
+  var group = document.querySelector('[data-drawer-group-status]');
+  if (!group) return;
+
+  var drawers = group.querySelectorAll('[data-drawer-name]');
+  var triggers = document.querySelectorAll('[data-drawer-target]');
+
+  function closeAll() {
+    drawers.forEach(function(d) { d.setAttribute('data-drawer-status', 'not-active'); });
+    triggers.forEach(function(t) { t.setAttribute('data-drawer-status', 'not-active'); });
+    group.setAttribute('data-drawer-group-status', 'not-active');
+  }
+
+  triggers.forEach(function(trigger) {
+    trigger.addEventListener('click', function(e) {
+      e.preventDefault();
+      var name = this.getAttribute('data-drawer-target');
+      closeAll();
+      var drawer = group.querySelector('[data-drawer-name="' + name + '"]');
+      if (drawer) drawer.setAttribute('data-drawer-status', 'active');
+      this.setAttribute('data-drawer-status', 'active');
+      group.setAttribute('data-drawer-group-status', 'active');
+    });
+  });
+
+  group.querySelectorAll('[data-drawer-close]').forEach(function(btn) {
     btn.addEventListener('click', closeAll);
   });
 
@@ -1182,37 +1228,13 @@ function renderVariants(root, state, data, setState) {
     const price = card.querySelector('[data-cfg-variant-price]');
     if (price) price.textContent = formatPrice(variant.price) + ' EUR';
 
-    // Expandable details
-    const details = card.querySelector('[data-cfg-variant-details]');
+    // "Show more" opens drawer with full specs
     const expandBtn = card.querySelector('[data-cfg-variant-expand]');
-    if (details && expandBtn) {
-      var detailRows = [
-        ['Обхват', variant.range_km + ' km'],
-        ['Мощност', variant.power_kw + ' kW'],
-        ['Ускорение 0-100', variant.acceleration],
-        ['Макс. скорост', variant.top_speed + ' km/h'],
-        ['Батерия', variant.battery_kwh + ' kWh ' + (variant.battery_type || '')],
-        ['DC зареждане', variant.dc_charge_power_kw + ' kW — ' + (variant.dc_charge_time || '')],
-        ['AC зареждане', variant.ac_charge_time || ''],
-        ['Задвижване', variant.drivetrain || ''],
-        ['Окачване', variant.suspension || ''],
-      ];
-      details.innerHTML = detailRows
-        .filter(function(r) { return r[1] && r[1] !== 'undefined' && r[1] !== 'undefined km/h'; })
-        .map(function(r) { return '<div class="configurator__detail-row"><span class="configurator__detail-label">' + r[0] + '</span><span class="configurator__detail-value">' + r[1] + '</span></div>'; })
-        .join('');
-
-      expandBtn.textContent = 'Повече';
+    if (expandBtn) {
+      expandBtn.textContent = 'Show more';
+      expandBtn.setAttribute('data-drawer-target', 'specs-' + variant.variant_code);
       expandBtn.addEventListener('click', function(e) {
         e.stopPropagation();
-        var isOpen = card.hasAttribute('data-cfg-expanded');
-        if (isOpen) {
-          card.removeAttribute('data-cfg-expanded');
-          expandBtn.textContent = 'Повече';
-        } else {
-          card.setAttribute('data-cfg-expanded', '');
-          expandBtn.textContent = 'По-малко';
-        }
       });
     }
 
@@ -1636,6 +1658,7 @@ function init() {
   // Functional components — run regardless of motion preference
   initFormConsent();
   initModal();
+  initDrawer();
 
   mm.add('(prefers-reduced-motion: no-preference)', () => {
     initLenis();

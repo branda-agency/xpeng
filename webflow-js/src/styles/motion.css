@@ -473,3 +473,26 @@
   display: flex;
 }
 
+/* --- Drawer (right slide) --- */
+[data-drawer-group-status] {
+  opacity: 0;
+  pointer-events: none;
+  visibility: hidden;
+  transition: opacity 0.3s ease, visibility 0.3s ease;
+}
+
+[data-drawer-group-status="active"] {
+  opacity: 1;
+  pointer-events: auto;
+  visibility: visible;
+}
+
+[data-drawer-name] {
+  transform: translateX(100%);
+  transition: transform 0.4s ease;
+}
+
+[data-drawer-name][data-drawer-status="active"] {
+  transform: translateX(0);
+}
+
