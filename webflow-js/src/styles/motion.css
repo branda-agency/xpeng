@@ -416,3 +416,33 @@
   margin-right: 0.15em;
 }
 
+/* --- Button hover wipe --- */
+[data-btn-hover] {
+  position: relative;
+  overflow: hidden;
+}
+
+[data-btn-hover] > * {
+  position: relative;
+  z-index: 1;
+}
+
+[data-btn-hover]::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  transform: scaleX(0);
+  transform-origin: left center;
+  transition: transform 0.4s ease;
+  z-index: 0;
+}
+
+[data-btn-hover]:hover::after {
+  transform: scaleX(1);
+}
+
+[data-btn-hover="green"]::after {
+  background-color: #8B9A2D;
+}
+
