@@ -451,3 +451,25 @@
   border-color: #A4CE4C;
 }
 
+/* --- Modal --- */
+[data-modal-group-status] {
+  opacity: 0;
+  pointer-events: none;
+  visibility: hidden;
+  transition: opacity 0.2s ease, visibility 0.2s ease;
+}
+
+[data-modal-group-status="active"] {
+  opacity: 1;
+  pointer-events: auto;
+  visibility: visible;
+}
+
+[data-modal-name] {
+  display: none;
+}
+
+[data-modal-name][data-modal-status="active"] {
+  display: flex;
+}
+

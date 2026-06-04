@@ -50,6 +50,16 @@
      data-lenis-start             → Resumes smooth scroll on click
      data-lenis-toggle            → Toggles smooth scroll on click
 
+   MODAL:
+     data-modal-group-status="not-active" → Modal overlay wrapper (fixed, covers viewport)
+     data-modal-name="example"            → Modal card, value = unique name
+     data-modal-status="not-active"       → Active state on cards & triggers
+     data-modal-target="example"          → Trigger button, value matches modal name
+     data-modal-close                     → Close button (on backdrop + X icon)
+
+   BUTTON HOVER:
+     data-btn-hover="green"       → Left-to-right fill wipe on hover
+
    ============================================================ */
 
 import './styles/motion.css';
@@ -379,6 +389,44 @@ function initFormConsent() {
       submit.style.opacity = isChecked ? '1' : '0.5';
       submit.style.pointerEvents = isChecked ? 'auto' : 'none';
     });
+  });
+}
+
+
+/* ============================================================
+   8b. MODAL
+   ============================================================ */
+
+function initModal() {
+  var group = document.querySelector('[data-modal-group-status]');
+  if (!group) return;
+
+  var modals = group.querySelectorAll('[data-modal-name]');
+  var triggers = document.querySelectorAll('[data-modal-target]');
+
+  function closeAll() {
+    modals.forEach(function(m) { m.setAttribute('data-modal-status', 'not-active'); });
+    triggers.forEach(function(t) { t.setAttribute('data-modal-status', 'not-active'); });
+    group.setAttribute('data-modal-group-status', 'not-active');
+  }
+
+  triggers.forEach(function(trigger) {
+    trigger.addEventListener('click', function() {
+      var name = this.getAttribute('data-modal-target');
+      closeAll();
+      var modal = group.querySelector('[data-modal-name="' + name + '"]');
+      if (modal) modal.setAttribute('data-modal-status', 'active');
+      this.setAttribute('data-modal-status', 'active');
+      group.setAttribute('data-modal-group-status', 'active');
+    });
+  });
+
+  group.querySelectorAll('[data-modal-close]').forEach(function(btn) {
+    btn.addEventListener('click', closeAll);
+  });
+
+  document.addEventListener('keydown', function(e) {
+    if (e.key === 'Escape') closeAll();
   });
 }
 
@@ -1590,6 +1638,7 @@ function init() {
 
   // Functional components — run regardless of motion preference
   initFormConsent();
+  initModal();
 
   mm.add('(prefers-reduced-motion: no-preference)', () => {
     initLenis();
