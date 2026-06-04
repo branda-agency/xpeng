@@ -1235,9 +1235,6 @@ function renderVariants(root, state, data, setState) {
     if (expandBtn) {
       expandBtn.textContent = 'Show more';
       expandBtn.setAttribute('data-drawer-target', 'specs-' + variant.variant_code);
-      expandBtn.addEventListener('click', function(e) {
-        e.stopPropagation();
-      });
     }
 
     if (variant.variant_code === state.selectedVariant?.variant_code) {
