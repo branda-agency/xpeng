@@ -473,6 +473,20 @@
   display: flex;
 }
 
+/* --- Config confirm dialog --- */
+[data-cfg-confirm] {
+  opacity: 0;
+  pointer-events: none;
+  visibility: hidden;
+  transition: opacity 0.2s ease, visibility 0.2s ease;
+}
+
+[data-cfg-confirm="active"] {
+  opacity: 1;
+  pointer-events: auto;
+  visibility: visible;
+}
+
 /* --- Drawer (right slide) --- */
 [data-drawer-group-status] {
   opacity: 0;

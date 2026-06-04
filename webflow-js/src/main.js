@@ -64,6 +64,13 @@
      data-drawer-target="specs-rwd-sr"     → Trigger button, value matches drawer name
      data-drawer-close                     → Close button (on backdrop + X icon)
 
+   CONFIG CONFIRM DIALOG:
+     data-cfg-confirm="not-active"        → Overlay wrapper (fixed, covers viewport)
+     data-cfg-confirm-backdrop            → Dark backdrop (click to cancel)
+     data-cfg-confirm-message             → Message text element
+     data-cfg-confirm-apply               → "Apply changes" button
+     data-cfg-confirm-cancel              → "Cancel" button
+
    BUTTON HOVER:
      data-btn-hover="green"       → Left-to-right fill wipe on hover
 
@@ -1246,32 +1253,32 @@ function renderVariants(root, state, data, setState) {
       var prevVariant = state.selectedVariant?.variant_code;
       if (prevVariant === variant.variant_code) return;
 
-      // Update variant
-      state.selectedVariant = variant;
+      function applyVariantChange() {
+        state.selectedVariant = variant;
 
-      // Re-filter options silently (no notify — avoid triggering gallery mode changes)
-      var colors = getOptionsForVariant(data.colors, variant.variant_code);
-      var curColor = colors.find(function(c) { return c.color_code === state.selectedColor?.color_code; });
-      state.selectedColor = curColor || colors.find(function(c) { return c.is_default; }) || colors[0];
+        var colors = getOptionsForVariant(data.colors, variant.variant_code);
+        var curColor = colors.find(function(c) { return c.color_code === state.selectedColor?.color_code; });
+        state.selectedColor = curColor || colors.find(function(c) { return c.is_default; }) || colors[0];
 
-      var interiors = getOptionsForVariant(data.interiors, variant.variant_code);
-      var curInt = interiors.find(function(i) { return i.interior_code === state.selectedInterior?.interior_code; });
-      state.selectedInterior = curInt || interiors.find(function(i) { return i.is_default; }) || interiors[0];
+        var interiors = getOptionsForVariant(data.interiors, variant.variant_code);
+        var curInt = interiors.find(function(i) { return i.interior_code === state.selectedInterior?.interior_code; });
+        state.selectedInterior = curInt || interiors.find(function(i) { return i.is_default; }) || interiors[0];
 
-      var wheels = getOptionsForVariant(data.wheels, variant.variant_code);
-      var curWhl = wheels.find(function(w) { return w.wheel_code === state.selectedWheels?.wheel_code; });
-      state.selectedWheels = curWhl || wheels.find(function(w) { return w.is_default; }) || wheels[0];
+        var wheels = getOptionsForVariant(data.wheels, variant.variant_code);
+        var curWhl = wheels.find(function(w) { return w.wheel_code === state.selectedWheels?.wheel_code; });
+        state.selectedWheels = curWhl || wheels.find(function(w) { return w.is_default; }) || wheels[0];
 
-      // Re-render options with new filtered data
-      renderColors(root, state, data, setState);
-      renderInteriors(root, state, data, setState);
-      renderWheels(root, state, data, setState);
+        renderColors(root, state, data, setState);
+        renderInteriors(root, state, data, setState);
+        renderWheels(root, state, data, setState);
 
-      // Update gallery as exterior (variant change = exterior view)
-      state.galleryMode = 'exterior';
-      updateGallery(root, state);
-      updatePrice(root, state);
-      updateActiveStates(root, state);
+        state.galleryMode = 'exterior';
+        updateGallery(root, state);
+        updatePrice(root, state);
+        updateActiveStates(root, state);
+      }
+
+      showConfigConfirm(root, applyVariantChange);
     });
 
     container.appendChild(card);
@@ -1553,6 +1560,45 @@ function updateActiveStates(root, state) {
     if (code === state.selectedWheels?.wheel_code) opt.setAttribute('data-cfg-active', '');
     else opt.removeAttribute('data-cfg-active');
   });
+}
+
+// ---- Configuration confirm dialog ----
+
+function showConfigConfirm(root, onApply) {
+  var dialog = document.querySelector('[data-cfg-confirm]');
+  if (!dialog) { onApply(); return; } // No dialog in DOM — apply immediately
+
+  dialog.setAttribute('data-cfg-confirm', 'active');
+
+  var applyBtn = dialog.querySelector('[data-cfg-confirm-apply]');
+  var cancelBtn = dialog.querySelector('[data-cfg-confirm-cancel]');
+  var backdrop = dialog.querySelector('[data-cfg-confirm-backdrop]');
+
+  function close() {
+    dialog.setAttribute('data-cfg-confirm', 'not-active');
+    cleanup();
+  }
+
+  function apply() {
+    close();
+    onApply();
+  }
+
+  function onEscape(e) {
+    if (e.key === 'Escape') close();
+  }
+
+  function cleanup() {
+    if (applyBtn) applyBtn.removeEventListener('click', apply);
+    if (cancelBtn) cancelBtn.removeEventListener('click', close);
+    if (backdrop) backdrop.removeEventListener('click', close);
+    document.removeEventListener('keydown', onEscape);
+  }
+
+  if (applyBtn) applyBtn.addEventListener('click', apply);
+  if (cancelBtn) cancelBtn.addEventListener('click', close);
+  if (backdrop) backdrop.addEventListener('click', close);
+  document.addEventListener('keydown', onEscape);
 }
 
 function updateGallery(root, state) {
