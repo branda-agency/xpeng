@@ -447,24 +447,26 @@ function initDrawer() {
   if (!group) return;
 
   var drawers = group.querySelectorAll('[data-drawer-name]');
-  var triggers = document.querySelectorAll('[data-drawer-target]');
 
   function closeAll() {
     drawers.forEach(function(d) { d.setAttribute('data-drawer-status', 'not-active'); });
-    triggers.forEach(function(t) { t.setAttribute('data-drawer-status', 'not-active'); });
+    document.querySelectorAll('[data-drawer-target]').forEach(function(t) {
+      t.setAttribute('data-drawer-status', 'not-active');
+    });
     group.setAttribute('data-drawer-group-status', 'not-active');
   }
 
-  triggers.forEach(function(trigger) {
-    trigger.addEventListener('click', function(e) {
-      e.preventDefault();
-      var name = this.getAttribute('data-drawer-target');
-      closeAll();
-      var drawer = group.querySelector('[data-drawer-name="' + name + '"]');
-      if (drawer) drawer.setAttribute('data-drawer-status', 'active');
-      this.setAttribute('data-drawer-status', 'active');
-      group.setAttribute('data-drawer-group-status', 'active');
-    });
+  // Event delegation — catches dynamically added triggers
+  document.addEventListener('click', function(e) {
+    var trigger = e.target.closest('[data-drawer-target]');
+    if (!trigger) return;
+    e.preventDefault();
+    var name = trigger.getAttribute('data-drawer-target');
+    closeAll();
+    var drawer = group.querySelector('[data-drawer-name="' + name + '"]');
+    if (drawer) drawer.setAttribute('data-drawer-status', 'active');
+    trigger.setAttribute('data-drawer-status', 'active');
+    group.setAttribute('data-drawer-group-status', 'active');
   });
 
   group.querySelectorAll('[data-drawer-close]').forEach(function(btn) {
