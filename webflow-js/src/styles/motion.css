@@ -415,3 +415,58 @@
   transform: rotate(45deg);
   margin-right: 0.15em;
 }
+
+/* --- Button 029 --- */
+:root {
+  --button-029-color: #fff;
+  --button-029-color-background: #000;
+  --button-029-hover-color: #fff;
+  --button-029-hover-color-background: #8B9A2D;
+  --button-029-color-focus: #000;
+  --button-029-padding: 0.75em 1em;
+  --button-029-border-radius: 2.5em;
+  --button-029-focus-inset: -0.125em;
+  --button-029-click-scale: 0.955 0.925;
+  --button-029-clip-path: inset(0 100% 0 0 round 0 0.75em 0.75em 0);
+  --button-029-clip-path-hover: inset(0 0 0 0 round 0);
+  --button-029-ease-click: cubic-bezier(0.4, 0, 0.2, 1);
+  --button-029-ease-hover: cubic-bezier(0.32, 0.72, 0, 1);
+  --button-029-ease-focus: cubic-bezier(0.32, 0.72, 0, 1);
+}
+
+.button-029 {
+  -webkit-tap-highlight-color: transparent;
+  transition: scale 0.15s var(--button-029-ease-click);
+}
+
+@media (hover: hover) and (pointer: fine) and (prefers-reduced-motion: no-preference) {
+  .button-029:is(:hover, :focus-visible) .button-029__hover,
+  [data-hover]:is(:hover, :focus-visible) .button-029 .button-029__hover {
+    clip-path: var(--button-029-clip-path-hover);
+    transition: clip-path 0.55s 0.05s var(--button-029-ease-hover);
+  }
+}
+
+.button-029:is(:focus-visible)::after {
+  box-shadow: 0 0 0 0.125em var(--button-029-color-focus);
+}
+
+.button-029:active {
+  scale: var(--button-029-click-scale);
+}
+
+.button-029::after {
+  content: '';
+  display: block;
+  position: absolute;
+  inset: var(--button-029-focus-inset);
+  border-radius: var(--button-029-border-radius);
+  transition: box-shadow 0.3s var(--button-029-ease-focus);
+  pointer-events: none;
+  z-index: 1;
+}
+
+.button-029__hover {
+  clip-path: var(--button-029-clip-path);
+  transition: clip-path 0.5s var(--button-029-ease-hover);
+}
