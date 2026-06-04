@@ -1253,20 +1253,28 @@ function renderVariants(root, state, data, setState) {
       var prevVariant = state.selectedVariant?.variant_code;
       if (prevVariant === variant.variant_code) return;
 
+      // Check if current selections survive the variant switch
+      var newColors = getOptionsForVariant(data.colors, variant.variant_code);
+      var newInteriors = getOptionsForVariant(data.interiors, variant.variant_code);
+      var newWheels = getOptionsForVariant(data.wheels, variant.variant_code);
+
+      var colorSurvives = newColors.some(function(c) { return c.color_code === state.selectedColor?.color_code; });
+      var interiorSurvives = newInteriors.some(function(i) { return i.interior_code === state.selectedInterior?.interior_code; });
+      var wheelSurvives = newWheels.some(function(w) { return w.wheel_code === state.selectedWheels?.wheel_code; });
+
+      var selectionsChange = !colorSurvives || !interiorSurvives || !wheelSurvives;
+
       function applyVariantChange() {
         state.selectedVariant = variant;
 
-        var colors = getOptionsForVariant(data.colors, variant.variant_code);
-        var curColor = colors.find(function(c) { return c.color_code === state.selectedColor?.color_code; });
-        state.selectedColor = curColor || colors.find(function(c) { return c.is_default; }) || colors[0];
+        state.selectedColor = (colorSurvives && newColors.find(function(c) { return c.color_code === state.selectedColor?.color_code; }))
+          || newColors.find(function(c) { return c.is_default; }) || newColors[0];
 
-        var interiors = getOptionsForVariant(data.interiors, variant.variant_code);
-        var curInt = interiors.find(function(i) { return i.interior_code === state.selectedInterior?.interior_code; });
-        state.selectedInterior = curInt || interiors.find(function(i) { return i.is_default; }) || interiors[0];
+        state.selectedInterior = (interiorSurvives && newInteriors.find(function(i) { return i.interior_code === state.selectedInterior?.interior_code; }))
+          || newInteriors.find(function(i) { return i.is_default; }) || newInteriors[0];
 
-        var wheels = getOptionsForVariant(data.wheels, variant.variant_code);
-        var curWhl = wheels.find(function(w) { return w.wheel_code === state.selectedWheels?.wheel_code; });
-        state.selectedWheels = curWhl || wheels.find(function(w) { return w.is_default; }) || wheels[0];
+        state.selectedWheels = (wheelSurvives && newWheels.find(function(w) { return w.wheel_code === state.selectedWheels?.wheel_code; }))
+          || newWheels.find(function(w) { return w.is_default; }) || newWheels[0];
 
         renderColors(root, state, data, setState);
         renderInteriors(root, state, data, setState);
@@ -1278,7 +1286,11 @@ function renderVariants(root, state, data, setState) {
         updateActiveStates(root, state);
       }
 
-      showConfigConfirm(root, applyVariantChange);
+      if (selectionsChange) {
+        showConfigConfirm(root, applyVariantChange);
+      } else {
+        applyVariantChange();
+      }
     });
 
     container.appendChild(card);
