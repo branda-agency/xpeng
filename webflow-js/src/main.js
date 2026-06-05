@@ -1819,7 +1819,7 @@ function renderSummary(root, config) {
         if (label) label.textContent = acc.accessory_name;
         var price = el.querySelector('[data-summary-item-price]');
         if (price) price.textContent = '+' + formatPrice(acc.price) + ' EUR';
-        var thumb = el.querySelector('[data-summary-item-thumb]');
+        var thumb = el.querySelector('.summary__item-thumb') || el.querySelector('[data-summary-item-thumb]') || el.querySelector('img');
         if (thumb && acc.image) thumb.src = acc.image;
         accContainer.appendChild(el);
       });
@@ -1861,7 +1861,7 @@ function setLineThumb(root, type, src) {
   if (!src) return;
   var item = root.querySelector('[data-summary-item="' + type + '"]');
   if (!item) return;
-  var thumb = item.querySelector('[data-summary-item-thumb]');
+  var thumb = item.querySelector('.summary__item-thumb') || item.querySelector('[data-summary-item-thumb]') || item.querySelector('img');
   if (thumb) thumb.src = src;
 }
 
