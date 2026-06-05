@@ -1626,7 +1626,6 @@ function updateGallery(root, state) {
     // Show exterior car render — pick 21" image if 21" wheels selected
     var color = state.selectedColor;
     var is21 = state.selectedWheels && state.selectedWheels.wheel_code && state.selectedWheels.wheel_code.indexOf('21') >= 0;
-    console.log('[CFG gallery]', 'wheel:', state.selectedWheels?.wheel_code, 'is21:', is21, 'image_front_21:', color?.image_front_21);
     if (is21 && color && color.image_front_21) {
       url = color.image_front_21;
     } else {
