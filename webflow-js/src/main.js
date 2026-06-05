@@ -499,10 +499,15 @@ function routePage() {
   const slug = segments[segments.length - 1];
 
   if (path === 'home') initHomePage();
+  else if (path === 'configurator/summary') {
+    if (lenis) lenis.destroy();
+    initSummaryPage();
+  }
   else if (segments.includes('configurator') && CONFIGURATOR_SLUGS.includes(slug)) {
     if (lenis) lenis.destroy();
     initConfiguratorPage(slug);
   }
+  else if (path === 'test-drive') initTestDrivePage();
   else if (PRODUCT_SLUGS.includes(slug)) initProductPage();
 }
 
@@ -1697,6 +1702,205 @@ function bindContinueBtn(root, state) {
   });
 }
 
+
+// ---- Summary page ----
+
+function initSummaryPage() {
+  var root = document.querySelector('[data-cfg-summary]');
+  if (!root) return;
+
+  var stored = sessionStorage.getItem('xpeng-cfg');
+  var config = null;
+
+  if (stored) {
+    try { config = JSON.parse(stored); } catch (e) { /* fall through */ }
+  }
+
+  if (config) {
+    renderSummary(root, config);
+  } else {
+    // Reconstruct from URL params + API
+    var params = new URLSearchParams(window.location.search);
+    var modelSlug = params.get('model');
+    if (!modelSlug) return;
+
+    fetchModelData(modelSlug).then(function(data) {
+      if (!data) return;
+      config = reconstructConfig(data, params);
+      sessionStorage.setItem('xpeng-cfg', JSON.stringify(config));
+      renderSummary(root, config);
+    });
+  }
+}
+
+function reconstructConfig(data, params) {
+  var variantCode = params.get('variant');
+  var colorCode = params.get('color');
+  var interiorCode = params.get('interior');
+  var wheelCode = params.get('wheels');
+  var accCodes = (params.get('accessories') || '').split(',').filter(Boolean);
+
+  var variant = data.variants.find(function(v) { return v.variant_code === variantCode; }) || data.variants[0];
+  var colors = getOptionsForVariant(data.colors, variant.variant_code);
+  var interiors = getOptionsForVariant(data.interiors, variant.variant_code);
+  var wheels = getOptionsForVariant(data.wheels, variant.variant_code);
+
+  var color = colors.find(function(c) { return c.color_code === colorCode; }) || colors[0];
+  var interior = interiors.find(function(i) { return i.interior_code === interiorCode; }) || interiors[0];
+  var selectedWheels = wheels.find(function(w) { return w.wheel_code === wheelCode; }) || wheels[0];
+  var accessories = data.accessories.filter(function(a) { return accCodes.includes(a.accessory_code); });
+
+  var totalEur = (variant.price || 0) + (color.price || 0) + (interior.price || 0) + (selectedWheels.price || 0);
+  accessories.forEach(function(a) { totalEur += a.price || 0; });
+
+  return {
+    model: data.model,
+    selectedVariant: variant,
+    selectedColor: color,
+    selectedInterior: interior,
+    selectedWheels: selectedWheels,
+    selectedAccessories: accessories,
+    totals: { totalEur: totalEur, totalBgn: Math.round(totalEur * EUR_TO_BGN) }
+  };
+}
+
+function renderSummary(root, config) {
+  // Heading
+  var heading = root.querySelector('[data-summary-heading]');
+  if (heading) heading.textContent = 'Your XPENG ' + (config.model.model_name || '').replace('XPENG ', '') + ' SUV';
+
+  // Car image — pick 21" image if 21" wheels selected
+  var carImg = root.querySelector('[data-summary-car-image]');
+  if (carImg && config.selectedColor) {
+    var is21 = config.selectedWheels && config.selectedWheels.wheel_code && config.selectedWheels.wheel_code.indexOf('21') >= 0;
+    var url = (is21 && config.selectedColor.image_front_21) || config.selectedColor.image_front || '';
+    if (url) carImg.src = url;
+  }
+
+  // Variant line item
+  setLineItem(root, 'variant', config.selectedVariant.variant_name, formatPrice(config.selectedVariant.price) + ' EUR');
+
+  // Color line item + swatch
+  var colorPrice = config.selectedColor.price > 0 ? '+' + formatPrice(config.selectedColor.price) + ' EUR' : '';
+  setLineItem(root, 'color', config.selectedColor.color_name, colorPrice);
+  var swatch = root.querySelector('[data-summary-color-swatch]');
+  if (swatch) {
+    if (config.selectedColor.swatch_image) {
+      swatch.style.backgroundImage = 'url(' + config.selectedColor.swatch_image + ')';
+      swatch.style.backgroundSize = 'cover';
+      swatch.style.backgroundPosition = 'center';
+    } else {
+      swatch.style.backgroundColor = config.selectedColor.color_hex;
+    }
+  }
+
+  // Interior line item
+  var interiorPrice = config.selectedInterior.price > 0 ? '+' + formatPrice(config.selectedInterior.price) + ' EUR' : '';
+  setLineItem(root, 'interior', config.selectedInterior.interior_name, interiorPrice);
+  setLineThumb(root, 'interior', config.selectedInterior.image_thumb);
+
+  // Wheels line item
+  var wheelsPrice = config.selectedWheels.price > 0 ? '+' + formatPrice(config.selectedWheels.price) + ' EUR' : '';
+  setLineItem(root, 'wheels', config.selectedWheels.wheel_name, wheelsPrice);
+  setLineThumb(root, 'wheels', config.selectedWheels.image_thumb);
+
+  // Accessories — clone template for each selected accessory
+  var accTemplate = root.querySelector('[data-summary-item="accessory"]');
+  if (accTemplate) {
+    var accContainer = accTemplate.parentElement;
+    if (config.selectedAccessories.length === 0) {
+      accTemplate.style.display = 'none';
+    } else {
+      accTemplate.style.display = 'none';
+      config.selectedAccessories.forEach(function(acc) {
+        var el = accTemplate.cloneNode(true);
+        el.style.display = '';
+        var label = el.querySelector('[data-summary-item-label]');
+        if (label) label.textContent = acc.accessory_name;
+        var price = el.querySelector('[data-summary-item-price]');
+        if (price) price.textContent = '+' + formatPrice(acc.price) + ' EUR';
+        var thumb = el.querySelector('[data-summary-item-thumb]');
+        if (thumb && acc.image) thumb.src = acc.image;
+        accContainer.appendChild(el);
+      });
+    }
+  }
+
+  // Totals
+  var totalEur = root.querySelector('[data-summary-total-eur]');
+  if (totalEur) totalEur.textContent = formatPrice(config.totals.totalEur) + ' EUR';
+  var totalBgn = root.querySelector('[data-summary-total-bgn]');
+  if (totalBgn) totalBgn.textContent = formatPrice(config.totals.totalBgn) + ' лв.';
+
+  // Test drive link
+  var tdLink = root.querySelector('[data-summary-test-drive]');
+  if (tdLink) tdLink.href = '/test-drive?model=' + (config.model.model_slug || '');
+
+  // Pre-order button — disabled until Stripe is set up
+  var preorderBtn = root.querySelector('[data-summary-preorder]');
+  if (preorderBtn) {
+    preorderBtn.disabled = true;
+    preorderBtn.style.opacity = '0.5';
+    preorderBtn.style.cursor = 'not-allowed';
+  }
+
+  // Fade in
+  root.classList.add('is-loaded');
+}
+
+function setLineItem(root, type, label, price) {
+  var item = root.querySelector('[data-summary-item="' + type + '"]');
+  if (!item) return;
+  var labelEl = item.querySelector('[data-summary-item-label]');
+  if (labelEl) labelEl.textContent = label;
+  var priceEl = item.querySelector('[data-summary-item-price]');
+  if (priceEl) priceEl.textContent = price;
+}
+
+function setLineThumb(root, type, src) {
+  if (!src) return;
+  var item = root.querySelector('[data-summary-item="' + type + '"]');
+  if (!item) return;
+  var thumb = item.querySelector('[data-summary-item-thumb]');
+  if (thumb) thumb.src = src;
+}
+
+// ---- Test drive page ----
+
+function initTestDrivePage() {
+  var root = document.querySelector('[data-test-drive]');
+  if (!root) return;
+
+  var cards = root.querySelectorAll('[data-td-model]');
+  var hiddenInput = root.querySelector('[data-td-model-input]');
+
+  function selectModel(slug) {
+    cards.forEach(function(card) {
+      var isMatch = card.getAttribute('data-td-model') === slug;
+      if (isMatch) card.setAttribute('data-td-active', '');
+      else card.removeAttribute('data-td-active');
+    });
+    if (hiddenInput) hiddenInput.value = slug;
+  }
+
+  cards.forEach(function(card) {
+    card.style.cursor = 'pointer';
+    card.addEventListener('click', function() {
+      selectModel(card.getAttribute('data-td-model'));
+    });
+  });
+
+  // Pre-select from URL param or default to G9
+  var params = new URLSearchParams(window.location.search);
+  var preselected = params.get('model');
+  if (preselected && ['g9', 'g6', 'p7-plus'].includes(preselected)) {
+    selectModel(preselected);
+  } else {
+    selectModel('g9');
+  }
+}
+
+// ---- Product page ----
 
 function initProductPage() {
   try { initColorPicker(); } catch (e) { console.error('colorPicker:', e); }

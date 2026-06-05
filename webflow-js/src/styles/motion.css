@@ -520,3 +520,23 @@
   pointer-events: auto;
 }
 
+/* --- Summary page --- */
+[data-cfg-summary] {
+  opacity: 0;
+  transition: opacity 0.4s ease;
+}
+
+[data-cfg-summary].is-loaded {
+  opacity: 1;
+}
+
+/* --- Test drive model cards --- */
+[data-td-model] {
+  transition: border-color 0.25s ease, box-shadow 0.25s ease;
+}
+
+[data-td-model][data-td-active] {
+  border-color: #0a0a1a;
+  box-shadow: inset 0 0 0 1px #0a0a1a;
+}
+
