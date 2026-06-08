@@ -530,13 +530,13 @@
   opacity: 1;
 }
 
-/* --- Test drive model cards --- */
-[data-td-model] {
-  transition: border-color 0.25s ease, box-shadow 0.25s ease;
+/* --- Test drive radio cards --- */
+.radio-card {
+  transition: background-color 0.25s ease, border-color 0.25s ease;
 }
 
-[data-td-model][data-td-active] {
-  border-color: #0a0a1a;
-  box-shadow: inset 0 0 0 1px #0a0a1a;
+.radio-card:has(input:checked) {
+  background-color: #F3F7ED;
+  border: 1px solid #8CB654;
 }
 
