@@ -226,11 +226,13 @@ function initMobileNav() {
     nav.setAttribute('data-menu-open', 'true');
     document.body.style.overflow = 'hidden';
     gsap.set(nav, { yPercent: 0 });
+    if (lenis) lenis.stop();
   }
 
   function closeDrawer() {
     nav.setAttribute('data-menu-open', 'false');
     document.body.style.overflow = '';
+    if (lenis) lenis.start();
     // Collapse all open groups
     drawer.querySelectorAll('[data-nav-drawer-group].is-open').forEach(function(g) {
       g.classList.remove('is-open');
