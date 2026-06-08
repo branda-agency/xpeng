@@ -1871,29 +1871,26 @@ function initTestDrivePage() {
   var root = document.querySelector('[data-test-drive]');
   if (!root) return;
 
-  var cards = root.querySelectorAll('[data-td-model]');
-  var hiddenInput = root.querySelector('[data-td-model-input]');
+  // Map configurator slugs to Webflow radio values
+  var slugToValue = { 'g9': 'G9', 'g6': 'G6', 'p7-plus': 'P7+' };
+  var radios = root.querySelectorAll('input[name="Choose-a-model"]');
 
   function selectModel(slug) {
-    cards.forEach(function(card) {
-      var isMatch = card.getAttribute('data-td-model') === slug;
-      if (isMatch) card.setAttribute('data-td-active', '');
-      else card.removeAttribute('data-td-active');
+    var value = slugToValue[slug];
+    if (!value) return;
+    radios.forEach(function(radio) {
+      if (radio.value === value) {
+        radio.checked = true;
+        // Trigger change event so Webflow's UI updates the custom radio visual
+        radio.dispatchEvent(new Event('change', { bubbles: true }));
+      }
     });
-    if (hiddenInput) hiddenInput.value = slug;
   }
-
-  cards.forEach(function(card) {
-    card.style.cursor = 'pointer';
-    card.addEventListener('click', function() {
-      selectModel(card.getAttribute('data-td-model'));
-    });
-  });
 
   // Pre-select from URL param or default to G9
   var params = new URLSearchParams(window.location.search);
   var preselected = params.get('model');
-  if (preselected && ['g9', 'g6', 'p7-plus'].includes(preselected)) {
+  if (preselected && slugToValue[preselected]) {
     selectModel(preselected);
   } else {
     selectModel('g9');
