@@ -1879,10 +1879,13 @@ function initTestDrivePage() {
     var value = slugToValue[slug];
     if (!value) return;
     radios.forEach(function(radio) {
+      var radioVisual = radio.parentElement.querySelector('.w-radio-input');
       if (radio.value === value) {
         radio.checked = true;
-        // Trigger change event so Webflow's UI updates the custom radio visual
-        radio.dispatchEvent(new Event('change', { bubbles: true }));
+        if (radioVisual) radioVisual.classList.add('w--redirected-checked');
+      } else {
+        radio.checked = false;
+        if (radioVisual) radioVisual.classList.remove('w--redirected-checked');
       }
     });
   }
