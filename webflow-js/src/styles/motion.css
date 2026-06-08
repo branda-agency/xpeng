@@ -48,7 +48,15 @@
 /* --- Nav transitions --- */
 [data-menu-wrap] {
   will-change: transform;
-  transition: background-color 0.35s ease, box-shadow 0.35s ease;
+  transition: background-color 0.35s ease, box-shadow 0.35s ease, color 0.35s ease;
+}
+
+[data-menu-open="true"][data-menu-wrap] {
+  color: var(--_colors---semantic--content-primary);
+}
+
+[data-menu-open="true"] .nav__hamburger-line {
+  background-color: var(--_colors---semantic--content-primary);
 }
 
 /* Nav dropdown hover */
