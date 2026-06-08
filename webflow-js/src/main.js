@@ -213,6 +213,62 @@ function initNavScrollBehavior() {
 
 
 /* ============================================================
+   3a. MOBILE NAV DRAWER
+   ============================================================ */
+
+function initMobileNav() {
+  var nav = document.querySelector('[data-menu-wrap]');
+  var toggle = nav && nav.querySelector('[data-menu-toggle]');
+  var drawer = nav && nav.querySelector('[data-nav-drawer]');
+  if (!nav || !toggle || !drawer) return;
+
+  function openDrawer() {
+    nav.setAttribute('data-menu-open', 'true');
+    document.body.style.overflow = 'hidden';
+    gsap.set(nav, { yPercent: 0 });
+  }
+
+  function closeDrawer() {
+    nav.setAttribute('data-menu-open', 'false');
+    document.body.style.overflow = '';
+    // Collapse all open groups
+    drawer.querySelectorAll('[data-nav-drawer-group].is-open').forEach(function(g) {
+      g.classList.remove('is-open');
+    });
+  }
+
+  toggle.addEventListener('click', function() {
+    var isOpen = nav.getAttribute('data-menu-open') === 'true';
+    if (isOpen) closeDrawer();
+    else openDrawer();
+  });
+
+  // Expandable groups
+  drawer.querySelectorAll('[data-nav-drawer-group]').forEach(function(group) {
+    var header = group.querySelector('[data-nav-drawer-toggle]');
+    if (!header) return;
+    header.addEventListener('click', function() {
+      group.classList.toggle('is-open');
+    });
+  });
+
+  // Close on Escape
+  document.addEventListener('keydown', function(e) {
+    if (e.key === 'Escape' && nav.getAttribute('data-menu-open') === 'true') {
+      closeDrawer();
+    }
+  });
+
+  // Close when clicking a link inside the drawer
+  drawer.querySelectorAll('a').forEach(function(link) {
+    link.addEventListener('click', function() {
+      closeDrawer();
+    });
+  });
+}
+
+
+/* ============================================================
    4. TEXT REVEALS
    ============================================================ */
 
@@ -1920,6 +1976,7 @@ function init() {
   initFormConsent();
   initModal();
   initDrawer();
+  initMobileNav();
 
   mm.add('(prefers-reduced-motion: no-preference)', () => {
     initLenis();
