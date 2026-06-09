@@ -1733,10 +1733,11 @@ function updateGallery(root, state) {
     var interior = state.selectedInterior;
     url = (interior && (interior.image_full || interior.image_thumb)) || '';
   } else {
-    // Show exterior car render — pick 21" image if 21" wheels selected
+    // Show exterior car render — pick alternate wheel image if larger wheels selected
     var color = state.selectedColor;
-    var is21 = state.selectedWheels && state.selectedWheels.wheel_code && state.selectedWheels.wheel_code.indexOf('21') >= 0;
-    if (is21 && color && color.image_front_21) {
+    var wCode = state.selectedWheels && state.selectedWheels.wheel_code || '';
+    var isLargeWheel = wCode.indexOf('20') >= 0 || wCode.indexOf('21') >= 0;
+    if (isLargeWheel && color && color.image_front_21) {
       url = color.image_front_21;
     } else {
       url = (color && color.image_front) || '';
@@ -1874,11 +1875,12 @@ function renderSummary(root, config) {
   var heading = root.querySelector('[data-summary-heading]');
   if (heading) heading.textContent = 'Your XPENG ' + (config.model.model_name || '').replace('XPENG ', '') + ' SUV';
 
-  // Car image — pick 21" image if 21" wheels selected
+  // Car image — pick alternate wheel image if larger wheels selected
   var carImg = root.querySelector('[data-summary-car-image]');
   if (carImg && config.selectedColor) {
-    var is21 = config.selectedWheels && config.selectedWheels.wheel_code && config.selectedWheels.wheel_code.indexOf('21') >= 0;
-    var url = (is21 && config.selectedColor.image_front_21) || config.selectedColor.image_front || '';
+    var wCode = config.selectedWheels && config.selectedWheels.wheel_code || '';
+    var isLargeWheel = wCode.indexOf('20') >= 0 || wCode.indexOf('21') >= 0;
+    var url = (isLargeWheel && config.selectedColor.image_front_21) || config.selectedColor.image_front || '';
     if (url) carImg.src = url;
   }
 
