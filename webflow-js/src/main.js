@@ -597,7 +597,8 @@ function initHeroSlider() {
   const contents = Array.from(slides).map((s) => s.querySelector('.hero-slider__content'));
   const contentChildren = contents.map((c) => c ? Array.from(c.children) : []);
 
-  const { interval, crossfadeDuration, ease } = CONFIG.heroSlider;
+  const { interval, ease } = CONFIG.heroSlider;
+  const crossfadeDuration = window.innerWidth <= 991 ? 0.5 : CONFIG.heroSlider.crossfadeDuration;
   let current = 0;
   let progressTween = null;
   let isAnimating = false;
