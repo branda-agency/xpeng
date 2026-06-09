@@ -2073,35 +2073,70 @@ function buildCategorySlider(sections) {
     });
   }
 
-  // Touch / swipe with drag follow
+  // Touch / swipe with drag follow + velocity
   var startX = 0;
   var moveX = 0;
+  var lastX = 0;
+  var lastTime = 0;
+  var velocityX = 0;
   var dragging = false;
+  var locked = false; // true once we commit to horizontal
 
   wrapper.addEventListener('touchstart', function(e) {
     startX = e.touches[0].clientX;
     moveX = startX;
+    lastX = startX;
+    lastTime = Date.now();
+    velocityX = 0;
     dragging = true;
+    locked = false;
     track.style.transition = 'none';
   }, { passive: true });
 
   wrapper.addEventListener('touchmove', function(e) {
     if (!dragging) return;
-    moveX = e.touches[0].clientX;
-    var delta = moveX - startX;
-    var offset = (-current * 100) + (delta / wrapper.offsetWidth * 100);
-    track.style.transform = 'translateX(' + offset + '%)';
-  }, { passive: true });
+    var x = e.touches[0].clientX;
+    var deltaFromStart = x - startX;
+
+    // Lock to horizontal once we move >8px horizontally
+    if (!locked && Math.abs(deltaFromStart) > 8) {
+      locked = true;
+    }
+
+    if (!locked) return;
+
+    // Prevent vertical scroll while swiping horizontally
+    e.preventDefault();
+
+    // Track velocity
+    var now = Date.now();
+    var dt = now - lastTime;
+    if (dt > 0) velocityX = (x - lastX) / dt;
+    lastX = x;
+    lastTime = now;
+    moveX = x;
+
+    // Rubber-band at edges
+    var pct = deltaFromStart / wrapper.offsetWidth * 100;
+    if ((current === 0 && pct > 0) || (current === sections.length - 1 && pct < 0)) {
+      pct *= 0.3;
+    }
+    track.style.transform = 'translateX(' + (-current * 100 + pct) + '%)';
+  }, { passive: false });
 
   wrapper.addEventListener('touchend', function() {
     if (!dragging) return;
     dragging = false;
     track.style.transition = '';
     var delta = moveX - startX;
-    if (Math.abs(delta) > 50) {
-      if (delta < 0 && current < sections.length - 1) goTo(current + 1);
-      else if (delta > 0 && current > 0) goTo(current - 1);
-      else goTo(current);
+
+    // Velocity flick (>0.3 px/ms) or distance (>25% of width)
+    var flick = Math.abs(velocityX) > 0.3;
+    var far = Math.abs(delta) > wrapper.offsetWidth * 0.25;
+
+    if (flick || far) {
+      var dir = (velocityX !== 0) ? (velocityX < 0 ? 1 : -1) : (delta < 0 ? 1 : -1);
+      goTo(current + dir);
     } else {
       goTo(current);
     }
