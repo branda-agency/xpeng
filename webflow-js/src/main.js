@@ -1607,7 +1607,10 @@ function handleStateChange(root, state, changeType) {
   }
 
   if (changeType === 'interior') {
-    state.galleryMode = 'interior';
+    // Only switch to interior panorama if image_full exists, otherwise keep exterior
+    if (state.selectedInterior && state.selectedInterior.image_full) {
+      state.galleryMode = 'interior';
+    }
     updateGallery(root, state);
   }
 
