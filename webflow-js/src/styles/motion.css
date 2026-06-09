@@ -56,6 +56,10 @@
   color: var(--_colors---semantic--content-primary);
 }
 
+[data-menu-wrap].is--scrolling .nav__hamburger-line {
+  background-color: var(--_colors---semantic--content-primary);
+}
+
 [data-menu-open="true"][data-menu-wrap] {
   color: var(--_colors---semantic--content-primary);
 }
