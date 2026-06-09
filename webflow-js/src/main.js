@@ -937,7 +937,7 @@ function initModelsCarousel() {
 
 function initPeekSlider() {
   const section = document.querySelector('[data-peek-slider]');
-  if (!section) return;
+  if (!section || window.innerWidth < 1280) return;
 
   const slides = section.querySelectorAll('[data-peek-slide]');
   const prevBtn = section.querySelector('[data-peek-prev]');
