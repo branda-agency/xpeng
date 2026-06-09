@@ -174,41 +174,57 @@ function initLenis() {
    3. NAV SCROLL BEHAVIOR
    ============================================================ */
 
+function navScrollHandler(nav, direction, velocity, scroll) {
+  if (Math.abs(velocity) < CONFIG.nav.velocityThreshold) return;
+  if (nav.getAttribute('data-menu-open') === 'true') return;
+
+  if (scroll <= CONFIG.nav.topThreshold) {
+    if (nav._lastDir !== 0) {
+      nav._lastDir = 0;
+      gsap.to(nav, {
+        yPercent: 0,
+        duration: CONFIG.nav.hideDuration,
+        ease: CONFIG.nav.showEase,
+        overwrite: true,
+      });
+    }
+    return;
+  }
+
+  if (direction === nav._lastDir) return;
+  nav._lastDir = direction;
+
+  gsap.to(nav, {
+    yPercent: direction === 1 ? -110 : 0,
+    duration: CONFIG.nav.hideDuration,
+    ease: direction === 1 ? CONFIG.nav.hideEase : CONFIG.nav.showEase,
+    overwrite: true,
+  });
+}
+
 function initNavScrollBehavior() {
   const nav = document.querySelector('[data-menu-wrap]');
-  if (!nav || !lenis) return;
+  if (!nav) return;
 
-  let lastDirection = 0;
-
+  nav._lastDir = 0;
   gsap.set(nav, { yPercent: 0 });
 
-  lenis.on('scroll', ({ direction, velocity, scroll }) => {
-    if (Math.abs(velocity) < CONFIG.nav.velocityThreshold) return;
-    if (nav.getAttribute('data-menu-open') === 'true') return;
-
-    if (scroll <= CONFIG.nav.topThreshold) {
-      if (lastDirection !== 0) {
-        lastDirection = 0;
-        gsap.to(nav, {
-          yPercent: 0,
-          duration: CONFIG.nav.hideDuration,
-          ease: CONFIG.nav.showEase,
-          overwrite: true,
-        });
-      }
-      return;
-    }
-
-    if (direction === lastDirection) return;
-    lastDirection = direction;
-
-    gsap.to(nav, {
-      yPercent: direction === 1 ? -110 : 0,
-      duration: CONFIG.nav.hideDuration,
-      ease: direction === 1 ? CONFIG.nav.hideEase : CONFIG.nav.showEase,
-      overwrite: true,
+  if (lenis) {
+    lenis.on('scroll', ({ direction, velocity, scroll }) => {
+      navScrollHandler(nav, direction, velocity, scroll);
     });
-  });
+  } else {
+    // Native scroll fallback (mobile — no Lenis)
+    let lastY = window.scrollY;
+    window.addEventListener('scroll', () => {
+      var scrollY = window.scrollY;
+      var delta = scrollY - lastY;
+      var direction = delta > 0 ? 1 : -1;
+      var velocity = Math.abs(delta);
+      lastY = scrollY;
+      navScrollHandler(nav, direction, velocity, scrollY);
+    }, { passive: true });
+  }
 }
 
 
@@ -1984,6 +2000,7 @@ function initProductPage() {
 
 function init() {
   const mm = gsap.matchMedia();
+  const isDesktop = window.innerWidth > 991;
 
   // Functional components — run regardless of motion preference
   initFormConsent();
@@ -1992,7 +2009,7 @@ function init() {
   initMobileNav();
 
   mm.add('(prefers-reduced-motion: no-preference)', () => {
-    initLenis();
+    if (isDesktop) initLenis();
     initNavScrollBehavior();
     initTextReveals();
     initElementReveals();
@@ -2000,7 +2017,7 @@ function init() {
   });
 
   mm.add('(prefers-reduced-motion: reduce)', () => {
-    initLenis();
+    if (isDesktop) initLenis();
     routePage();
 
     gsap.set('[data-split="heading"]', { visibility: 'visible' });
