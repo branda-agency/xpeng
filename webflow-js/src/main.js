@@ -1374,7 +1374,11 @@ function renderVariants(root, state, data, setState) {
       var interiorSurvives = newInteriors.some(function(i) { return i.interior_code === state.selectedInterior?.interior_code; });
       var wheelSurvives = newWheels.some(function(w) { return w.wheel_code === state.selectedWheels?.wheel_code; });
 
-      var selectionsChange = !colorSurvives || !interiorSurvives || !wheelSurvives;
+      // Skip confirmation if the category either survives or has only one option (no user choice lost)
+      var colorNeedsConfirm = !colorSurvives && newColors.length > 1;
+      var interiorNeedsConfirm = !interiorSurvives && newInteriors.length > 1;
+      var wheelNeedsConfirm = !wheelSurvives && newWheels.length > 1;
+      var selectionsChange = colorNeedsConfirm || interiorNeedsConfirm || wheelNeedsConfirm;
 
       function applyVariantChange() {
         state.selectedVariant = variant;
