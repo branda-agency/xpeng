@@ -2002,6 +2002,114 @@ function initProductPage() {
 
 
 /* ============================================================
+   10f. CATEGORY SLIDERS (mobile only)
+   ============================================================ */
+
+function initCategorySliders() {
+  if (window.innerWidth >= 768) return;
+
+  var all = Array.from(document.querySelectorAll('[data-slider-category]'));
+  if (all.length < 2) return;
+
+  // Group consecutive sections with the same category
+  var groups = [];
+  var i = 0;
+  while (i < all.length) {
+    var cat = all[i].getAttribute('data-slider-category');
+    var group = [all[i]];
+    var j = i + 1;
+    while (j < all.length && all[j].getAttribute('data-slider-category') === cat) {
+      group.push(all[j]);
+      j++;
+    }
+    if (group.length >= 2) groups.push(group);
+    i = j;
+  }
+
+  groups.forEach(buildCategorySlider);
+}
+
+function buildCategorySlider(sections) {
+  // Create wrapper
+  var wrapper = document.createElement('div');
+  wrapper.className = 'cat-slider';
+
+  // Create track
+  var track = document.createElement('div');
+  track.className = 'cat-slider__track';
+  wrapper.appendChild(track);
+
+  // Insert wrapper before first section
+  sections[0].parentNode.insertBefore(wrapper, sections[0]);
+
+  // Move sections into track as slides
+  sections.forEach(function(section) {
+    section.classList.add('cat-slider__slide');
+    track.appendChild(section);
+  });
+
+  // Create dots
+  var dots = document.createElement('div');
+  dots.className = 'cat-slider__dots';
+  sections.forEach(function(_, i) {
+    var dot = document.createElement('div');
+    dot.className = 'cat-slider__dot';
+    if (i === 0) dot.classList.add('is-active');
+    dot.addEventListener('click', function() { goTo(i); });
+    dots.appendChild(dot);
+  });
+  wrapper.appendChild(dots);
+
+  // Slider state
+  var current = 0;
+
+  function goTo(index) {
+    if (index < 0 || index >= sections.length) index = current;
+    current = index;
+    track.style.transform = 'translateX(' + (-current * 100) + '%)';
+    var allDots = dots.querySelectorAll('.cat-slider__dot');
+    allDots.forEach(function(d, i) {
+      d.classList.toggle('is-active', i === current);
+    });
+  }
+
+  // Touch / swipe with drag follow
+  var startX = 0;
+  var moveX = 0;
+  var dragging = false;
+
+  wrapper.addEventListener('touchstart', function(e) {
+    startX = e.touches[0].clientX;
+    moveX = startX;
+    dragging = true;
+    track.style.transition = 'none';
+  }, { passive: true });
+
+  wrapper.addEventListener('touchmove', function(e) {
+    if (!dragging) return;
+    moveX = e.touches[0].clientX;
+    var delta = moveX - startX;
+    var offset = (-current * 100) + (delta / wrapper.offsetWidth * 100);
+    track.style.transform = 'translateX(' + offset + '%)';
+  }, { passive: true });
+
+  wrapper.addEventListener('touchend', function() {
+    if (!dragging) return;
+    dragging = false;
+    track.style.transition = '';
+    var delta = moveX - startX;
+    if (Math.abs(delta) > 50) {
+      if (delta < 0 && current < sections.length - 1) goTo(current + 1);
+      else if (delta > 0 && current > 0) goTo(current - 1);
+      else goTo(current);
+    } else {
+      goTo(current);
+    }
+  });
+}
+
+
+/* ============================================================
    11. INIT
    ============================================================ */
 
@@ -2014,6 +2122,7 @@ function init() {
   initModal();
   initDrawer();
   initMobileNav();
+  initCategorySliders();
 
   mm.add('(prefers-reduced-motion: no-preference)', () => {
     if (isDesktop) initLenis();
