@@ -175,6 +175,13 @@ function initLenis() {
    ============================================================ */
 
 function navScrollHandler(nav, direction, velocity, scroll) {
+  // Scrolling class — add when past threshold, remove at top
+  if (scroll > CONFIG.nav.topThreshold) {
+    nav.classList.add('is--scrolling');
+  } else {
+    nav.classList.remove('is--scrolling');
+  }
+
   if (Math.abs(velocity) < CONFIG.nav.velocityThreshold) return;
   if (nav.getAttribute('data-menu-open') === 'true') return;
 
