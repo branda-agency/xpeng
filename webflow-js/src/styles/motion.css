@@ -421,10 +421,37 @@
 
 /* --- Loading --- */
 
+[data-cfg-loading] {
+  position: relative;
+}
+
+[data-cfg-loading] .configurator__gallery,
 [data-cfg-loading] .configurator__options {
-  opacity: 0.4;
+  opacity: 0;
   pointer-events: none;
-  transition: opacity 0.3s ease;
+}
+
+[data-cfg-loading]::after {
+  content: '';
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 2em;
+  height: 2em;
+  margin: -1em 0 0 -1em;
+  border: 2px solid rgba(0, 0, 0, 0.1);
+  border-top-color: #0a0a1a;
+  border-radius: 50%;
+  animation: cfg-spin 0.7s linear infinite;
+}
+
+@keyframes cfg-spin {
+  to { transform: rotate(360deg); }
+}
+
+[data-configurator] .configurator__gallery,
+[data-configurator] .configurator__options {
+  transition: opacity 0.4s ease;
 }
 
 .configurator__gallery-arrow::after {

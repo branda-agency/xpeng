@@ -1235,6 +1235,8 @@ function initConfiguratorPage(modelSlug) {
   const root = document.querySelector('[data-configurator]');
   if (!root) return;
 
+  root.setAttribute('data-cfg-loading', '');
+
   // State
   const state = {
     data: null,
