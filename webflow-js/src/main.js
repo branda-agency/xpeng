@@ -1132,30 +1132,35 @@ const MOCK_DATA = {
   g6: {
     model: { model_slug: 'g6', model_name: 'XPENG G6', starting_price: 43600 },
     variants: [
-      { variant_code: 'rwd-sr', variant_name: 'RWD Standard Range', price: 43600, is_default: true, range_km: 435, power_kw: 218, acceleration: '6.7s', delivery_time: 'Q4 2026', sort_order: 1 },
-      { variant_code: 'rwd-lr', variant_name: 'RWD Long Range', price: 47600, is_default: false, range_km: 570, power_kw: 218, acceleration: '6.7s', delivery_time: 'Q4 2026', sort_order: 2 },
-      { variant_code: 'awd', variant_name: 'AWD Performance', price: 51600, is_default: false, range_km: 460, power_kw: 358, acceleration: '3.9s', delivery_time: 'Q1 2027', sort_order: 3 },
+      { variant_code: 'rwd-sr', variant_name: 'RWD Standard Range', price: 43600, is_default: true, range_km: 455, power_kw: 185, acceleration: '6.9s', top_speed: 200, battery_kwh: 67.8, battery_type: 'LFP', dc_charge_power_kw: 382, dc_charge_time: '10-80% in 12 min', energy_consumption: '17.3 kWh/100km', drivetrain: 'RWD', delivery_time: 'Q4 2026', sort_order: 1 },
+      { variant_code: 'rwd-lr', variant_name: 'RWD Long Range', price: 47600, is_default: false, range_km: 525, power_kw: 218, acceleration: '6.7s', top_speed: 200, battery_kwh: 80, battery_type: 'LFP', dc_charge_power_kw: 451, dc_charge_time: '10-80% in 12 min', energy_consumption: '17.5 kWh/100km', drivetrain: 'RWD', delivery_time: 'Q4 2026', sort_order: 2 },
+      { variant_code: 'awd', variant_name: 'AWD Performance', price: 51600, is_default: false, range_km: 510, power_kw: 358, acceleration: '4.1s', top_speed: 200, battery_kwh: 80, battery_type: 'LFP', dc_charge_power_kw: 451, dc_charge_time: '10-80% in 12 min', energy_consumption: '18.4 kWh/100km', drivetrain: 'AWD', delivery_time: 'Q1 2027', sort_order: 3 },
     ],
     colors: [
       { variant_code: 'all', color_code: 'arctic-white', color_name: 'Arctic White', color_hex: '#F0EDE8', price: 0, is_default: true, sort_order: 1 },
-      { variant_code: 'all', color_code: 'silver-frost', color_name: 'Silver Frost', color_hex: '#B8B8B8', price: 800, is_default: false, sort_order: 2 },
-      { variant_code: 'all', color_code: 'graphite-gray', color_name: 'Graphite Gray', color_hex: '#707070', price: 800, is_default: false, sort_order: 3 },
-      { variant_code: 'all', color_code: 'midnight-black', color_name: 'Midnight Black', color_hex: '#2D2D2D', price: 800, is_default: false, sort_order: 4 },
-      { variant_code: 'all', color_code: 'fiery-orange', color_name: 'Fiery Orange', color_hex: '#C75B12', price: 800, is_default: false, sort_order: 5 },
+      { variant_code: 'all', color_code: 'stellar-purple', color_name: 'Stellar Purple', color_hex: '#8B7D9B', price: 800, is_default: false, sort_order: 2 },
+      { variant_code: 'all', color_code: 'silver-frost', color_name: 'Silver Frost', color_hex: '#B8B8B8', price: 800, is_default: false, sort_order: 3 },
+      { variant_code: 'all', color_code: 'graphite-gray', color_name: 'Graphite Gray', color_hex: '#707070', price: 800, is_default: false, sort_order: 4 },
+      { variant_code: 'all', color_code: 'midnight-black', color_name: 'Midnight Black', color_hex: '#2D2D2D', price: 800, is_default: false, sort_order: 5 },
     ],
     interiors: [
-      { variant_code: 'all', interior_code: 'black', interior_name: 'Black Leatherette', price: 0, is_default: true, sort_order: 1 },
-      { variant_code: 'all', interior_code: 'gray', interior_name: 'Gray Leatherette', price: 0, is_default: false, sort_order: 2 },
+      { variant_code: 'all', interior_code: 'dark-gray', interior_name: 'Dark Gray', price: 0, is_default: true, sort_order: 1 },
+      { variant_code: 'all', interior_code: 'light-gray', interior_name: 'Light Gray', price: 0, is_default: false, sort_order: 2 },
     ],
-    wheels: [{ variant_code: 'all', wheel_code: '20-standard', wheel_name: '20" Standard', price: 0, is_default: true, sort_order: 1 }],
-    accessories: [{ variant_code: 'all', accessory_code: 'tow-hitch', accessory_name: 'Електрически теглич', price: 1160, description: 'Електрически прибиращ се теглич.', image: '', sort_order: 1 }],
+    wheels: [
+      { variant_code: 'rwd-sr', wheel_code: '18-aero', wheel_name: '18" Aero', price: 0, is_default: true, sort_order: 1 },
+      { variant_code: 'rwd-sr', wheel_code: '20-sport', wheel_name: '20" Sport', price: 1000, is_default: false, sort_order: 2 },
+      { variant_code: 'rwd-lr', wheel_code: '20-sport', wheel_name: '20" Sport', price: 0, is_default: true, sort_order: 1 },
+      { variant_code: 'awd', wheel_code: '20-sport', wheel_name: '20" Sport', price: 0, is_default: true, sort_order: 1 },
+    ],
+    accessories: [{ variant_code: 'all', accessory_code: 'tow-hitch', accessory_name: 'Electric Retractable Towbar', price: 1190, description: '1,500 kg braked / 750 kg unbraked, 75 kg tongue weight', image: '', sort_order: 1 }],
   },
   'p7-plus': {
     model: { model_slug: 'p7-plus', model_name: 'XPENG P7+', starting_price: 46600 },
     variants: [
-      { variant_code: 'rwd-sr', variant_name: 'RWD Standard Range', price: 46600, is_default: true, range_km: 502, power_kw: 235, acceleration: '6.4s', delivery_time: 'Q4 2026', sort_order: 1 },
-      { variant_code: 'rwd-lr', variant_name: 'RWD Long Range', price: 49600, is_default: false, range_km: 710, power_kw: 235, acceleration: '6.4s', delivery_time: 'Q4 2026', sort_order: 2 },
-      { variant_code: 'awd', variant_name: 'AWD Performance', price: 53600, is_default: false, range_km: 610, power_kw: 430, acceleration: '3.6s', delivery_time: 'Q1 2027', sort_order: 3 },
+      { variant_code: 'rwd-sr', variant_name: 'RWD Standard Range', price: 46600, is_default: true, range_km: 455, power_kw: 180, acceleration: '6.9s', top_speed: 200, battery_kwh: 61.7, battery_type: 'LFP', dc_charge_power_kw: 350, dc_charge_time: '20-80% in 10 min', energy_consumption: '15.2 kWh/100km', drivetrain: 'RWD', delivery_time: 'Q4 2026', sort_order: 1 },
+      { variant_code: 'rwd-lr', variant_name: 'RWD Long Range', price: 49600, is_default: false, range_km: 530, power_kw: 230, acceleration: '6.2s', top_speed: 200, battery_kwh: 74.9, battery_type: 'LFP', dc_charge_power_kw: 446, dc_charge_time: '20-80% in 10 min', energy_consumption: '16.4 kWh/100km', drivetrain: 'RWD', delivery_time: 'Q4 2026', sort_order: 2 },
+      { variant_code: 'awd', variant_name: 'AWD Performance', price: 53600, is_default: false, range_km: 500, power_kw: 370, acceleration: '4.3s', top_speed: 200, battery_kwh: 74.9, battery_type: 'LFP', dc_charge_power_kw: 446, dc_charge_time: '20-80% in 10 min', energy_consumption: '17.4 kWh/100km', drivetrain: 'AWD', delivery_time: 'Q1 2027', sort_order: 3 },
     ],
     colors: [
       { variant_code: 'all', color_code: 'arctic-white', color_name: 'Arctic White', color_hex: '#F0EDE8', price: 0, is_default: true, sort_order: 1 },
@@ -1164,11 +1169,19 @@ const MOCK_DATA = {
       { variant_code: 'all', color_code: 'midnight-black', color_name: 'Midnight Black', color_hex: '#2D2D2D', price: 800, is_default: false, sort_order: 4 },
     ],
     interiors: [
-      { variant_code: 'all', interior_code: 'black', interior_name: 'Black Nappa', price: 0, is_default: true, sort_order: 1 },
-      { variant_code: 'all', interior_code: 'white', interior_name: 'White Nappa', price: 0, is_default: false, sort_order: 2 },
+      { variant_code: 'rwd-sr', interior_code: 'dark-gray', interior_name: 'Dark Gray', price: 0, is_default: true, sort_order: 1 },
+      { variant_code: 'rwd-sr', interior_code: 'light-gray', interior_name: 'Light Gray', price: 0, is_default: false, sort_order: 2 },
+      { variant_code: 'rwd-lr', interior_code: 'dark-gray', interior_name: 'Dark Gray', price: 0, is_default: true, sort_order: 1 },
+      { variant_code: 'rwd-lr', interior_code: 'light-gray', interior_name: 'Light Gray', price: 0, is_default: false, sort_order: 2 },
+      { variant_code: 'awd', interior_code: 'dark-gray', interior_name: 'Dark Gray', price: 0, is_default: true, sort_order: 1 },
+      { variant_code: 'awd', interior_code: 'light-gray', interior_name: 'Light Gray', price: 0, is_default: false, sort_order: 2 },
     ],
-    wheels: [{ variant_code: 'all', wheel_code: '19-aero', wheel_name: '19" Aero', price: 0, is_default: true, sort_order: 1 }],
-    accessories: [{ variant_code: 'all', accessory_code: 'tow-hitch', accessory_name: 'Електрически теглич', price: 1190, description: 'Електрически прибиращ се теглич.', image: '', sort_order: 1 }],
+    wheels: [
+      { variant_code: 'rwd-sr', wheel_code: '19-aero', wheel_name: '19" Aero', price: 0, is_default: true, sort_order: 1 },
+      { variant_code: 'rwd-lr', wheel_code: '20-sport', wheel_name: '20" Sport', price: 0, is_default: true, sort_order: 1 },
+      { variant_code: 'awd', wheel_code: '20-sport', wheel_name: '20" Sport', price: 0, is_default: true, sort_order: 1 },
+    ],
+    accessories: [{ variant_code: 'all', accessory_code: 'tow-hitch', accessory_name: 'Electric Retractable Towbar', price: 1190, description: '1,500 kg braked / 750 kg unbraked, 75 kg tongue weight', image: '', sort_order: 1 }],
   },
 };
 
