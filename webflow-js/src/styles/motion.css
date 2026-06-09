@@ -68,6 +68,10 @@
   background-color: var(--_colors---semantic--content-primary);
 }
 
+.is--theme-light .nav__hamburger-line {
+  background-color: var(--_colors---semantic--content-primary);
+}
+
 /* Nav dropdown hover */
 .nav__dropdown-menu {
   opacity: 0;
