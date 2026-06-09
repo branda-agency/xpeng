@@ -709,6 +709,24 @@ function initHeroSlider() {
   const DRAG_RESISTANCE = 0.4;
   const wrapperWidth = () => wrapper.offsetWidth;
 
+  function snapBack() {
+    var tweenTargets = [slides[current]];
+    if (peekIndex >= 0) tweenTargets.push(slides[peekIndex]);
+
+    gsap.to(tweenTargets, {
+      x: 0,
+      duration: 0.4,
+      ease: 'power3.out',
+      onComplete: () => {
+        if (peekIndex >= 0 && peekIndex !== current) {
+          gsap.set(slides[peekIndex], { xPercent: 100, x: 0 });
+        }
+        peekIndex = -1;
+        if (progressTween) progressTween.resume();
+      },
+    });
+  }
+
   wrapper.addEventListener('pointerdown', (e) => {
     if (isAnimating) return;
     dragStartX = e.clientX;
@@ -751,24 +769,14 @@ function initHeroSlider() {
       if (rawDelta < 0) nextSlide();
       else prevSlide();
     } else {
-      // Rubber-band both slides back
-      const tweenTargets = [slides[current]];
-      if (peekIndex >= 0) tweenTargets.push(slides[peekIndex]);
-
-      gsap.to(tweenTargets, {
-        x: 0,
-        duration: 0.4,
-        ease: 'power3.out',
-        onComplete: () => {
-          // Reset peek slide off-screen
-          if (peekIndex >= 0 && peekIndex !== current) {
-            gsap.set(slides[peekIndex], { xPercent: 100, x: 0 });
-          }
-          peekIndex = -1;
-          if (progressTween) progressTween.resume();
-        },
-      });
+      snapBack();
     }
+  });
+
+  wrapper.addEventListener('pointercancel', () => {
+    if (!isDragging) return;
+    isDragging = false;
+    snapBack();
   });
 
   // Start autoplay

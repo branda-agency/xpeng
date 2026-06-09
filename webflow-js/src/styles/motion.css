@@ -163,6 +163,7 @@
   cursor: grab;
   user-select: none;
   -webkit-user-select: none;
+  touch-action: pan-y;
 }
 
 [data-hero-slider]:active {
