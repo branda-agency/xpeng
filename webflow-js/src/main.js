@@ -755,6 +755,8 @@ function initHeroSlider() {
 
   wrapper.addEventListener('pointerdown', (e) => {
     if (isAnimating) return;
+    // Don't capture pointer on interactive elements — let links/buttons work
+    if (e.target.closest('a, button')) return;
     dragStartX = e.clientX;
     isDragging = true;
     peekIndex = -1;
