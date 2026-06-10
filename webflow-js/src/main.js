@@ -438,16 +438,17 @@ function initSpecsTabs() {
   const panels = document.querySelectorAll('[data-specs-panel]');
   if (!tabs.length || !panels.length) return;
 
-  function activate(variant) {
+  function activate(variant, instant) {
     tabs.forEach((t) => {
       t.classList.toggle('is-active', t.getAttribute('data-specs-tab') === variant);
     });
     panels.forEach((panel) => {
-      const isMatch = panel.getAttribute('data-specs-panel') === variant;
-      gsap.to(panel, {
-        autoAlpha: isMatch ? 1 : 0,
-        duration: 0.3,
-      });
+      var isMatch = panel.getAttribute('data-specs-panel') === variant;
+      if (instant) {
+        gsap.set(panel, { autoAlpha: isMatch ? 1 : 0, zIndex: isMatch ? 1 : 0 });
+      } else {
+        gsap.to(panel, { autoAlpha: isMatch ? 1 : 0, zIndex: isMatch ? 1 : 0, duration: 0.3 });
+      }
     });
   }
 
@@ -462,13 +463,8 @@ function initSpecsTabs() {
   }
 
   // Set initial state — show the active tab's panel immediately
-  const activeTab = document.querySelector('[data-specs-tab].is-active') || tabs[0];
-  const activeVariant = activeTab.getAttribute('data-specs-tab');
-  activeTab.classList.add('is-active');
-  panels.forEach((panel) => {
-    var isMatch = panel.getAttribute('data-specs-panel') === activeVariant;
-    gsap.set(panel, { autoAlpha: isMatch ? 1 : 0 });
-  });
+  var activeTab = document.querySelector('[data-specs-tab].is-active') || tabs[0];
+  activate(activeTab.getAttribute('data-specs-tab'), true);
 
   tabs.forEach((tab) => {
     tab.addEventListener('click', () => {
