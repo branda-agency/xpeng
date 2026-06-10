@@ -26,19 +26,13 @@
   height: 100%;
 }
 
-/* --- Specs tabs: stack panels to prevent layout shift --- */
+/* --- Specs tabs --- */
 [data-specs-tab] {
   cursor: pointer;
 }
 
-.specs-table__panels {
-  display: grid;
-}
-
-.specs-table__panels > [data-specs-panel] {
-  grid-area: 1 / 1;
-  visibility: hidden;
-  opacity: 0;
+[data-specs-panel] {
+  display: none;
 }
 
 /* --- Form consent disabled state --- */

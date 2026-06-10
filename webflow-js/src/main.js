@@ -434,41 +434,35 @@ function initColorPicker() {
    ============================================================ */
 
 function initSpecsTabs() {
-  const tabs = document.querySelectorAll('[data-specs-tab]');
-  const panels = document.querySelectorAll('[data-specs-panel]');
-  if (!tabs.length || !panels.length) return;
+  var sections = document.querySelectorAll('[data-specs-section]');
+  if (!sections.length) return;
 
-  function activate(variant, instant) {
-    tabs.forEach((t) => {
-      t.classList.toggle('is-active', t.getAttribute('data-specs-tab') === variant);
-    });
-    panels.forEach((panel) => {
-      var isMatch = panel.getAttribute('data-specs-panel') === variant;
-      if (instant) {
-        gsap.set(panel, { autoAlpha: isMatch ? 1 : 0, zIndex: isMatch ? 1 : 0 });
-      } else {
-        gsap.to(panel, { autoAlpha: isMatch ? 1 : 0, zIndex: isMatch ? 1 : 0, duration: 0.3 });
-      }
-    });
-  }
+  sections.forEach(function(section) {
+    var tabs = section.querySelectorAll('[data-specs-tab]');
+    var panels = section.querySelectorAll('[data-specs-panel]');
+    if (!tabs.length || !panels.length) return;
 
-  // Wrap panels in a grid container so they stack without layout shift
-  var firstPanel = panels[0];
-  var parent = firstPanel.parentElement;
-  if (!parent.classList.contains('specs-table__panels')) {
-    var wrapper = document.createElement('div');
-    wrapper.className = 'specs-table__panels';
-    panels.forEach((p) => wrapper.appendChild(p));
-    parent.appendChild(wrapper);
-  }
+    function activate(variant) {
+      tabs.forEach(function(t) {
+        t.classList.toggle('is-active', t.getAttribute('data-specs-tab') === variant);
+      });
+      panels.forEach(function(panel) {
+        if (panel.getAttribute('data-specs-panel') === variant) {
+          panel.style.display = 'block';
+        } else {
+          panel.style.display = 'none';
+        }
+      });
+    }
 
-  // Set initial state — show the active tab's panel immediately
-  var activeTab = document.querySelector('[data-specs-tab].is-active') || tabs[0];
-  activate(activeTab.getAttribute('data-specs-tab'), true);
+    // Set initial state from active tab (or first tab)
+    var activeTab = section.querySelector('[data-specs-tab].is-active') || tabs[0];
+    activate(activeTab.getAttribute('data-specs-tab'));
 
-  tabs.forEach((tab) => {
-    tab.addEventListener('click', () => {
-      activate(tab.getAttribute('data-specs-tab'));
+    tabs.forEach(function(tab) {
+      tab.addEventListener('click', function() {
+        activate(tab.getAttribute('data-specs-tab'));
+      });
     });
   });
 }
