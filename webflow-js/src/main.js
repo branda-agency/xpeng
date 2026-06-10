@@ -1187,6 +1187,27 @@ const MOCK_DATA = {
 
 const EUR_TO_BGN = 1.95583;
 
+/* ----------------------------------------------------------------
+   PRICE VISIBILITY TOGGLE
+   ----------------------------------------------------------------
+   Set to false to hide ALL prices across the configurator and
+   summary pages. The configurator still works — users can select
+   variants, colors, interiors, wheels, accessories — but no prices
+   are displayed anywhere.
+
+   Data in the Google Sheet is NOT affected — prices remain stored,
+   they're just not rendered in the UI.
+
+   TO RE-ENABLE PRICES:
+   1. Set SHOW_PRICES = true
+   2. npm run build
+   3. git add + commit + push (Cloudflare auto-deploys)
+   4. Publish Webflow site
+
+   Search "SHOW_PRICES" to find all guarded locations.
+   ---------------------------------------------------------------- */
+var SHOW_PRICES = false;
+
 function formatPrice(num) {
   return num.toLocaleString('de-DE');
 }
@@ -1320,7 +1341,7 @@ function renderHeader(root, data) {
   const nameEl = root.querySelector('[data-cfg-model-name]');
   const priceEl = root.querySelector('[data-cfg-starting-price]');
   if (nameEl) nameEl.textContent = data.model.model_name;
-  if (priceEl) priceEl.textContent = 'от ' + formatPrice(data.model.starting_price) + ' EUR';
+  if (priceEl) priceEl.textContent = SHOW_PRICES ? 'от ' + formatPrice(data.model.starting_price) + ' EUR' : '';
 }
 
 function renderVariants(root, state, data, setState) {
@@ -1347,7 +1368,7 @@ function renderVariants(root, state, data, setState) {
     }
 
     const price = card.querySelector('[data-cfg-variant-price]');
-    if (price) price.textContent = formatPrice(variant.price) + ' EUR';
+    if (price) price.textContent = SHOW_PRICES ? formatPrice(variant.price) + ' EUR' : '';
 
     // "Show more" opens drawer with full specs
     const expandBtn = card.querySelector('[data-cfg-variant-expand]');
@@ -1441,7 +1462,7 @@ function renderColors(root, state, data, setState) {
     if (name) name.textContent = color.color_name;
 
     const price = el.querySelector('[data-cfg-swatch-price]');
-    if (price) price.textContent = color.price > 0 ? '+' + formatPrice(color.price) + ' EUR' : '';
+    if (price) price.textContent = SHOW_PRICES && color.price > 0 ? '+' + formatPrice(color.price) + ' EUR' : '';
 
     if (color.color_code === state.selectedColor?.color_code) {
       el.setAttribute('data-color-active', '');
@@ -1518,7 +1539,7 @@ function renderWheels(root, state, data, setState) {
     if (name) name.textContent = wheel.wheel_name;
 
     const price = el.querySelector('[data-cfg-wheel-price]');
-    if (price) price.textContent = wheel.price > 0 ? '+' + formatPrice(wheel.price) + ' EUR' : '';
+    if (price) price.textContent = SHOW_PRICES && wheel.price > 0 ? '+' + formatPrice(wheel.price) + ' EUR' : '';
 
     if (wheel.wheel_code === state.selectedWheels?.wheel_code) {
       el.setAttribute('data-cfg-active', '');
@@ -1564,7 +1585,7 @@ function renderAccessories(root, state, data, setState) {
     if (name) name.textContent = acc.accessory_name;
 
     const price = el.querySelector('[data-cfg-accessory-price]');
-    if (price) price.textContent = formatPrice(acc.price) + ' EUR';
+    if (price) price.textContent = SHOW_PRICES ? formatPrice(acc.price) + ' EUR' : '';
 
     // Render description as bullet list
     const desc = el.querySelector('[data-cfg-accessory-desc]');
@@ -1656,8 +1677,8 @@ function updatePrice(root, state) {
   const { totalEur, totalBgn } = calculateTotal(state);
   const eurEl = root.querySelector('[data-cfg-total-eur]');
   const bgnEl = root.querySelector('[data-cfg-total-bgn]');
-  if (eurEl) eurEl.textContent = formatPrice(totalEur) + ' EUR';
-  if (bgnEl) bgnEl.textContent = formatPrice(totalBgn) + ' лв.';
+  if (eurEl) eurEl.textContent = SHOW_PRICES ? formatPrice(totalEur) + ' EUR' : '';
+  if (bgnEl) bgnEl.textContent = SHOW_PRICES ? formatPrice(totalBgn) + ' лв.' : '';
 }
 
 function updateActiveStates(root, state) {
@@ -1891,10 +1912,10 @@ function renderSummary(root, config) {
   }
 
   // Variant line item
-  setLineItem(root, 'variant', config.selectedVariant.variant_name, formatPrice(config.selectedVariant.price) + ' EUR');
+  setLineItem(root, 'variant', config.selectedVariant.variant_name, SHOW_PRICES ? formatPrice(config.selectedVariant.price) + ' EUR' : '');
 
   // Color line item + swatch
-  var colorPrice = config.selectedColor.price > 0 ? '+' + formatPrice(config.selectedColor.price) + ' EUR' : '';
+  var colorPrice = SHOW_PRICES && config.selectedColor.price > 0 ? '+' + formatPrice(config.selectedColor.price) + ' EUR' : '';
   setLineItem(root, 'color', config.selectedColor.color_name, colorPrice);
   var swatch = root.querySelector('[data-summary-color-swatch]');
   if (swatch) {
@@ -1908,12 +1929,12 @@ function renderSummary(root, config) {
   }
 
   // Interior line item
-  var interiorPrice = config.selectedInterior.price > 0 ? '+' + formatPrice(config.selectedInterior.price) + ' EUR' : '';
+  var interiorPrice = SHOW_PRICES && config.selectedInterior.price > 0 ? '+' + formatPrice(config.selectedInterior.price) + ' EUR' : '';
   setLineItem(root, 'interior', config.selectedInterior.interior_name, interiorPrice);
   setLineThumb(root, 'interior', config.selectedInterior.image_thumb);
 
   // Wheels line item
-  var wheelsPrice = config.selectedWheels.price > 0 ? '+' + formatPrice(config.selectedWheels.price) + ' EUR' : '';
+  var wheelsPrice = SHOW_PRICES && config.selectedWheels.price > 0 ? '+' + formatPrice(config.selectedWheels.price) + ' EUR' : '';
   setLineItem(root, 'wheels', config.selectedWheels.wheel_name, wheelsPrice);
   setLineThumb(root, 'wheels', config.selectedWheels.image_thumb);
 
@@ -1931,7 +1952,7 @@ function renderSummary(root, config) {
         var label = el.querySelector('[data-summary-item-label]');
         if (label) label.textContent = acc.accessory_name;
         var price = el.querySelector('[data-summary-item-price]');
-        if (price) price.textContent = '+' + formatPrice(acc.price) + ' EUR';
+        if (price) price.textContent = SHOW_PRICES ? '+' + formatPrice(acc.price) + ' EUR' : '';
         var thumb = el.querySelector('.summary__item-thumb') || el.querySelector('[data-summary-item-thumb]') || el.querySelector('img');
         if (thumb && acc.image) thumb.src = acc.image;
         accContainer.appendChild(el);
@@ -1941,9 +1962,9 @@ function renderSummary(root, config) {
 
   // Totals
   var totalEur = root.querySelector('[data-summary-total-eur]');
-  if (totalEur) totalEur.textContent = formatPrice(config.totals.totalEur) + ' EUR';
+  if (totalEur) totalEur.textContent = SHOW_PRICES ? formatPrice(config.totals.totalEur) + ' EUR' : '';
   var totalBgn = root.querySelector('[data-summary-total-bgn]');
-  if (totalBgn) totalBgn.textContent = formatPrice(config.totals.totalBgn) + ' лв.';
+  if (totalBgn) totalBgn.textContent = SHOW_PRICES ? formatPrice(config.totals.totalBgn) + ' лв.' : '';
 
   // Test drive link
   var tdLink = root.querySelector('[data-summary-test-drive]');
