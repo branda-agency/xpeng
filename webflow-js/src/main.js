@@ -402,6 +402,15 @@ function initColorPicker() {
     const images = picker.querySelectorAll('[data-color-image]');
     const nameEl = picker.querySelector('[data-color-name]');
 
+    // Set initial state — show first swatch's image, hide the rest
+    var activeSwatch = picker.querySelector('[data-color-swatch][data-color-active]') || swatches[0];
+    var activeColor = activeSwatch.getAttribute('data-color-swatch');
+    activeSwatch.setAttribute('data-color-active', '');
+    images.forEach((img) => {
+      gsap.set(img, { autoAlpha: img.getAttribute('data-color-image') === activeColor ? 1 : 0 });
+    });
+    if (nameEl) nameEl.textContent = activeSwatch.getAttribute('title') || activeColor;
+
     swatches.forEach((swatch) => {
       swatch.addEventListener('click', () => {
         const color = swatch.getAttribute('data-color-swatch');
