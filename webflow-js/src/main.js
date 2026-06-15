@@ -1001,7 +1001,6 @@ function initModelsCarousel() {
                 loaded = true;
                 frameImg.src = frames[0].src;
                 wrap.style.display = 'block';
-                if (staticImg) staticImg.style.display = 'none';
               }
             };
             frames[fi] = img;
