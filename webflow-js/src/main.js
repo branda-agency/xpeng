@@ -833,6 +833,10 @@ function initHeroSlider() {
    10b. MODELS CAROUSEL
    ============================================================ */
 
+// 360 viewer CDN — set to Bunny CDN base URL after uploading processed frames
+// Folder structure: {ROTATE_CDN}/{model}/{frame}.webp  e.g. .../g6/0.webp
+var ROTATE_CDN = 'https://xpeng.b-cdn.net/360';
+
 function initModelsCarousel() {
   const section = document.querySelector('[data-models]');
   if (!section) return;
@@ -848,6 +852,7 @@ function initModelsCarousel() {
   const watermarks = Array.from(slides).map((s) => s.querySelector('.models__watermark'));
   let current = 0;
   let isAnimating = false;
+  let onSlideChange = null;
 
   // Initial state
   gsap.set(slides, { xPercent: 100, autoAlpha: 1 });
@@ -870,6 +875,7 @@ function initModelsCarousel() {
     const prev = current;
     current = index;
     if (dir === undefined) dir = index > prev ? 1 : -1;
+    if (onSlideChange) onSlideChange(current, prev);
 
     // Update tabs
     tabs.forEach((t) => t.classList.remove('is-active'));
@@ -954,6 +960,132 @@ function initModelsCarousel() {
   if (nextBtn) nextBtn.addEventListener('click', () => {
     goTo((current + 1) % slides.length, 1);
   });
+
+  /* -------------------------------------------------------
+     360 Rotate Viewers
+     Drag-to-rotate functionality for models with 360 frames.
+     Each slide with data-360="{model}" gets a rotate viewer.
+     ------------------------------------------------------- */
+  if (ROTATE_CDN) {
+    var rotateViewers = [];
+    var isMobile = 'ontouchstart' in window;
+
+    slides.forEach(function (slide, idx) {
+      var model = slide.getAttribute('data-360');
+      if (!model) return;
+
+      var frameCount = parseInt(slide.getAttribute('data-360-frames')) || 36;
+      var wrap = slide.querySelector('[data-rotate]');
+      var frameImg = slide.querySelector('[data-rotate-frame]');
+      var cursorEl = slide.querySelector('[data-rotate-cursor]');
+      var staticImg = slide.querySelector('.models__car-img');
+      if (!wrap || !frameImg) return;
+
+      var frames = new Array(frameCount);
+      var loaded = false;
+      var loadedCount = 0;
+      var frameIndex = 0;
+      var dragging = false;
+      var lastX = 0;
+      var rem = 0;
+
+      function preload() {
+        if (loadedCount > 0) return; // already started
+        for (var i = 0; i < frameCount; i++) {
+          (function (fi) {
+            var img = new Image();
+            img.src = ROTATE_CDN + '/' + model + '/' + fi + '.webp';
+            img.onload = function () {
+              loadedCount++;
+              if (loadedCount === frameCount) {
+                loaded = true;
+                frameImg.src = frames[0].src;
+                wrap.style.display = 'block';
+                if (staticImg) staticImg.style.display = 'none';
+              }
+            };
+            frames[fi] = img;
+          })(i);
+        }
+      }
+
+      function setFrame(idx) {
+        frameIndex = ((idx % frameCount) + frameCount) % frameCount;
+        if (loaded) frameImg.src = frames[frameIndex].src;
+      }
+
+      function handleDrag(x) {
+        var delta = x - lastX + rem;
+        if (Math.abs(delta) >= 10) {
+          var steps = delta > 0 ? Math.floor(delta / 10) : Math.ceil(delta / 10);
+          setFrame(frameIndex + steps);
+          rem = delta % 10;
+        } else {
+          rem = delta;
+        }
+        lastX = x;
+      }
+
+      // --- Mouse events (desktop) ---
+      if (!isMobile) {
+        wrap.addEventListener('mouseenter', function () {
+          if (cursorEl && loaded) cursorEl.style.opacity = '1';
+        });
+        wrap.addEventListener('mouseleave', function () {
+          if (cursorEl) cursorEl.style.opacity = '0';
+          dragging = false;
+        });
+        wrap.addEventListener('mousedown', function (e) {
+          if (!loaded) return;
+          dragging = true;
+          lastX = e.clientX;
+          rem = 0;
+        });
+        wrap.addEventListener('mouseup', function () { dragging = false; });
+        wrap.addEventListener('mousemove', function (e) {
+          if (cursorEl) {
+            var rect = wrap.getBoundingClientRect();
+            cursorEl.style.left = (e.clientX - rect.left) + 'px';
+            cursorEl.style.top = (e.clientY - rect.top) + 'px';
+          }
+          if (!dragging || !loaded) return;
+          e.preventDefault();
+          handleDrag(e.clientX);
+        });
+      }
+
+      // --- Touch events (mobile) ---
+      wrap.addEventListener('touchstart', function (e) {
+        if (!loaded) return;
+        dragging = true;
+        lastX = e.touches[0].pageX;
+        rem = 0;
+      }, { passive: true });
+      wrap.addEventListener('touchmove', function (e) {
+        if (!dragging || !loaded) return;
+        handleDrag(e.touches[0].pageX);
+      }, { passive: true });
+      wrap.addEventListener('touchend', function () { dragging = false; });
+
+      rotateViewers.push({ idx: idx, preload: preload, reset: function () { setFrame(0); } });
+    });
+
+    if (rotateViewers.length > 0) {
+      // Preload all 360 models when section enters viewport
+      var obs = new IntersectionObserver(function (entries) {
+        if (entries[0].isIntersecting) {
+          rotateViewers.forEach(function (v) { v.preload(); });
+          obs.disconnect();
+        }
+      }, { threshold: 0.1 });
+      obs.observe(section);
+
+      // Reset rotation on slide change
+      onSlideChange = function () {
+        rotateViewers.forEach(function (v) { v.reset(); });
+      };
+    }
+  }
 
 }
 

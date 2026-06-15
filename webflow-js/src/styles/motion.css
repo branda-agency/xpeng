@@ -224,6 +224,59 @@
   transition: stroke 0.3s ease;
 }
 
+/* --- 360 Rotate Viewer --- */
+.models__car {
+  position: relative;
+}
+
+[data-rotate] {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  display: none;
+  cursor: none;
+  user-select: none;
+  -webkit-user-select: none;
+  touch-action: pan-y;
+}
+
+[data-rotate-frame] {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+  pointer-events: none;
+  user-select: none;
+  -webkit-user-drag: none;
+}
+
+[data-rotate-cursor] {
+  position: absolute;
+  z-index: 3;
+  width: 3.6em;
+  height: 3.6em;
+  pointer-events: none;
+  user-select: none;
+  transform: translate(-50%, -50%);
+  opacity: 0;
+  transition: opacity 0.3s ease;
+}
+
+@media (max-width: 767px) {
+  [data-rotate-cursor] {
+    display: none;
+  }
+
+  [data-rotate] {
+    cursor: grab;
+  }
+
+  [data-rotate]:active {
+    cursor: grabbing;
+  }
+}
+
 /* --- Configurator --- */
 [data-cfg-image] {
   will-change: opacity;
