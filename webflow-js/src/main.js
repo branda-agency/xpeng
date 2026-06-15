@@ -1001,7 +1001,10 @@ function initModelsCarousel() {
                 loaded = true;
                 frameImg.src = frames[0].src;
                 wrap.style.display = 'block';
-                if (staticImg) staticImg.style.visibility = 'hidden';
+                if (staticImg) {
+                  staticImg.style.visibility = 'hidden';
+                  staticImg.style.pointerEvents = 'none';
+                }
               }
             };
             frames[fi] = img;
