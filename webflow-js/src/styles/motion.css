@@ -225,8 +225,13 @@
 }
 
 /* --- 360 Rotate Viewer --- */
-.models__watermark {
+.models__watermark,
+.models__arows-wrap {
   pointer-events: none;
+}
+
+.models__arrow {
+  pointer-events: auto;
 }
 
 [data-rotate] {
