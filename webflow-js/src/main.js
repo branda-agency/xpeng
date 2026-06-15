@@ -851,16 +851,17 @@ function initModelsCarousel() {
   const infoChildren = Array.from(infos).map((info) => Array.from(info.children));
   const watermarks = Array.from(slides).map((s) => s.querySelector('.models__watermark'));
   let current = 0;
+  tabs.forEach((t, i) => { if (t.classList.contains('is-active')) current = i; });
   let isAnimating = false;
   let onSlideChange = null;
 
   // Initial state
   gsap.set(slides, { xPercent: 100, autoAlpha: 1 });
-  gsap.set(slides[0], { xPercent: 0 });
+  gsap.set(slides[current], { xPercent: 0 });
   gsap.set(infos, { autoAlpha: 0, position: 'absolute', left: 0, right: 0 });
-  gsap.set(infos[0], { autoAlpha: 1 });
+  gsap.set(infos[current], { autoAlpha: 1 });
   gsap.set(watermarks, { autoAlpha: 0, y: '0.5em' });
-  gsap.set(watermarks[0], { autoAlpha: 1, y: 0 });
+  gsap.set(watermarks[current], { autoAlpha: 1, y: 0 });
 
   function updateArrows() {
     if (prevBtn) gsap.to(prevBtn, { autoAlpha: current === 0 ? 0.4 : 1, duration: 0.3 });
