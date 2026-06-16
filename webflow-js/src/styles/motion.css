@@ -260,6 +260,10 @@
   -webkit-user-drag: none;
 }
 
+[data-360="g9"] [data-rotate-frame] {
+  transform: scale(1);
+}
+
 [data-rotate-cursor] {
   position: absolute;
   z-index: 3;
