@@ -1528,7 +1528,7 @@ function renderVariants(root, state, data, setState) {
     // "Show more" opens drawer with full specs
     const expandBtn = card.querySelector('[data-cfg-variant-expand]');
     if (expandBtn) {
-      expandBtn.textContent = 'Show more';
+      expandBtn.textContent = 'Виж още';
       expandBtn.setAttribute('data-drawer-target', 'specs-' + variant.variant_code);
     }
 
