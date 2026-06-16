@@ -1519,7 +1519,7 @@ function renderVariants(root, state, data, setState) {
 
     const specs = card.querySelector('[data-cfg-variant-specs]');
     if (specs && variant.energy_consumption) {
-      specs.textContent = 'Разход на енергия ' + variant.energy_consumption + ', CO₂ емисии: 0 г/км, CO₂ клас: A (Комбинирани стойности съгласно WLTP.)';
+      specs.textContent = 'Разход на енергия ' + variant.energy_consumption.replace('km', 'км') + ', CO₂ емисии: 0 г/км, CO₂ клас: A (Комбинирани стойности съгласно WLTP.)';
     }
 
     const price = card.querySelector('[data-cfg-variant-price]');
@@ -1716,7 +1716,7 @@ function renderAccessories(root, state, data, setState) {
     if (stepTitle) {
       // Preserve accordion icon if present
       var icon = stepTitle.querySelector('.configurator__accordion-icon');
-      stepTitle.textContent = 'Optional';
+      stepTitle.textContent = 'Опционално оборудване';
       if (icon) stepTitle.appendChild(icon);
     }
   }
