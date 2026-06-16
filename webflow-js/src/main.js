@@ -1287,7 +1287,7 @@ const MOCK_DATA = {
   g6: {
     model: { model_slug: 'g6', model_name: 'XPENG G6', starting_price: 43600 },
     variants: [
-      { variant_code: 'rwd-sr', variant_name: 'RWD Standard Range', price: 43600, is_default: true, range_km: 455, power_kw: 185, acceleration: '6.9s', top_speed: 200, battery_kwh: 67.8, battery_type: 'LFP', dc_charge_power_kw: 382, dc_charge_time: '10-80% in 12 min', energy_consumption: '17.3 kWh/100km', drivetrain: 'RWD', delivery_time: 'Q4 2026', sort_order: 1 },
+      { variant_code: 'rwd-sr', variant_name: 'RWD Standard Range', price: 43600, is_default: true, range_km: 455, power_kw: 185, acceleration: '6.9s', top_speed: 200, battery_kwh: 67.8, battery_type: 'LFP', dc_charge_power_kw: 382, dc_charge_time: '10-80% in 12 min', energy_consumption: '16.6 kWh/100km', drivetrain: 'RWD', delivery_time: 'Q4 2026', sort_order: 1 },
       { variant_code: 'rwd-lr', variant_name: 'RWD Long Range', price: 47600, is_default: false, range_km: 525, power_kw: 218, acceleration: '6.7s', top_speed: 200, battery_kwh: 80, battery_type: 'LFP', dc_charge_power_kw: 451, dc_charge_time: '10-80% in 12 min', energy_consumption: '17.5 kWh/100km', drivetrain: 'RWD', delivery_time: 'Q4 2026', sort_order: 2 },
       { variant_code: 'awd', variant_name: 'AWD Performance', price: 51600, is_default: false, range_km: 510, power_kw: 358, acceleration: '4.1s', top_speed: 200, battery_kwh: 80, battery_type: 'LFP', dc_charge_power_kw: 451, dc_charge_time: '10-80% in 12 min', energy_consumption: '18.4 kWh/100km', drivetrain: 'AWD', delivery_time: 'Q1 2027', sort_order: 3 },
     ],
@@ -1519,7 +1519,7 @@ function renderVariants(root, state, data, setState) {
 
     const specs = card.querySelector('[data-cfg-variant-specs]');
     if (specs && variant.energy_consumption) {
-      specs.textContent = 'Electricity consumption ' + variant.energy_consumption + '; CO2 emissions 0 g/km; CO2 class: A (combined values according to WLTP).';
+      specs.textContent = 'Разход на енергия ' + variant.energy_consumption + ', CO₂ емисии: 0 г/км, CO₂ клас: A (Комбинирани стойности съгласно WLTP.)';
     }
 
     const price = card.querySelector('[data-cfg-variant-price]');
