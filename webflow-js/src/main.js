@@ -1296,17 +1296,13 @@ const MOCK_DATA = {
       { variant_code: 'all', color_code: 'stellar-purple', color_name: 'Stellar Purple', color_hex: '#8B7D9B', price: 800, is_default: false, sort_order: 2 },
       { variant_code: 'all', color_code: 'silver-frost', color_name: 'Silver Frost', color_hex: '#B8B8B8', price: 800, is_default: false, sort_order: 3 },
       { variant_code: 'all', color_code: 'graphite-gray', color_name: 'Graphite Gray', color_hex: '#707070', price: 800, is_default: false, sort_order: 4 },
-      { variant_code: 'all', color_code: 'midnight-black', color_name: 'Midnight Black', color_hex: '#2D2D2D', price: 800, is_default: false, sort_order: 5 },
     ],
     interiors: [
       { variant_code: 'all', interior_code: 'dark-gray', interior_name: 'Dark Gray', price: 0, is_default: true, sort_order: 1 },
       { variant_code: 'all', interior_code: 'light-gray', interior_name: 'Light Gray', price: 0, is_default: false, sort_order: 2 },
     ],
     wheels: [
-      { variant_code: 'rwd-sr', wheel_code: '18-aero', wheel_name: '18" Aero', price: 0, is_default: true, sort_order: 1 },
-      { variant_code: 'rwd-sr', wheel_code: '20-sport', wheel_name: '20" Sport', price: 1000, is_default: false, sort_order: 2 },
-      { variant_code: 'rwd-lr', wheel_code: '20-sport', wheel_name: '20" Sport', price: 0, is_default: true, sort_order: 1 },
-      { variant_code: 'awd', wheel_code: '20-sport', wheel_name: '20" Sport', price: 0, is_default: true, sort_order: 1 },
+      { variant_code: 'all', wheel_code: '20-sport', wheel_name: '20" Sport', price: 0, is_default: true, sort_order: 1 },
     ],
     accessories: [{ variant_code: 'all', accessory_code: 'tow-hitch', accessory_name: 'Electric Retractable Towbar', price: 1190, description: '1,500 kg braked / 750 kg unbraked, 75 kg tongue weight', image: '', sort_order: 1 }],
   },
@@ -1321,7 +1317,6 @@ const MOCK_DATA = {
       { variant_code: 'all', color_code: 'arctic-white', color_name: 'Arctic White', color_hex: '#F0EDE8', price: 0, is_default: true, sort_order: 1 },
       { variant_code: 'all', color_code: 'silver-frost', color_name: 'Silver Frost', color_hex: '#B8B8B8', price: 800, is_default: false, sort_order: 2 },
       { variant_code: 'all', color_code: 'graphite-gray', color_name: 'Graphite Gray', color_hex: '#707070', price: 800, is_default: false, sort_order: 3 },
-      { variant_code: 'all', color_code: 'midnight-black', color_name: 'Midnight Black', color_hex: '#2D2D2D', price: 800, is_default: false, sort_order: 4 },
     ],
     interiors: [
       { variant_code: 'rwd-sr', interior_code: 'dark-gray', interior_name: 'Dark Gray', price: 0, is_default: true, sort_order: 1 },
