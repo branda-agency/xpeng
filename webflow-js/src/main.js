@@ -1567,8 +1567,14 @@ function renderVariants(root, state, data, setState) {
         state.selectedInterior = (interiorSurvives && newInteriors.find(function(i) { return i.interior_code === state.selectedInterior?.interior_code; }))
           || newInteriors.find(function(i) { return i.is_default; }) || newInteriors[0];
 
-        state.selectedWheels = (wheelSurvives && newWheels.find(function(w) { return w.wheel_code === state.selectedWheels?.wheel_code; }))
-          || newWheels.find(function(w) { return w.is_default; }) || null;
+        var newDefault = newWheels.find(function(w) { return w.is_default; }) || null;
+        if (wheelSurvives && state.selectedWheels) {
+          var carried = newWheels.find(function(w) { return w.wheel_code === state.selectedWheels.wheel_code; });
+          // Only carry over if the wheel is default in the new variant
+          state.selectedWheels = (carried && carried.is_default) ? carried : newDefault;
+        } else {
+          state.selectedWheels = newDefault;
+        }
 
         renderColors(root, state, data, setState);
         renderInteriors(root, state, data, setState);
@@ -1700,6 +1706,8 @@ function renderWheels(root, state, data, setState) {
 
     if (wheel.wheel_code === state.selectedWheels?.wheel_code) {
       el.setAttribute('data-cfg-active', '');
+    } else {
+      el.removeAttribute('data-cfg-active');
     }
 
     el.addEventListener('click', () => {
