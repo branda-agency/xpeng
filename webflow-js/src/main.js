@@ -1672,8 +1672,8 @@ function renderWheels(root, state, data, setState) {
 
   const wheels = getOptionsForVariant(data.wheels, state.selectedVariant?.variant_code);
 
-  // Hide step if only 1 or 0 options
-  if (step && wheels.length <= 1) {
+  // Hide step if no options; show and auto-select if only one
+  if (step && wheels.length === 0) {
     step.style.display = 'none';
     return;
   } else if (step) {
