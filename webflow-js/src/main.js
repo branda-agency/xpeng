@@ -1743,14 +1743,18 @@ function renderAccessories(root, state, data, setState) {
 
     // Render description as bullet list
     const desc = el.querySelector('[data-cfg-accessory-desc]');
-    if (desc && acc.description) {
-      var bullets = acc.description.split('|').filter(function(line) { return line.trim(); });
-      if (bullets.length > 1) {
-        desc.innerHTML = '<ul class="configurator__accessory-bullets">' +
-          bullets.map(function(b) { return '<li>' + b.trim() + '</li>'; }).join('') +
-          '</ul>';
+    if (desc) {
+      if (acc.description) {
+        var bullets = acc.description.split('|').filter(function(line) { return line.trim(); });
+        if (bullets.length > 1) {
+          desc.innerHTML = '<ul class="configurator__accessory-bullets">' +
+            bullets.map(function(b) { return '<li>' + b.trim() + '</li>'; }).join('') +
+            '</ul>';
+        } else {
+          desc.textContent = acc.description;
+        }
       } else {
-        desc.textContent = acc.description;
+        desc.textContent = '';
       }
     }
 
