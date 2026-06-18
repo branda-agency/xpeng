@@ -1258,6 +1258,9 @@ function initTabbedCarousel() {
 
 const CONFIGURATOR_API = 'https://script.google.com/macros/s/AKfycbxDzXiIHLDm4I2sTaWMIBKK-zhQRjwtSuroX1BhnfdyRuua5GHDFDC4VUFAUQzMkdC6cA/exec';
 
+// Accessories hidden from UI but kept in Sheet data (remove from list to re-enable)
+const HIDDEN_ACCESSORIES = ['black-edition'];
+
 // Mock data for development (G9)
 const MOCK_DATA = {
   g9: {
@@ -1725,7 +1728,8 @@ function renderAccessories(root, state, data, setState) {
   const template = container.querySelector('[data-cfg-accessory]') || container.lastElementChild;
   if (!template) return;
 
-  const accessories = getOptionsForVariant(data.accessories, state.selectedVariant?.variant_code);
+  const accessories = getOptionsForVariant(data.accessories, state.selectedVariant?.variant_code)
+    .filter((acc) => !HIDDEN_ACCESSORIES.includes(acc.accessory_code));
   container.innerHTML = '';
 
   accessories.forEach((acc) => {
