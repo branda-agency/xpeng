@@ -1282,6 +1282,7 @@ const MOCK_DATA = {
     ],
     accessories: [
       { variant_code: 'all', accessory_code: 'tow-hitch', accessory_name: 'Електрически теглич', price: 1260, description: 'Електрически прибиращ се теглич с максимално теглително тегло 1500 кг.', image: '', sort_order: 1 },
+      { variant_code: 'all', accessory_code: 'black-edition', accessory_name: 'Black Edition', price: 1000, description: 'Боя Midnight Black | Черни 21-инчови джанти | Предно лого в Smoked Black | Предни калници, Smart камера на предната врата и декоративни елементи в Smoked Black | Декоративни елементи на лайсната на предната броня в Smoked Black | Надписи „XPENG" и „G9" отзад в Smoked Black | Черни спирачни апарати', image: 'https://cdn.prod.website-files.com/6a041f81e8910a5a1669594c/6a2a4fdc77e7d58cc663fc2a_Black%20Edition.avif', sort_order: 3 },
     ],
   },
   g6: {
@@ -1304,7 +1305,10 @@ const MOCK_DATA = {
     wheels: [
       { variant_code: 'all', wheel_code: '20-sport', wheel_name: '20" Sport', price: 0, is_default: true, sort_order: 1 },
     ],
-    accessories: [{ variant_code: 'all', accessory_code: 'tow-hitch', accessory_name: 'Electric Retractable Towbar', price: 1190, description: '1,500 kg braked / 750 kg unbraked, 75 kg tongue weight', image: '', sort_order: 1 }],
+    accessories: [
+      { variant_code: 'all', accessory_code: 'tow-hitch', accessory_name: 'Electric Retractable Towbar', price: 1190, description: '1,500 kg braked / 750 kg unbraked, 75 kg tongue weight', image: '', sort_order: 1 },
+      { variant_code: 'all', accessory_code: 'black-edition', accessory_name: 'Black Edition', price: 1000, description: 'Боя Midnight Black | Черни 20-инчови джанти | Предно лого в Smoked Black | Предни калници, Smart камера на предната врата и декоративни елементи в Smoked Black | Декоративни елементи на лайсната на предната броня в Smoked Black | Надписи „XPENG" и „G6" отзад в Smoked Black | Черни спирачни апарати', image: 'https://cdn.prod.website-files.com/6a041f81e8910a5a1669594c/6a2a5349e94f6efe2f62584e_Black%20edition.avif', sort_order: 2 },
+    ],
   },
   'p7-plus': {
     model: { model_slug: 'p7-plus', model_name: 'XPENG P7+', starting_price: 46600 },
