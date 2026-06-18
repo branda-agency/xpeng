@@ -1465,7 +1465,7 @@ function applyDefaults(state, data) {
   state.selectedInterior = interiors.find((i) => i.is_default) || interiors[0];
 
   const wheels = getOptionsForVariant(data.wheels, state.selectedVariant.variant_code);
-  state.selectedWheels = wheels.find((w) => w.is_default) || wheels[0];
+  state.selectedWheels = wheels.find((w) => w.is_default) || null;
 
   state.selectedAccessories = [];
 }
@@ -1568,7 +1568,7 @@ function renderVariants(root, state, data, setState) {
           || newInteriors.find(function(i) { return i.is_default; }) || newInteriors[0];
 
         state.selectedWheels = (wheelSurvives && newWheels.find(function(w) { return w.wheel_code === state.selectedWheels?.wheel_code; }))
-          || newWheels.find(function(w) { return w.is_default; }) || newWheels[0];
+          || newWheels.find(function(w) { return w.is_default; }) || null;
 
         renderColors(root, state, data, setState);
         renderInteriors(root, state, data, setState);
@@ -1703,7 +1703,12 @@ function renderWheels(root, state, data, setState) {
     }
 
     el.addEventListener('click', () => {
-      setState({ selectedWheels: wheel }, 'wheels');
+      // Toggle: deselect if already selected (only for non-default wheels)
+      if (state.selectedWheels?.wheel_code === wheel.wheel_code && !wheel.is_default) {
+        setState({ selectedWheels: null }, 'wheels');
+      } else {
+        setState({ selectedWheels: wheel }, 'wheels');
+      }
     });
 
     container.appendChild(el);
@@ -2096,9 +2101,11 @@ function renderSummary(root, config) {
   setLineThumb(root, 'interior', config.selectedInterior.image_thumb);
 
   // Wheels line item
-  var wheelsPrice = SHOW_PRICES && config.selectedWheels.price > 0 ? '+' + formatPrice(config.selectedWheels.price) + ' EUR' : '';
-  setLineItem(root, 'wheels', config.selectedWheels.wheel_name, wheelsPrice);
-  setLineThumb(root, 'wheels', config.selectedWheels.image_thumb);
+  if (config.selectedWheels) {
+    var wheelsPrice = SHOW_PRICES && config.selectedWheels.price > 0 ? '+' + formatPrice(config.selectedWheels.price) + ' EUR' : '';
+    setLineItem(root, 'wheels', config.selectedWheels.wheel_name, wheelsPrice);
+    setLineThumb(root, 'wheels', config.selectedWheels.image_thumb);
+  }
 
   // Accessories — clone template for each selected accessory
   var accTemplate = root.querySelector('[data-summary-item="accessory"]');
