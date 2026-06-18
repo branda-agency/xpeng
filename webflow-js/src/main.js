@@ -1356,7 +1356,7 @@ const EUR_TO_BGN = 1.95583;
 
    Search "SHOW_PRICES" to find all guarded locations.
    ---------------------------------------------------------------- */
-var SHOW_PRICES = false;
+var SHOW_PRICES = true;
 
 function formatPrice(num) {
   return num.toLocaleString('de-DE');
