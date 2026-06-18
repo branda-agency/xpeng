@@ -1689,11 +1689,15 @@ function renderWheels(root, state, data, setState) {
     step.style.display = '';
   }
 
+  // Clean template: strip any stale active state before cloning
+  template.removeAttribute('data-cfg-active');
+
   container.innerHTML = '';
 
   wheels.forEach((wheel) => {
     const el = template.cloneNode(true);
     el.setAttribute('data-cfg-wheel-option', wheel.wheel_code);
+    el.removeAttribute('data-cfg-active');
 
     const thumb = el.querySelector('.configurator__wheel-thumb');
     if (thumb && wheel.image_thumb) thumb.src = wheel.image_thumb;
@@ -1706,8 +1710,6 @@ function renderWheels(root, state, data, setState) {
 
     if (wheel.wheel_code === state.selectedWheels?.wheel_code) {
       el.setAttribute('data-cfg-active', '');
-    } else {
-      el.removeAttribute('data-cfg-active');
     }
 
     el.addEventListener('click', () => {
