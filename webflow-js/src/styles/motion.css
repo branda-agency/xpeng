@@ -75,6 +75,15 @@
   transition: opacity 0.25s ease, transform 0.25s ease;
 }
 
+.nav__dropdown-menu::before {
+  content: '';
+  position: absolute;
+  top: -2em;
+  left: 0;
+  right: 0;
+  height: 2em;
+}
+
 .nav__dropdown:hover .nav__dropdown-menu {
   display: flex;
   flex-direction: column;
