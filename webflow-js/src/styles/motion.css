@@ -90,6 +90,7 @@
   opacity: 1;
   pointer-events: auto;
   transform: translateY(0);
+  box-shadow: 0 0.25em 1em rgba(0, 0, 0, 0.08);
 }
 
 .nav__dropdown-link {
