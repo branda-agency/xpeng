@@ -1939,8 +1939,8 @@ function updateGallery(root, state) {
   } else {
     // Show exterior car render — pick alternate wheel image if larger wheels selected
     var color = state.selectedColor;
-    var selWheel = state.selectedWheels;
-    var isLargeWheel = selWheel && !selWheel.is_default;
+    var wCode = (state.selectedWheels && state.selectedWheels.wheel_code) || '';
+    var isLargeWheel = /2[01]/.test(wCode);
     if (isLargeWheel && color && color.image_front_21) {
       url = color.image_front_21;
     } else {
@@ -2082,8 +2082,8 @@ function renderSummary(root, config) {
   // Car image — pick alternate wheel image if larger wheels selected
   var carImg = root.querySelector('[data-summary-car-image]');
   if (carImg && config.selectedColor) {
-    var selWheel = config.selectedWheels;
-    var isLargeWheel = selWheel && !selWheel.is_default;
+    var wCode = (config.selectedWheels && config.selectedWheels.wheel_code) || '';
+    var isLargeWheel = /2[01]/.test(wCode);
     var url = (isLargeWheel && config.selectedColor.image_front_21) || config.selectedColor.image_front || '';
     if (url) carImg.src = url;
   }
