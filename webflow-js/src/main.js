@@ -2156,11 +2156,15 @@ function renderSummary(root, config) {
   setLineItem(root, 'interior', config.selectedInterior.interior_name, interiorPrice);
   setLineThumb(root, 'interior', config.selectedInterior.image_thumb);
 
-  // Wheels line item
+  // Wheels line item — hide row when no wheels selected
+  var wheelsItem = root.querySelector('[data-summary-item="wheels"]');
   if (config.selectedWheels) {
+    if (wheelsItem) wheelsItem.style.display = '';
     var wheelsPrice = SHOW_PRICES && config.selectedWheels.price > 0 ? '+' + formatPrice(config.selectedWheels.price) + ' EUR' : '';
     setLineItem(root, 'wheels', config.selectedWheels.wheel_name, wheelsPrice);
     setLineThumb(root, 'wheels', config.selectedWheels.image_thumb);
+  } else {
+    if (wheelsItem) wheelsItem.style.display = 'none';
   }
 
   // Accessories — clone template for each selected accessory
