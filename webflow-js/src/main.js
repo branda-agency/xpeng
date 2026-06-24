@@ -1983,14 +1983,21 @@ function updateGallery(root, state) {
     var interior = state.selectedInterior;
     url = (interior && (interior.image_full || interior.image_thumb)) || '';
   } else {
-    // Show exterior car render — pick alternate wheel image if larger wheels selected
-    var color = state.selectedColor;
-    var wCode = (state.selectedWheels && state.selectedWheels.wheel_code) || '';
-    var isLargeWheel = /2[01]/.test(wCode);
-    if (isLargeWheel && color && color.image_front_21) {
-      url = color.image_front_21;
-    } else {
-      url = (color && color.image_front) || '';
+    // Black Edition selected — show the accessory hero image
+    if (state.selectedAccessories.includes('black-edition') && state.data) {
+      var beAcc = state.data.accessories.find(function(a) { return a.accessory_code === 'black-edition'; });
+      if (beAcc && beAcc.image) url = beAcc.image;
+    }
+    // Normal: show exterior car render — pick alternate wheel image if larger wheels selected
+    if (!url) {
+      var color = state.selectedColor;
+      var wCode = (state.selectedWheels && state.selectedWheels.wheel_code) || '';
+      var isLargeWheel = /2[01]/.test(wCode);
+      if (isLargeWheel && color && color.image_front_21) {
+        url = color.image_front_21;
+      } else {
+        url = (color && color.image_front) || '';
+      }
     }
   }
 
