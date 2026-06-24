@@ -2123,7 +2123,7 @@ function reconstructConfig(data, params) {
 function renderSummary(root, config) {
   // Heading
   var heading = root.querySelector('[data-summary-heading]');
-  if (heading) heading.textContent = 'Your XPENG ' + (config.model.model_name || '').replace('XPENG ', '') + ' SUV';
+  if (heading) heading.textContent = 'Вашият ' + (config.model.model_name || '');
 
   // Car image — pick alternate wheel image if larger wheels selected
   var carImg = root.querySelector('[data-summary-car-image]');
