@@ -1304,11 +1304,11 @@ const MOCK_DATA = {
     ],
     wheels: [
       { variant_code: 'all', wheel_code: '20-standard', wheel_name: '20" Standard', price: 0, is_default: true, image_thumb: '', sort_order: 1 },
-      { variant_code: 'all', wheel_code: '21-black-edition', wheel_name: '21" Black Edition', price: 0, is_default: false, requires_accessory: 'black-edition', image_thumb: '', sort_order: 2 },
+      { variant_code: 'all', wheel_code: '21-black-edition', wheel_name: '21" Black Edition', price: 1290, is_default: false, requires_accessory: 'black-edition', image_thumb: '', sort_order: 2 },
     ],
     accessories: [
       { variant_code: 'all', accessory_code: 'tow-hitch', accessory_name: 'Електрически теглич', price: 1260, description: 'Електрически прибиращ се теглич с максимално теглително тегло 1500 кг.', image: '', sort_order: 1 },
-      { variant_code: 'all', accessory_code: 'black-edition', accessory_name: 'Black Edition', price: 2780, description: 'Ярък черен цвят | 21-инчови черни джанти | Оранжеви спирачни апарати | Ярки черни ъгли на стъклата | Ярки черни странични панели | Ярки черни елементи на интелигентните камери | Ярка черна лайсна на предпазната решетка | Ярко черно лого', image: 'https://cdn.prod.website-files.com/6a041f81e8910a5a1669594c/6a2a4fdc77e7d58cc663fc2a_Black%20Edition.avif', sort_order: 3 },
+      { variant_code: 'all', accessory_code: 'black-edition', accessory_name: 'Black Edition', price: 1490, description: 'Ярък черен цвят | Оранжеви спирачни апарати | Ярки черни ъгли на стъклата | Ярки черни странични панели | Ярки черни елементи на интелигентните камери | Ярка черна лайсна на предпазната решетка | Ярко черно лого', image: 'https://cdn.prod.website-files.com/6a041f81e8910a5a1669594c/6a2a4fdc77e7d58cc663fc2a_Black%20Edition.avif', sort_order: 3 },
     ],
   },
   g6: {
@@ -1330,11 +1330,11 @@ const MOCK_DATA = {
     ],
     wheels: [
       { variant_code: 'all', wheel_code: '20-sport', wheel_name: '20" Sport', price: 0, is_default: true, sort_order: 1 },
-      { variant_code: 'all', wheel_code: '20-black-edition', wheel_name: '20" Black Edition', price: 0, is_default: false, requires_accessory: 'black-edition', sort_order: 2 },
+      { variant_code: 'all', wheel_code: '20-black-edition', wheel_name: '20" Black Edition', price: 1290, is_default: false, requires_accessory: 'black-edition', sort_order: 2 },
     ],
     accessories: [
       { variant_code: 'all', accessory_code: 'tow-hitch', accessory_name: 'Electric Retractable Towbar', price: 1190, description: '1,500 kg braked / 750 kg unbraked, 75 kg tongue weight', image: '', sort_order: 1 },
-      { variant_code: 'all', accessory_code: 'black-edition', accessory_name: 'Black Edition', price: 2780, description: 'Черен цвят | 20-инчови черни джанти | Черни спирачни апарати | Предно лого с опушено черен ефект | Декоративни елементи с опушено черен ефект на интелигентните камери | Опушено черен ефект на елементите по предната броня | Надписи „XPENG" и „G6" отзад с опушен черен ефект', image: 'https://cdn.prod.website-files.com/6a041f81e8910a5a1669594c/6a2a5349e94f6efe2f62584e_Black%20edition.avif', sort_order: 2 },
+      { variant_code: 'all', accessory_code: 'black-edition', accessory_name: 'Black Edition', price: 1490, description: 'Черен цвят | Черни спирачни апарати | Предно лого с опушено черен ефект | Декоративни елементи с опушено черен ефект на интелигентните камери | Опушено черен ефект на елементите по предната броня | Надписи „XPENG" и „G6" отзад с опушен черен ефект', image: 'https://cdn.prod.website-files.com/6a041f81e8910a5a1669594c/6a2a5349e94f6efe2f62584e_Black%20edition.avif', sort_order: 2 },
     ],
   },
   'p7-plus': {
