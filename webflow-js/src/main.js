@@ -1308,7 +1308,7 @@ const MOCK_DATA = {
     ],
     accessories: [
       { variant_code: 'all', accessory_code: 'tow-hitch', accessory_name: 'Електрически теглич', price: 1260, description: 'Електрически прибиращ се теглич с максимално теглително тегло 1500 кг.', image: '', sort_order: 1 },
-      { variant_code: 'all', accessory_code: 'black-edition', accessory_name: 'Black Edition', price: 1490, description: 'Ярък черен цвят | Оранжеви спирачни апарати | Ярки черни ъгли на стъклата | Ярки черни странични панели | Ярки черни елементи на интелигентните камери | Ярка черна лайсна на предпазната решетка | Ярко черно лого', image: 'https://cdn.prod.website-files.com/6a041f81e8910a5a1669594c/6a3bdbe168c02486c7b836f3_g9-black-edition-MAIN.avif', sort_order: 3 },
+      { variant_code: 'all', accessory_code: 'black-edition', accessory_name: 'Black Edition', price: 1490, description: 'Ярък черен цвят | Оранжеви спирачни апарати | Ярки черни ъгли на стъклата | Ярки черни странични панели | Ярки черни елементи на интелигентните камери | Ярка черна лайсна на предпазната решетка | Ярко черно лого', image: 'https://cdn.prod.website-files.com/6a041f81e8910a5a1669594c/6a2a4fdc77e7d58cc663fc2a_Black%20Edition.avif', sort_order: 3 },
     ],
   },
   g6: {
@@ -1334,7 +1334,7 @@ const MOCK_DATA = {
     ],
     accessories: [
       { variant_code: 'all', accessory_code: 'tow-hitch', accessory_name: 'Electric Retractable Towbar', price: 1190, description: '1,500 kg braked / 750 kg unbraked, 75 kg tongue weight', image: '', sort_order: 1 },
-      { variant_code: 'all', accessory_code: 'black-edition', accessory_name: 'Black Edition', price: 1490, description: 'Черен цвят | Черни спирачни апарати | Предно лого с опушено черен ефект | Декоративни елементи с опушено черен ефект на интелигентните камери | Опушено черен ефект на елементите по предната броня | Надписи „XPENG" и „G6" отзад с опушен черен ефект', image: 'https://cdn.prod.website-files.com/6a041f81e8910a5a1669594c/6a3bdbe785f5872a728efd2d_g6-black-edition-main.avif', sort_order: 2 },
+      { variant_code: 'all', accessory_code: 'black-edition', accessory_name: 'Black Edition', price: 1490, description: 'Черен цвят | Черни спирачни апарати | Предно лого с опушено черен ефект | Декоративни елементи с опушено черен ефект на интелигентните камери | Опушено черен ефект на елементите по предната броня | Надписи „XPENG" и „G6" отзад с опушен черен ефект', image: 'https://cdn.prod.website-files.com/6a041f81e8910a5a1669594c/6a2a5349e94f6efe2f62584e_Black%20edition.avif', sort_order: 2 },
     ],
   },
   'p7-plus': {
@@ -1986,10 +1986,14 @@ function updateGallery(root, state) {
     var interior = state.selectedInterior;
     url = (interior && (interior.image_full || interior.image_thumb)) || '';
   } else {
-    // Black Edition selected — show the accessory hero image
+    // Black Edition selected — show dedicated gallery image (separate from accessory thumbnail)
+    var beGallery = {
+      g9: 'https://cdn.prod.website-files.com/6a041f81e8910a5a1669594c/6a3bdbe168c02486c7b836f3_g9-black-edition-MAIN.avif',
+      g6: 'https://cdn.prod.website-files.com/6a041f81e8910a5a1669594c/6a3bdbe785f5872a728efd2d_g6-black-edition-main.avif'
+    };
     if (state.selectedAccessories.includes('black-edition') && state.data) {
-      var beAcc = state.data.accessories.find(function(a) { return a.accessory_code === 'black-edition'; });
-      if (beAcc && beAcc.image) url = beAcc.image;
+      var slug = state.data.model.model_slug;
+      if (beGallery[slug]) url = beGallery[slug];
     }
     // Normal: show exterior car render — pick alternate wheel image if larger wheels selected
     if (!url) {
