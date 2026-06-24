@@ -2139,12 +2139,23 @@ function renderSummary(root, config) {
   var heading = root.querySelector('[data-summary-heading]');
   if (heading) heading.textContent = 'Вашият ' + (config.model.model_name || '');
 
-  // Car image — pick alternate wheel image if larger wheels selected
+  // Car image — Black Edition hero or color-based render
   var carImg = root.querySelector('[data-summary-car-image]');
-  if (carImg && config.selectedColor) {
-    var wCode = (config.selectedWheels && config.selectedWheels.wheel_code) || '';
-    var isLargeWheel = /2[01]/.test(wCode);
-    var url = (isLargeWheel && config.selectedColor.image_front_21) || config.selectedColor.image_front || '';
+  if (carImg) {
+    var beGallery = {
+      g9: 'https://cdn.prod.website-files.com/6a041f81e8910a5a1669594c/6a3bdbe168c02486c7b836f3_g9-black-edition-MAIN.avif',
+      g6: 'https://cdn.prod.website-files.com/6a041f81e8910a5a1669594c/6a3bdbe785f5872a728efd2d_g6-black-edition-main.avif'
+    };
+    var hasBlackEdition = config.selectedAccessories.some(function(a) { return a.accessory_code === 'black-edition'; });
+    var slug = config.model.model_slug;
+    var url = '';
+    if (hasBlackEdition && beGallery[slug]) {
+      url = beGallery[slug];
+    } else if (config.selectedColor) {
+      var wCode = (config.selectedWheels && config.selectedWheels.wheel_code) || '';
+      var isLargeWheel = /2[01]/.test(wCode);
+      url = (isLargeWheel && config.selectedColor.image_front_21) || config.selectedColor.image_front || '';
+    }
     if (url) carImg.src = url;
   }
 
