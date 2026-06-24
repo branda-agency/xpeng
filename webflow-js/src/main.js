@@ -1728,7 +1728,10 @@ function renderWheels(root, state, data, setState) {
     el.removeAttribute('data-cfg-active');
 
     const thumb = el.querySelector('.configurator__wheel-thumb');
-    if (thumb && wheel.image_thumb) thumb.src = wheel.image_thumb;
+    if (thumb && wheel.image_thumb) {
+      thumb.src = wheel.image_thumb;
+      thumb.style.objectFit = 'contain';
+    }
 
     const name = el.querySelector('[data-cfg-wheel-name]');
     if (name) name.textContent = wheel.wheel_name;
