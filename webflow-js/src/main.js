@@ -64,6 +64,21 @@
      data-drawer-target="specs-rwd-sr"     → Trigger button, value matches drawer name
      data-drawer-close                     → Close button (on backdrop + X icon)
 
+   FIND US (store locator):
+     data-find-us                     → Page container (100vw × 100vh)
+     data-find-us-map                 → Google Maps render target
+     data-find-us-sidebar             → Desktop sidebar panel
+     data-find-us-filters             → Desktop filter row wrapper
+     data-find-us-filter="region"     → Filter select: region
+     data-find-us-filter="type"       → Filter select: type
+     data-find-us-store-list          → Desktop store card container (scrollable)
+     data-find-us-empty               → Empty state (no results)
+     data-find-us-seo                 → Hidden SEO markup container
+     data-find-us-mobile-filters      → Mobile filter bar (hidden on desktop)
+     data-find-us-drawer              → Mobile bottom drawer
+     data-find-us-drawer-body         → Drawer scrollable content
+     data-find-us-drawer-close        → Drawer close button
+
    CONFIG CONFIRM DIALOG:
      data-cfg-confirm="not-active"        → Overlay wrapper (fixed, covers viewport)
      data-cfg-confirm-backdrop            → Dark backdrop (click to cancel)
@@ -591,6 +606,9 @@ function initDrawer() {
 const PRODUCT_SLUGS = ['g9', 'g6', 'p7-plus'];
 const CONFIGURATOR_SLUGS = ['g9', 'g6', 'p7-plus'];
 
+/* Google Maps API key — replace with your own from Google Cloud Console */
+var GOOGLE_MAPS_KEY = '';
+
 function routePage() {
   const path = window.location.pathname.replace(/^\/|\/$/g, '') || 'home';
   const segments = path.split('/');
@@ -604,6 +622,10 @@ function routePage() {
   else if (segments.includes('configurator') && CONFIGURATOR_SLUGS.includes(slug)) {
     if (lenis) lenis.destroy();
     initConfiguratorPage(slug);
+  }
+  else if (path === 'find-us') {
+    if (lenis) lenis.destroy();
+    initFindUs();
   }
   else if (path === 'test-drive') initTestDrivePage();
   else if (PRODUCT_SLUGS.includes(slug)) initProductPage();
@@ -1259,7 +1281,7 @@ function initTabbedCarousel() {
 const CONFIGURATOR_API = 'https://script.google.com/macros/s/AKfycbxDzXiIHLDm4I2sTaWMIBKK-zhQRjwtSuroX1BhnfdyRuua5GHDFDC4VUFAUQzMkdC6cA/exec';
 
 // Accessories hidden from UI but kept in Sheet data (remove from list to re-enable)
-const HIDDEN_ACCESSORIES = ['black-edition'];
+const HIDDEN_ACCESSORIES = [];
 
 // Mock data for development (G9)
 const MOCK_DATA = {
@@ -1282,10 +1304,11 @@ const MOCK_DATA = {
     ],
     wheels: [
       { variant_code: 'all', wheel_code: '20-standard', wheel_name: '20" Standard', price: 0, is_default: true, image_thumb: '', sort_order: 1 },
+      { variant_code: 'all', wheel_code: '21-black-edition', wheel_name: '21" Black Edition', price: 0, is_default: false, requires_accessory: 'black-edition', image_thumb: '', sort_order: 2 },
     ],
     accessories: [
       { variant_code: 'all', accessory_code: 'tow-hitch', accessory_name: 'Електрически теглич', price: 1260, description: 'Електрически прибиращ се теглич с максимално теглително тегло 1500 кг.', image: '', sort_order: 1 },
-      { variant_code: 'all', accessory_code: 'black-edition', accessory_name: 'Black Edition', price: 1000, description: 'Боя Midnight Black | Черни 21-инчови джанти | Предно лого в Smoked Black | Предни калници, Smart камера на предната врата и декоративни елементи в Smoked Black | Декоративни елементи на лайсната на предната броня в Smoked Black | Надписи „XPENG" и „G9" отзад в Smoked Black | Черни спирачни апарати', image: 'https://cdn.prod.website-files.com/6a041f81e8910a5a1669594c/6a2a4fdc77e7d58cc663fc2a_Black%20Edition.avif', sort_order: 3 },
+      { variant_code: 'all', accessory_code: 'black-edition', accessory_name: 'Black Edition', price: 2780, description: 'Ярък черен цвят | 21-инчови черни джанти | Оранжеви спирачни апарати | Ярки черни ъгли на стъклата | Ярки черни странични панели | Ярки черни елементи на интелигентните камери | Ярка черна лайсна на предпазната решетка | Ярко черно лого', image: 'https://cdn.prod.website-files.com/6a041f81e8910a5a1669594c/6a2a4fdc77e7d58cc663fc2a_Black%20Edition.avif', sort_order: 3 },
     ],
   },
   g6: {
@@ -1307,10 +1330,11 @@ const MOCK_DATA = {
     ],
     wheels: [
       { variant_code: 'all', wheel_code: '20-sport', wheel_name: '20" Sport', price: 0, is_default: true, sort_order: 1 },
+      { variant_code: 'all', wheel_code: '20-black-edition', wheel_name: '20" Black Edition', price: 0, is_default: false, requires_accessory: 'black-edition', sort_order: 2 },
     ],
     accessories: [
       { variant_code: 'all', accessory_code: 'tow-hitch', accessory_name: 'Electric Retractable Towbar', price: 1190, description: '1,500 kg braked / 750 kg unbraked, 75 kg tongue weight', image: '', sort_order: 1 },
-      { variant_code: 'all', accessory_code: 'black-edition', accessory_name: 'Black Edition', price: 1000, description: 'Боя Midnight Black | Черни 20-инчови джанти | Предно лого в Smoked Black | Предни калници, Smart камера на предната врата и декоративни елементи в Smoked Black | Декоративни елементи на лайсната на предната броня в Smoked Black | Надписи „XPENG" и „G6" отзад в Smoked Black | Черни спирачни апарати', image: 'https://cdn.prod.website-files.com/6a041f81e8910a5a1669594c/6a2a5349e94f6efe2f62584e_Black%20edition.avif', sort_order: 2 },
+      { variant_code: 'all', accessory_code: 'black-edition', accessory_name: 'Black Edition', price: 2780, description: 'Черен цвят | 20-инчови черни джанти | Черни спирачни апарати | Предно лого с опушено черен ефект | Декоративни елементи с опушено черен ефект на интелигентните камери | Опушено черен ефект на елементите по предната броня | Надписи „XPENG" и „G6" отзад с опушен черен ефект', image: 'https://cdn.prod.website-files.com/6a041f81e8910a5a1669594c/6a2a5349e94f6efe2f62584e_Black%20edition.avif', sort_order: 2 },
     ],
   },
   'p7-plus': {
@@ -1679,7 +1703,11 @@ function renderWheels(root, state, data, setState) {
   const template = container.querySelector('[data-cfg-wheel-option]') || container.lastElementChild;
   if (!template) return;
 
-  const wheels = getOptionsForVariant(data.wheels, state.selectedVariant?.variant_code);
+  var allWheels = getOptionsForVariant(data.wheels, state.selectedVariant?.variant_code);
+  var hasBlackEdition = state.selectedAccessories.includes('black-edition');
+  const wheels = hasBlackEdition
+    ? allWheels.filter(function(w) { return /black-edition/.test(w.wheel_code); })
+    : allWheels.filter(function(w) { return !/black-edition/.test(w.wheel_code); });
 
   // Hide step if no options; show and auto-select if only one
   if (step && wheels.length === 0) {
@@ -1713,9 +1741,10 @@ function renderWheels(root, state, data, setState) {
     }
 
     el.addEventListener('click', () => {
-      // Toggle: deselect if already selected (only for non-default wheels)
-      if (state.selectedWheels?.wheel_code === wheel.wheel_code && !wheel.is_default) {
-        setState({ selectedWheels: null }, 'wheels');
+      if (state.selectedWheels?.wheel_code === wheel.wheel_code) {
+        // Don't deselect wheels tied to an active accessory package
+        if (/black-edition/.test(wheel.wheel_code) && state.selectedAccessories.includes('black-edition')) return;
+        if (!wheel.is_default) setState({ selectedWheels: null }, 'wheels');
       } else {
         setState({ selectedWheels: wheel }, 'wheels');
       }
@@ -1791,6 +1820,23 @@ function renderAccessories(root, state, data, setState) {
         const idx = list.indexOf(acc.accessory_code);
         if (idx >= 0) list.splice(idx, 1);
         else list.push(acc.accessory_code);
+
+        // Black Edition: auto-select/revert wheels when toggled
+        if (acc.accessory_code === 'black-edition') {
+          var bAllWheels = getOptionsForVariant(data.wheels, state.selectedVariant?.variant_code);
+          if (list.includes('black-edition')) {
+            var beWheel = bAllWheels.find(function(w) { return /black-edition/.test(w.wheel_code); });
+            setState({ selectedAccessories: list, selectedWheels: beWheel || state.selectedWheels }, 'accessories');
+          } else {
+            var stdWheel = bAllWheels.find(function(w) { return w.is_default; });
+            setState({ selectedAccessories: list, selectedWheels: stdWheel || null }, 'accessories');
+          }
+          renderWheels(root, state, data, setState);
+          state.galleryMode = 'exterior';
+          updateGallery(root, state);
+          return;
+        }
+
         setState({ selectedAccessories: list }, 'accessories');
       });
     }
@@ -2362,6 +2408,868 @@ function buildCategorySlider(sections) {
       goTo(current);
     }
   });
+}
+
+
+/* ============================================================
+   10g. FIND US (Store Locator)
+   ============================================================
+
+   Full-screen Google Maps page with sidebar store list (desktop)
+   and bottom drawers (mobile). 1:1 clone of xpeng.com/find-us.
+
+   Data attributes: see header block.
+   Docs: docs/find-us-spec.md
+   ============================================================ */
+
+/* --- Placeholder store data (replace with real BAI locations) --- */
+var FIND_US_STORES = [
+  {
+    id: 'bai-sofia',
+    name: 'XPENG Sofia — BAI Automotive',
+    address: 'бул. Цариградско шосе 100, 1784 София',
+    city: 'София',
+    lat: 42.6605,
+    lng: 23.3953,
+    phone: '+359 2 123 4567',
+    email: 'info@xpeng.bg',
+    coverImage: '',
+    services: [
+      {
+        type: 'experience',
+        label: 'Шоурум',
+        status: 'open',
+        phone: '+359 2 123 4567',
+        email: 'showroom@xpeng.bg',
+        link: '',
+        hours: {
+          monday: '09:00-18:00',
+          tuesday: '09:00-18:00',
+          wednesday: '09:00-18:00',
+          thursday: '09:00-18:00',
+          friday: '09:00-18:00',
+          saturday: '10:00-16:00',
+          sunday: ''
+        }
+      },
+      {
+        type: 'service',
+        label: 'Сервиз',
+        status: 'coming_soon',
+        phone: '',
+        email: '',
+        link: '',
+        hours: {}
+      }
+    ]
+  },
+  {
+    id: 'bai-plovdiv',
+    name: 'XPENG Plovdiv — BAI Automotive',
+    address: 'бул. Марица 100, 4000 Пловдив',
+    city: 'Пловдив',
+    lat: 42.1354,
+    lng: 24.7453,
+    phone: '+359 32 123 456',
+    email: 'plovdiv@xpeng.bg',
+    coverImage: '',
+    services: [
+      {
+        type: 'experience',
+        label: 'Шоурум',
+        status: 'open',
+        phone: '+359 32 123 456',
+        email: 'plovdiv@xpeng.bg',
+        link: '',
+        hours: {
+          monday: '09:00-18:00',
+          tuesday: '09:00-18:00',
+          wednesday: '09:00-18:00',
+          thursday: '09:00-18:00',
+          friday: '09:00-18:00',
+          saturday: '10:00-14:00',
+          sunday: ''
+        }
+      }
+    ]
+  }
+];
+
+var FIND_US_SERVICE_TYPES = [
+  { value: 'experience', label: 'Шоурум' },
+  { value: 'delivery', label: 'Доставка' },
+  { value: 'service', label: 'Сервиз' }
+];
+
+var FIND_US_DEFAULT_CENTER = { lat: 42.6977, lng: 23.3219 }; // Sofia
+var FIND_US_DEFAULT_ZOOM = 8;
+
+/* --- Marker icon URLs (upload these SVGs to Webflow CDN) --- */
+var MARKER_SMALL = 'https://a-cdn.xpeng.com//website/_next/static/media/marker-green-small.357bb4af.svg';
+var MARKER_DEFAULT = 'https://a-cdn.xpeng.com//website/_next/static/media/marker-green.f58abdfa.svg';
+var MARKER_ACTIVE = 'https://a-cdn.xpeng.com//website/_next/static/media/marker-green-active.44ac9244.svg';
+var STORE_COVER_FALLBACK = 'https://a-cdn.xpeng.com/www/public/static/img/store-cover.53b1ff54.jpg';
+
+
+function initFindUs() {
+  var container = document.querySelector('[data-find-us]');
+  if (!container) return;
+
+  /* --- Refs --- */
+  var mapEl = container.querySelector('[data-find-us-map]');
+  var sidebar = container.querySelector('[data-find-us-sidebar]');
+  var filterRow = container.querySelector('[data-find-us-filters]');
+  var storeListEl = container.querySelector('[data-find-us-store-list]');
+  var emptyEl = container.querySelector('[data-find-us-empty]');
+  var seoEl = container.querySelector('[data-find-us-seo]');
+  var mobileFilters = container.querySelector('[data-find-us-mobile-filters]');
+  var drawer = container.querySelector('[data-find-us-drawer]');
+  var drawerBody = drawer ? drawer.querySelector('[data-find-us-drawer-body]') : null;
+  var drawerClose = drawer ? drawer.querySelector('[data-find-us-drawer-close]') : null;
+
+  /* --- State --- */
+  var map = null;
+  var markers = [];
+  var infoWindow = null;
+  var activeIndex = -1;
+  var filteredStores = FIND_US_STORES.slice();
+  var currentRegion = '';
+  var currentType = '';
+  var isMobile = window.innerWidth <= 960;
+  var drawerMode = 'list'; // 'list' | 'detail' | 'filter-region' | 'filter-type'
+  var drawerHeight = 'mid';
+  var locationCoords = null;
+
+  /* --- Lock body scroll --- */
+  document.body.style.height = '100vh';
+  document.body.style.overflow = 'hidden';
+
+  /* --- Build desktop filters --- */
+  buildDesktopFilters();
+
+  /* --- Load Google Maps --- */
+  loadGoogleMapsAPI(function() {
+    map = initMap(mapEl);
+    infoWindow = new google.maps.InfoWindow();
+    renderMarkers();
+    renderStoreList();
+    renderSeoMarkup();
+    initGeolocation();
+    initMobileUI();
+  });
+
+
+  /* ============================================
+     Google Maps Loader
+     ============================================ */
+
+  function loadGoogleMapsAPI(cb) {
+    if (window.google && window.google.maps) { cb(); return; }
+    if (!GOOGLE_MAPS_KEY) {
+      console.warn('[Find Us] No Google Maps API key set. Set GOOGLE_MAPS_KEY in main.js.');
+      if (mapEl) mapEl.innerHTML = '<div style="display:flex;align-items:center;justify-content:center;height:100%;background:#f0f0f0;font-family:sans-serif;color:#666;padding:2em;text-align:center"><div><p style="font-size:1.25em;margin-bottom:0.5em">Google Maps API key required</p><p style="font-size:0.875em">Set <code>GOOGLE_MAPS_KEY</code> in main.js to enable the map.</p></div></div>';
+      /* Still render the sidebar / store list even without map */
+      renderStoreList();
+      renderSeoMarkup();
+      initMobileUI();
+      return;
+    }
+    var script = document.createElement('script');
+    script.src = 'https://maps.googleapis.com/maps/api/js?key=' + GOOGLE_MAPS_KEY + '&v=weekly&language=bg&libraries=geometry,places';
+    script.async = true;
+    script.defer = true;
+    script.onload = function() {
+      var poll = setInterval(function() {
+        if (window.google && window.google.maps) { clearInterval(poll); cb(); }
+      }, 50);
+    };
+    script.onerror = function() {
+      console.error('[Find Us] Failed to load Google Maps API');
+    };
+    document.head.appendChild(script);
+  }
+
+
+  /* ============================================
+     Map Initialization
+     ============================================ */
+
+  function initMap(el) {
+    if (!el) return null;
+    var gmap = new google.maps.Map(el, {
+      zoom: FIND_US_DEFAULT_ZOOM,
+      center: FIND_US_DEFAULT_CENTER,
+      mapTypeControl: false,
+      fullscreenControl: false,
+      zoomControl: !isMobile,
+      streetViewControl: false,
+      keyboardShortcuts: false,
+      gestureHandling: 'greedy',
+      panControl: true
+    });
+
+    gmap.addListener('click', function() {
+      closeInfoWindow();
+      setActiveMarker(-1);
+    });
+
+    gmap.addListener('zoom_changed', function() {
+      updateMarkerIcons();
+    });
+
+    return gmap;
+  }
+
+
+  /* ============================================
+     Markers
+     ============================================ */
+
+  function renderMarkers() {
+    clearMarkers();
+    filteredStores.forEach(function(store, i) {
+      var marker = new google.maps.Marker({
+        position: { lat: store.lat, lng: store.lng },
+        map: map,
+        icon: getMarkerIcon(i),
+        title: store.name
+      });
+      marker.addListener('click', function() {
+        onMarkerClick(i);
+      });
+      markers.push(marker);
+    });
+  }
+
+  function clearMarkers() {
+    markers.forEach(function(m) { m.setMap(null); });
+    markers = [];
+  }
+
+  function getMarkerIcon(index) {
+    var zoom = map ? map.getZoom() : FIND_US_DEFAULT_ZOOM;
+    if (index === activeIndex) {
+      return { url: zoom < 10 ? MARKER_SMALL : MARKER_ACTIVE, scaledSize: zoom < 10 ? new google.maps.Size(31, 31) : new google.maps.Size(74, 75) };
+    }
+    return { url: zoom < 10 ? MARKER_SMALL : MARKER_DEFAULT, scaledSize: zoom < 10 ? new google.maps.Size(31, 31) : new google.maps.Size(44, 44) };
+  }
+
+  function updateMarkerIcons() {
+    markers.forEach(function(m, i) {
+      m.setIcon(getMarkerIcon(i));
+    });
+  }
+
+  function setActiveMarker(index) {
+    activeIndex = index;
+    if (map) updateMarkerIcons();
+  }
+
+  function onMarkerClick(index) {
+    setActiveMarker(index);
+    var store = filteredStores[index];
+    if (!store) return;
+
+    if (isMobile) {
+      openDrawerDetail(store, index);
+    } else {
+      openInfoWindow(store, index);
+    }
+    panToStore(store);
+  }
+
+
+  /* ============================================
+     Pan & Zoom
+     ============================================ */
+
+  function panToStore(store) {
+    if (!map) return;
+    var offset = isMobile
+      ? { lat: store.lat, lng: store.lng }
+      : { lat: store.lat + 0.08, lng: store.lng - 0.1 };
+    map.panTo(offset);
+    map.setZoom(11);
+  }
+
+
+  /* ============================================
+     Info Window (Desktop)
+     ============================================ */
+
+  function openInfoWindow(store, index) {
+    if (!infoWindow || !map) return;
+    infoWindow.setContent(buildInfoWindowHTML(store));
+    infoWindow.setPosition({ lat: store.lat, lng: store.lng });
+    infoWindow.open(map, markers[index]);
+  }
+
+  function closeInfoWindow() {
+    if (infoWindow) infoWindow.close();
+  }
+
+  function buildInfoWindowHTML(store) {
+    var svc = store.services[0] || {};
+    var img = store.coverImage || (svc.storePic || STORE_COVER_FALLBACK);
+    var pills = store.services.map(function(s) {
+      var cls = s.status === 'open' ? 'find-us-iw__pill is-active' : 'find-us-iw__pill is-coming-soon';
+      var suffix = s.status !== 'open' ? ' (Очаквайте скоро)' : '';
+      return '<span class="' + cls + '">' + s.label + suffix + '</span>';
+    }).join('');
+
+    var email = svc.email ? '<div class="find-us-iw__contact"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="4" width="20" height="16" rx="2"/><path d="m22 7-8.97 5.7a1.94 1.94 0 0 1-2.06 0L2 7"/></svg> ' + svc.email + '</div>' : '';
+    var phone = svc.phone ? '<div class="find-us-iw__contact"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72c.127.96.361 1.903.7 2.81a2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45c.907.339 1.85.573 2.81.7A2 2 0 0 1 22 16.92z"/></svg> ' + svc.phone + '</div>' : '';
+
+    var buttons = '';
+    var hasExperience = store.services.some(function(s) { return s.type === 'experience' && s.status === 'open'; });
+    if (hasExperience) {
+      buttons += '<button class="find-us-iw__btn" onclick="window.open(\'/test-drive\',\'_blank\')">ТЕСТ ДРАЙВ</button>';
+    }
+
+    return '<div class="find-us-iw">' +
+      '<div class="find-us-iw__img"><img src="' + img + '" alt="' + store.name + '"></div>' +
+      '<div class="find-us-iw__body">' +
+        '<div class="find-us-iw__name">' + store.name + '</div>' +
+        '<div class="find-us-iw__address">' + store.address + '</div>' +
+        '<div class="find-us-iw__pills">' + pills + '</div>' +
+        email + phone +
+        (buttons ? '<div class="find-us-iw__buttons">' + buttons + '</div>' : '') +
+      '</div>' +
+    '</div>';
+  }
+
+
+  /* ============================================
+     Desktop Filters
+     ============================================ */
+
+  function buildDesktopFilters() {
+    if (!filterRow) return;
+    var cities = getUniqueCities();
+    var regionSelect = filterRow.querySelector('[data-find-us-filter="region"]');
+    var typeSelect = filterRow.querySelector('[data-find-us-filter="type"]');
+
+    if (regionSelect) {
+      regionSelect.innerHTML = '<option value="">Всички региони</option>';
+      cities.forEach(function(c) {
+        regionSelect.innerHTML += '<option value="' + c + '">' + c + '</option>';
+      });
+      regionSelect.addEventListener('change', function() {
+        currentRegion = this.value;
+        applyFilters();
+      });
+    }
+
+    if (typeSelect) {
+      typeSelect.innerHTML = '<option value="">Всички типове</option>';
+      FIND_US_SERVICE_TYPES.forEach(function(t) {
+        typeSelect.innerHTML += '<option value="' + t.value + '">' + t.label + '</option>';
+      });
+      typeSelect.addEventListener('change', function() {
+        currentType = this.value;
+        applyFilters();
+      });
+    }
+  }
+
+  function getUniqueCities() {
+    var seen = {};
+    var cities = [];
+    FIND_US_STORES.forEach(function(s) {
+      if (s.city && !seen[s.city]) {
+        seen[s.city] = true;
+        cities.push(s.city);
+      }
+    });
+    return cities.sort();
+  }
+
+  function applyFilters() {
+    filteredStores = FIND_US_STORES.filter(function(store) {
+      var matchRegion = !currentRegion || store.city === currentRegion;
+      var matchType = !currentType || store.services.some(function(s) { return s.type === currentType; });
+      return matchRegion && matchType;
+    });
+
+    closeInfoWindow();
+    setActiveMarker(-1);
+    if (map) { renderMarkers(); }
+    renderStoreList();
+
+    if (filteredStores.length && map) {
+      var bounds = new google.maps.LatLngBounds();
+      filteredStores.forEach(function(s) { bounds.extend({ lat: s.lat, lng: s.lng }); });
+      map.fitBounds(bounds);
+      if (filteredStores.length === 1) map.setZoom(13);
+    }
+
+    if (isMobile) openDrawerList();
+  }
+
+
+  /* ============================================
+     Store List (Desktop Sidebar)
+     ============================================ */
+
+  function renderStoreList() {
+    if (!storeListEl) return;
+    if (!filteredStores.length) {
+      storeListEl.innerHTML = '';
+      if (emptyEl) emptyEl.style.display = '';
+      return;
+    }
+    if (emptyEl) emptyEl.style.display = 'none';
+
+    storeListEl.innerHTML = filteredStores.map(function(store, i) {
+      return buildStoreCardHTML(store, i);
+    }).join('');
+
+    /* Bind click events */
+    Array.from(storeListEl.querySelectorAll('[data-store-index]')).forEach(function(card) {
+      var idx = parseInt(card.getAttribute('data-store-index'), 10);
+
+      /* Card click → pan map */
+      card.addEventListener('click', function(e) {
+        if (e.target.closest('.find-us__service-pill') || e.target.closest('.find-us__hours-toggle') || e.target.closest('a')) return;
+        setActiveMarker(idx);
+        var store = filteredStores[idx];
+        if (store && map) {
+          panToStore(store);
+          openInfoWindow(store, idx);
+        }
+      });
+
+      /* Service pill clicks */
+      Array.from(card.querySelectorAll('.find-us__service-pill')).forEach(function(pill) {
+        pill.addEventListener('click', function(e) {
+          e.stopPropagation();
+          var svcIdx = parseInt(this.getAttribute('data-svc-index'), 10);
+          toggleServiceDetail(card, filteredStores[idx], svcIdx);
+        });
+      });
+
+      /* Hours toggle */
+      var toggle = card.querySelector('.find-us__hours-toggle');
+      if (toggle) {
+        toggle.addEventListener('click', function(e) {
+          e.stopPropagation();
+          var week = card.querySelector('.find-us__hours-week');
+          var today = card.querySelector('.find-us__hours-today');
+          if (!week) return;
+          var isOpen = week.style.display !== 'none';
+          week.style.display = isOpen ? 'none' : '';
+          if (today) today.style.display = isOpen ? '' : 'none';
+          this.querySelector('.find-us__toggle-text').textContent = isOpen ? 'Повече информация' : 'По-малко';
+          var arrow = this.querySelector('.find-us__toggle-arrow');
+          if (arrow) arrow.classList.toggle('is-expanded', !isOpen);
+        });
+      }
+    });
+  }
+
+  function buildStoreCardHTML(store, index) {
+    var svc0 = store.services[0] || {};
+
+    /* Service pills */
+    var pills = store.services.map(function(s, si) {
+      var cls = 'find-us__service-pill';
+      if (si === 0) cls += ' is-active';
+      if (s.status !== 'open') cls += ' is-coming-soon';
+      var suffix = s.status !== 'open' ? ' (Очаквайте скоро)' : '';
+      return '<li class="' + cls + '" data-svc-index="' + si + '">' + s.label + suffix + '</li>';
+    }).join('');
+
+    /* Contact for first service */
+    var contact = buildServiceDetailHTML(svc0);
+
+    /* Test drive button */
+    var hasExperience = store.services.some(function(s) { return s.type === 'experience' && s.status === 'open'; });
+    var tdBtn = hasExperience
+      ? '<a href="/test-drive" class="find-us__cta-button">Тест Драйв</a>'
+      : '';
+
+    return '<div class="find-us__store-card" data-store-index="' + index + '">' +
+      '<div class="find-us__store-name">' + store.name + '</div>' +
+      '<div class="find-us__store-address">' + store.address + '</div>' +
+      '<div class="find-us__service-list"><ol>' + pills + '</ol></div>' +
+      '<div class="find-us__service-detail">' + contact + '</div>' +
+      tdBtn +
+    '</div>';
+  }
+
+  function buildServiceDetailHTML(svc) {
+    if (!svc || !svc.email && !svc.phone) return '';
+    var html = '';
+
+    if (svc.email) {
+      html += '<div class="find-us__store-email">' +
+        '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="4" width="20" height="16" rx="2"/><path d="m22 7-8.97 5.7a1.94 1.94 0 0 1-2.06 0L2 7"/></svg> ' +
+        svc.email +
+      '</div>';
+    }
+
+    if (svc.phone) {
+      html += '<a href="tel:' + svc.phone.replace(/\s/g, '') + '" class="find-us__store-phone">' +
+        '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72c.127.96.361 1.903.7 2.81a2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45c.907.339 1.85.573 2.81.7A2 2 0 0 1 22 16.92z"/></svg> ' +
+        svc.phone +
+      '</a>';
+    }
+
+    /* Opening hours */
+    var hours = buildHoursHTML(svc.hours);
+    if (hours) html += hours;
+
+    return html;
+  }
+
+  function toggleServiceDetail(card, store, svcIndex) {
+    /* Update active pill */
+    Array.from(card.querySelectorAll('.find-us__service-pill')).forEach(function(p, i) {
+      p.classList.toggle('is-active', i === svcIndex);
+    });
+    /* Re-render detail */
+    var detailEl = card.querySelector('.find-us__service-detail');
+    if (detailEl && store.services[svcIndex]) {
+      detailEl.innerHTML = buildServiceDetailHTML(store.services[svcIndex]);
+      /* Re-bind hours toggle */
+      var toggle = detailEl.querySelector('.find-us__hours-toggle');
+      if (toggle) {
+        toggle.addEventListener('click', function(e) {
+          e.stopPropagation();
+          var week = detailEl.querySelector('.find-us__hours-week');
+          var today = detailEl.querySelector('.find-us__hours-today');
+          if (!week) return;
+          var isOpen = week.style.display !== 'none';
+          week.style.display = isOpen ? 'none' : '';
+          if (today) today.style.display = isOpen ? '' : 'none';
+          this.querySelector('.find-us__toggle-text').textContent = isOpen ? 'Повече информация' : 'По-малко';
+          var arrow = this.querySelector('.find-us__toggle-arrow');
+          if (arrow) arrow.classList.toggle('is-expanded', !isOpen);
+        });
+      }
+    }
+  }
+
+
+  /* ============================================
+     Opening Hours
+     ============================================ */
+
+  function buildHoursHTML(hours) {
+    if (!hours) return '';
+    var DAYS = ['monday','tuesday','wednesday','thursday','friday','saturday','sunday'];
+    var DAY_LABELS = { monday:'Понеделник', tuesday:'Вторник', wednesday:'Сряда', thursday:'Четвъртък', friday:'Петък', saturday:'Събота', sunday:'Неделя' };
+    var jsDay = new Date().getDay(); // 0=Sun
+    var todayKey = ['sunday','monday','tuesday','wednesday','thursday','friday','saturday'][jsDay];
+
+    var hasAny = DAYS.some(function(d) { return hours[d]; });
+    if (!hasAny) return '';
+
+    var todayVal = hours[todayKey] || '';
+
+    /* Today row */
+    var todayHTML = todayVal
+      ? '<div class="find-us__hours-today"><span class="find-us__hours-day">' + DAY_LABELS[todayKey] + '</span><span class="find-us__hours-time">' + todayVal + '</span></div>'
+      : '';
+
+    /* Full week */
+    var weekRows = DAYS.map(function(d) {
+      if (!hours[d]) return '';
+      return '<div class="find-us__hours-day-row"><span class="find-us__hours-day">' + DAY_LABELS[d] + '</span><span class="find-us__hours-time">' + hours[d] + '</span></div>';
+    }).join('');
+
+    return '<div class="find-us__hours">' +
+      '<div class="find-us__hours-title">Работно време</div>' +
+      todayHTML +
+      '<div class="find-us__hours-week" style="display:none">' + weekRows + '</div>' +
+      '<div class="find-us__hours-toggle">' +
+        '<span class="find-us__toggle-text">Повече информация</span>' +
+        '<svg class="find-us__toggle-arrow" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="m6 9 6 6 6-6"/></svg>' +
+      '</div>' +
+    '</div>';
+  }
+
+
+  /* ============================================
+     Mobile UI
+     ============================================ */
+
+  function initMobileUI() {
+    if (!isMobile) return;
+    if (!drawer || !drawerBody) return;
+
+    /* Hide desktop sidebar */
+    if (sidebar) sidebar.style.display = 'none';
+
+    /* Show mobile filters */
+    if (mobileFilters) {
+      mobileFilters.style.display = '';
+      buildMobileFilters();
+    }
+
+    /* Show drawer with store list */
+    openDrawerList();
+
+    /* Close button */
+    if (drawerClose) {
+      drawerClose.addEventListener('click', function() {
+        closeDrawer();
+      });
+    }
+
+    /* Drag to resize */
+    initDrawerDrag();
+  }
+
+  function buildMobileFilters() {
+    if (!mobileFilters) return;
+    var tabs = mobileFilters.querySelectorAll('[data-find-us-mobile-tab]');
+    tabs.forEach(function(tab) {
+      tab.addEventListener('click', function() {
+        var filter = this.getAttribute('data-find-us-mobile-tab');
+        if (filter === 'region') openDrawerFilterRegion();
+        else if (filter === 'type') openDrawerFilterType();
+      });
+    });
+  }
+
+  function openDrawerList() {
+    if (!drawer || !drawerBody) return;
+    drawerMode = 'list';
+    drawer.classList.add('is-open');
+    setDrawerHeight('mid');
+
+    if (!filteredStores.length) {
+      drawerBody.innerHTML = '<div class="find-us-mobile__empty"><p>Няма намерени обекти в този район.</p></div>';
+      return;
+    }
+
+    drawerBody.innerHTML = filteredStores.map(function(store, i) {
+      return buildMobileStoreCardHTML(store, i);
+    }).join('');
+
+    /* Bind card clicks */
+    Array.from(drawerBody.querySelectorAll('[data-store-index]')).forEach(function(card) {
+      var idx = parseInt(card.getAttribute('data-store-index'), 10);
+      card.addEventListener('click', function() {
+        var store = filteredStores[idx];
+        if (!store) return;
+        setActiveMarker(idx);
+        panToStore(store);
+        openDrawerDetail(store, idx);
+      });
+    });
+  }
+
+  function buildMobileStoreCardHTML(store, index) {
+    var pills = store.services.map(function(s) {
+      var cls = 'find-us-mobile__pill';
+      if (s.status !== 'open') cls += ' is-coming-soon';
+      var suffix = s.status !== 'open' ? ' (Очаквайте скоро)' : '';
+      return '<span class="' + cls + '">' + s.label + suffix + '</span>';
+    }).join('');
+
+    return '<div class="find-us-mobile__store-card" data-store-index="' + index + '">' +
+      '<div class="find-us-mobile__store-name">' + store.name + '</div>' +
+      '<div class="find-us-mobile__store-address">' + store.address + '</div>' +
+      '<div class="find-us-mobile__pills">' + pills + '</div>' +
+    '</div>';
+  }
+
+  function openDrawerDetail(store, index) {
+    if (!drawer || !drawerBody) return;
+    drawerMode = 'detail';
+    setDrawerHeight('mid');
+    drawer.classList.add('is-open');
+
+    var svc = store.services[0] || {};
+    var img = store.coverImage || STORE_COVER_FALLBACK;
+
+    var pills = store.services.map(function(s, si) {
+      var cls = 'find-us-mobile__pill';
+      if (si === 0) cls += ' is-active';
+      if (s.status !== 'open') cls += ' is-coming-soon';
+      var suffix = s.status !== 'open' ? ' (Очаквайте скоро)' : '';
+      return '<span class="' + cls + '" data-svc-index="' + si + '">' + s.label + suffix + '</span>';
+    }).join('');
+
+    var contact = buildServiceDetailHTML(svc);
+
+    var hasExperience = store.services.some(function(s) { return s.type === 'experience' && s.status === 'open'; });
+    var buttons = '';
+    if (hasExperience) {
+      buttons = '<div class="find-us-mobile__buttons"><a href="/test-drive" class="find-us-mobile__cta-btn">Тест Драйв</a></div>';
+    }
+
+    drawerBody.innerHTML =
+      '<div class="find-us-mobile__detail">' +
+        '<div class="find-us-mobile__detail-name">' + store.name + '</div>' +
+        '<div class="find-us-mobile__detail-address">' + store.address + '</div>' +
+        '<div class="find-us-mobile__detail-img"><img src="' + img + '" alt="' + store.name + '"></div>' +
+        '<div class="find-us-mobile__detail-pills">' + pills + '</div>' +
+        '<div class="find-us-mobile__detail-contact">' + contact + '</div>' +
+        buttons +
+      '</div>';
+
+    /* Bind pill clicks */
+    Array.from(drawerBody.querySelectorAll('[data-svc-index]')).forEach(function(pill) {
+      pill.addEventListener('click', function() {
+        var svcIdx = parseInt(this.getAttribute('data-svc-index'), 10);
+        var s = store.services[svcIdx];
+        if (!s) return;
+        Array.from(drawerBody.querySelectorAll('[data-svc-index]')).forEach(function(p, i) {
+          p.classList.toggle('is-active', i === svcIdx);
+        });
+        var contactEl = drawerBody.querySelector('.find-us-mobile__detail-contact');
+        if (contactEl) contactEl.innerHTML = buildServiceDetailHTML(s);
+      });
+    });
+  }
+
+  function openDrawerFilterRegion() {
+    if (!drawer || !drawerBody) return;
+    drawerMode = 'filter-region';
+    drawer.classList.add('is-open');
+    setDrawerHeight('mid');
+
+    var cities = getUniqueCities();
+    var items = '<div class="find-us-mobile__filter-option" data-value="">Всички</div>';
+    cities.forEach(function(c) {
+      items += '<div class="find-us-mobile__filter-option" data-value="' + c + '">' + c + '</div>';
+    });
+    drawerBody.innerHTML = '<div class="find-us-mobile__filter-list">' + items + '</div>';
+
+    Array.from(drawerBody.querySelectorAll('[data-value]')).forEach(function(opt) {
+      opt.addEventListener('click', function() {
+        currentRegion = this.getAttribute('data-value');
+        applyFilters();
+        /* Update tab label */
+        var tab = mobileFilters ? mobileFilters.querySelector('[data-find-us-mobile-tab="region"]') : null;
+        if (tab) tab.textContent = currentRegion || 'Регион';
+      });
+    });
+  }
+
+  function openDrawerFilterType() {
+    if (!drawer || !drawerBody) return;
+    drawerMode = 'filter-type';
+    drawer.classList.add('is-open');
+    setDrawerHeight('mid');
+
+    var items = '<div class="find-us-mobile__filter-option" data-value="">Всички</div>';
+    FIND_US_SERVICE_TYPES.forEach(function(t) {
+      items += '<div class="find-us-mobile__filter-option" data-value="' + t.value + '">' + t.label + '</div>';
+    });
+    drawerBody.innerHTML = '<div class="find-us-mobile__filter-list">' + items + '</div>';
+
+    Array.from(drawerBody.querySelectorAll('[data-value]')).forEach(function(opt) {
+      opt.addEventListener('click', function() {
+        currentType = this.getAttribute('data-value');
+        applyFilters();
+        var tab = mobileFilters ? mobileFilters.querySelector('[data-find-us-mobile-tab="type"]') : null;
+        if (tab) tab.textContent = currentType ? FIND_US_SERVICE_TYPES.find(function(t) { return t.value === currentType; }).label : 'Тип';
+      });
+    });
+  }
+
+  function closeDrawer() {
+    if (!drawer) return;
+    drawer.classList.remove('is-open');
+    drawerMode = 'list';
+  }
+
+  function setDrawerHeight(h) {
+    drawerHeight = h;
+    if (!drawer) return;
+    var heights = { min: '30vh', mid: '50vh', max: '80vh' };
+    var content = drawer.querySelector('.find-us-drawer__content');
+    if (content) content.style.height = heights[h] || '50vh';
+  }
+
+  function initDrawerDrag() {
+    var handle = drawer ? drawer.querySelector('[data-find-us-drawer-handle]') : null;
+    if (!handle) return;
+    var startY = 0;
+    var startHeight = 'mid';
+
+    handle.addEventListener('touchstart', function(e) {
+      startY = e.touches[0].clientY;
+      startHeight = drawerHeight;
+    }, { passive: true });
+
+    handle.addEventListener('touchmove', function(e) {
+      var dy = startY - e.touches[0].clientY;
+      if (Math.abs(dy) < 50) return;
+      if (dy > 0) { // drag up
+        if (startHeight === 'min') setDrawerHeight('mid');
+        else if (startHeight === 'mid') setDrawerHeight('max');
+      } else { // drag down
+        if (startHeight === 'max') setDrawerHeight('mid');
+        else if (startHeight === 'mid') setDrawerHeight('min');
+      }
+      startY = e.touches[0].clientY;
+      startHeight = drawerHeight;
+    }, { passive: true });
+  }
+
+
+  /* ============================================
+     Geolocation
+     ============================================ */
+
+  function initGeolocation() {
+    if (!navigator.geolocation) return;
+    navigator.geolocation.getCurrentPosition(
+      function(pos) {
+        if (!pos || !pos.coords) return;
+        locationCoords = { lat: pos.coords.latitude, lng: pos.coords.longitude };
+        if (map) {
+          map.panTo(locationCoords);
+          map.setZoom(10);
+        }
+      },
+      function() { /* denied or error — use default center */ }
+    );
+  }
+
+
+  /* ============================================
+     SEO Markup (hidden Schema.org)
+     ============================================ */
+
+  function renderSeoMarkup() {
+    if (!seoEl) return;
+    var DAYS_EN = ['Monday','Tuesday','Wednesday','Thursday','Friday','Saturday','Sunday'];
+    var DAYS_KEY = ['monday','tuesday','wednesday','thursday','friday','saturday','sunday'];
+
+    seoEl.innerHTML = FIND_US_STORES.map(function(store) {
+      var hoursMarkup = '';
+      if (store.services[0] && store.services[0].hours) {
+        var h = store.services[0].hours;
+        hoursMarkup = DAYS_KEY.map(function(d, i) {
+          if (!h[d]) return '';
+          return '<div itemprop="openingHoursSpecification" itemscope itemtype="https://schema.org/OpeningHoursSpecification">' +
+            '<meta itemprop="dayOfWeek" content="https://schema.org/' + DAYS_EN[i] + '">' +
+            '<span>' + h[d] + '</span>' +
+          '</div>';
+        }).join('');
+      }
+
+      return '<div itemscope itemtype="https://schema.org/LocalBusiness">' +
+        '<h3 itemprop="name">' + store.name + '</h3>' +
+        '<div itemprop="address" itemscope itemtype="https://schema.org/PostalAddress">' +
+          '<span itemprop="streetAddress">' + store.address + '</span>' +
+        '</div>' +
+        '<span itemprop="email">' + store.email + '</span>' +
+        '<span itemprop="telephone">' + store.phone + '</span>' +
+        hoursMarkup +
+        '<div itemprop="geo" itemscope itemtype="https://schema.org/GeoCoordinates">' +
+          '<meta itemprop="latitude" content="' + store.lat + '">' +
+          '<meta itemprop="longitude" content="' + store.lng + '">' +
+        '</div>' +
+      '</div>';
+    }).join('');
+  }
 }
 
 
