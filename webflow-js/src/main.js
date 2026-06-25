@@ -1330,7 +1330,7 @@ const MOCK_DATA = {
     ],
     wheels: [
       { variant_code: 'all', wheel_code: '20-sport', wheel_name: '20" Sport', price: 0, is_default: true, sort_order: 1 },
-      { variant_code: 'all', wheel_code: '20-black-edition', wheel_name: '20" Black Edition', price: 1290, is_default: false, requires_accessory: 'black-edition', sort_order: 2 },
+      { variant_code: 'all', wheel_code: '20-black-edition', wheel_name: '20" Black Edition', price: 0, is_default: false, requires_accessory: 'black-edition', sort_order: 2 },
     ],
     accessories: [
       { variant_code: 'all', accessory_code: 'tow-hitch', accessory_name: 'Electric Retractable Towbar', price: 1190, description: '1,500 kg braked / 750 kg unbraked, 75 kg tongue weight', image: '', sort_order: 1 },
