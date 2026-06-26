@@ -1320,9 +1320,8 @@ const MOCK_DATA = {
     ],
     colors: [
       { variant_code: 'all', color_code: 'arctic-white', color_name: 'Arctic White', color_hex: '#F0EDE8', price: 0, is_default: true, sort_order: 1 },
-      { variant_code: 'all', color_code: 'stellar-purple', color_name: 'Stellar Purple', color_hex: '#8B7D9B', price: 800, is_default: false, sort_order: 2 },
-      { variant_code: 'all', color_code: 'silver-frost', color_name: 'Silver Frost', color_hex: '#B8B8B8', price: 800, is_default: false, sort_order: 3 },
-      { variant_code: 'all', color_code: 'graphite-gray', color_name: 'Graphite Gray', color_hex: '#707070', price: 800, is_default: false, sort_order: 4 },
+      { variant_code: 'all', color_code: 'silver-frost', color_name: 'Silver Frost', color_hex: '#B8B8B8', price: 800, is_default: false, sort_order: 2 },
+      { variant_code: 'all', color_code: 'graphite-gray', color_name: 'Graphite Gray', color_hex: '#707070', price: 800, is_default: false, sort_order: 3 },
     ],
     interiors: [
       { variant_code: 'all', interior_code: 'dark-gray', interior_name: 'Dark Gray', price: 0, is_default: true, sort_order: 1 },
