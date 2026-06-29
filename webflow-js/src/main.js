@@ -2780,30 +2780,36 @@ function initFindUs() {
   function buildDesktopFilters() {
     if (!filterRow) return;
     var cities = getUniqueCities();
-    var regionSelect = filterRow.querySelector('[data-find-us-filter="region"]');
-    var typeSelect = filterRow.querySelector('[data-find-us-filter="type"]');
 
-    if (regionSelect) {
-      regionSelect.innerHTML = '<option value="">Всички региони</option>';
-      cities.forEach(function(c) {
-        regionSelect.innerHTML += '<option value="' + c + '">' + c + '</option>';
-      });
-      regionSelect.addEventListener('change', function() {
-        currentRegion = this.value;
-        applyFilters();
-      });
-    }
+    /* Create selects dynamically (Webflow doesn't allow <select> outside forms) */
+    var selectStyle = 'flex:1;padding:0.5em 0.75em;border:1px solid #d4d4d4;border-radius:0.25em;font-size:0.875em;color:#1a1a1a;background:#fff;cursor:pointer;font-family:inherit;-webkit-appearance:none;appearance:none;';
+    var regionSelect = document.createElement('select');
+    regionSelect.className = 'find-us__filter';
+    regionSelect.style.cssText = selectStyle;
+    regionSelect.setAttribute('data-find-us-filter', 'region');
+    regionSelect.innerHTML = '<option value="">Всички региони</option>';
+    cities.forEach(function(c) {
+      regionSelect.innerHTML += '<option value="' + c + '">' + c + '</option>';
+    });
+    regionSelect.addEventListener('change', function() {
+      currentRegion = this.value;
+      applyFilters();
+    });
+    filterRow.appendChild(regionSelect);
 
-    if (typeSelect) {
-      typeSelect.innerHTML = '<option value="">Всички типове</option>';
-      FIND_US_SERVICE_TYPES.forEach(function(t) {
-        typeSelect.innerHTML += '<option value="' + t.value + '">' + t.label + '</option>';
-      });
-      typeSelect.addEventListener('change', function() {
-        currentType = this.value;
-        applyFilters();
-      });
-    }
+    var typeSelect = document.createElement('select');
+    typeSelect.className = 'find-us__filter';
+    typeSelect.style.cssText = selectStyle;
+    typeSelect.setAttribute('data-find-us-filter', 'type');
+    typeSelect.innerHTML = '<option value="">Всички типове</option>';
+    FIND_US_SERVICE_TYPES.forEach(function(t) {
+      typeSelect.innerHTML += '<option value="' + t.value + '">' + t.label + '</option>';
+    });
+    typeSelect.addEventListener('change', function() {
+      currentType = this.value;
+      applyFilters();
+    });
+    filterRow.appendChild(typeSelect);
   }
 
   function getUniqueCities() {
