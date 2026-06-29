@@ -1599,9 +1599,18 @@ function renderVariants(root, state, data, setState) {
           state.selectedWheels = newDefault;
         }
 
+        // Clear accessories that don't exist in the new variant
+        var newAccessories = getOptionsForVariant(data.accessories, variant.variant_code)
+          .filter(function(a) { return !HIDDEN_ACCESSORIES.includes(a.accessory_code); });
+        var newAccCodes = newAccessories.map(function(a) { return a.accessory_code; });
+        state.selectedAccessories = state.selectedAccessories.filter(function(code) {
+          return newAccCodes.includes(code);
+        });
+
         renderColors(root, state, data, setState);
         renderInteriors(root, state, data, setState);
         renderWheels(root, state, data, setState);
+        renderAccessories(root, state, data, setState);
 
         state.galleryMode = 'exterior';
         updateGallery(root, state);
