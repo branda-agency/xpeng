@@ -607,7 +607,7 @@ const PRODUCT_SLUGS = ['g9', 'g6', 'p7-plus'];
 const CONFIGURATOR_SLUGS = ['g9', 'g6', 'p7-plus'];
 
 /* Google Maps API key — replace with your own from Google Cloud Console */
-var GOOGLE_MAPS_KEY = '';
+var GOOGLE_MAPS_KEY = 'AIzaSyAanOH24hj8hvGzwqXPHVX8ED_TBbayoi4';
 
 function routePage() {
   const path = window.location.pathname.replace(/^\/|\/$/g, '') || 'home';
