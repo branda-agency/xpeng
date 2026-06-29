@@ -1609,11 +1609,8 @@ function renderVariants(root, state, data, setState) {
         updateActiveStates(root, state);
       }
 
-      if (selectionsChange) {
-        showConfigConfirm(root, applyVariantChange);
-      } else {
-        applyVariantChange();
-      }
+      // Confirmation dialog temporarily disabled
+      applyVariantChange();
     });
 
     container.appendChild(card);
