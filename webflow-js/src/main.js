@@ -530,6 +530,46 @@ function initFormConsent() {
 
 
 /* ============================================================
+   8b. FORM FIELD VALIDATION (BG_R2_002)
+   Phone and city accepted any input. Extends the forms' native
+   constraint validation (required already works this way) with
+   format/length rules and Bulgarian error messages.
+   ============================================================ */
+
+function initFieldValidation() {
+  function wire(input, pattern, maxLen, message) {
+    input.setAttribute('pattern', pattern);
+    input.setAttribute('maxlength', String(maxLen));
+    input.addEventListener('invalid', function () {
+      if (input.validity.patternMismatch) input.setCustomValidity(message);
+    });
+    input.addEventListener('input', function () { input.setCustomValidity(''); });
+  }
+
+  // Phone: optional +, then 6–15 digits with spaces/dashes/parens allowed
+  document.querySelectorAll('input[data-name="Телефон"], input[type="tel"]').forEach(function (input) {
+    input.setAttribute('inputmode', 'tel');
+    wire(
+      input,
+      '\\+?[\\s\\-()]*([0-9][\\s\\-()]*){6,15}',
+      20,
+      'Моля, въведете валиден телефонен номер (6–15 цифри, позволени са +, интервали и тирета).'
+    );
+  });
+
+  // City: letters only (Cyrillic/Latin), 2–60 chars, spaces and dashes allowed
+  document.querySelectorAll('input[data-name="Град"]').forEach(function (input) {
+    wire(
+      input,
+      '[А-Яа-яA-Za-z][А-Яа-яA-Za-z\\s\\-]{1,59}',
+      60,
+      'Моля, въведете валидно име на град (само букви, мин. 2 знака).'
+    );
+  });
+}
+
+
+/* ============================================================
    8b. MODAL
    ============================================================ */
 
@@ -3336,6 +3376,7 @@ function init() {
 
   // Functional components — run regardless of motion preference
   initFormConsent();
+  initFieldValidation();
   initModal();
   initDrawer();
   initMobileNav();
