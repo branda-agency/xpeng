@@ -1823,6 +1823,7 @@ function renderAccessories(root, state, data, setState) {
 
     if (toggle) {
       toggle.addEventListener('click', (e) => {
+        e.preventDefault(); // anchor href="#" would scroll page to top (BG_R2_005)
         e.stopPropagation();
         const list = [...state.selectedAccessories];
         const idx = list.indexOf(acc.accessory_code);
@@ -1954,12 +1955,14 @@ function showConfigConfirm(root, onApply) {
   var cancelBtn = dialog.querySelector('[data-cfg-confirm-cancel]');
   var backdrop = dialog.querySelector('[data-cfg-confirm-backdrop]');
 
-  function close() {
+  function close(e) {
+    if (e && e.preventDefault) e.preventDefault(); // anchor href="#" (BG_R2_005)
     dialog.setAttribute('data-cfg-confirm', 'not-active');
     cleanup();
   }
 
-  function apply() {
+  function apply(e) {
+    if (e && e.preventDefault) e.preventDefault(); // anchor href="#" (BG_R2_005)
     close();
     onApply();
   }
