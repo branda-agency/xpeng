@@ -1098,3 +1098,11 @@
   right: 0.25em !important;
 }
 
+/* ============================================================
+   NAV — disable text selection (BG_R1_045)
+   ============================================================ */
+.nav {
+  -webkit-user-select: none;
+  user-select: none;
+}
+
