@@ -579,6 +579,16 @@
   border-color: #A4CE4C;
 }
 
+/* Color-picker "Конфигурирайте" button — green hover to match site buttons (BG_R2_019) */
+.btn.is--outline-dark {
+  transition: background-color 0.4s ease, border-color 0.4s ease;
+}
+
+.btn.is--outline-dark:hover {
+  background-color: #A4CE4C;
+  border-color: #A4CE4C;
+}
+
 /* --- Modal --- */
 [data-modal-group-status] {
   opacity: 0;
