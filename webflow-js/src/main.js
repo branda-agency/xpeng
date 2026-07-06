@@ -299,6 +299,15 @@ function initMobileNav() {
     }
   });
 
+  // TEMP PATCH (BG_R2_001): the P7+ configurator sublink shipped without a URL
+  // in Webflow. Remove once the link is set in the Designer.
+  drawer.querySelectorAll('[data-nav-drawer-group]').forEach(function(group) {
+    if (!group.querySelector('a[href="/model/p7-plus"]')) return;
+    group.querySelectorAll('a[href="#"]').forEach(function(a) {
+      a.setAttribute('href', '/configurator/p7-plus');
+    });
+  });
+
   // Close when clicking a link inside the drawer
   drawer.querySelectorAll('a').forEach(function(link) {
     link.addEventListener('click', function() {
