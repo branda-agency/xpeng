@@ -899,6 +899,8 @@ function initHeroSlider() {
 // 360 viewer CDN — set to Bunny CDN base URL after uploading processed frames
 // Folder structure: {ROTATE_CDN}/{model}/{frame}.webp  e.g. .../g6/0.webp
 var ROTATE_CDN = 'https://xpeng.b-cdn.net/360';
+// Versioned Bunny folders — bump when a model's frame set is replaced (BG_R2_006)
+var ROTATE_FOLDERS = { g9: 'g9-v2' };
 
 function initModelsCarousel() {
   const section = document.querySelector('[data-models]');
@@ -1058,7 +1060,7 @@ function initModelsCarousel() {
         for (var i = 0; i < frameCount; i++) {
           (function (fi) {
             var img = new Image();
-            img.src = ROTATE_CDN + '/' + model + '/' + fi + '.webp';
+            img.src = ROTATE_CDN + '/' + (ROTATE_FOLDERS[model] || model) + '/' + fi + '.webp';
             img.onload = function () {
               loadedCount++;
               if (loadedCount === frameCount) {
