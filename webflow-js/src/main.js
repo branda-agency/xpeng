@@ -1710,12 +1710,21 @@ function renderVariants(root, state, data, setState) {
         }
 
         // Clear accessories that don't exist in the new variant
+        var hadBlackEdition = state.selectedAccessories.includes('black-edition');
         var newAccessories = getOptionsForVariant(data.accessories, variant.variant_code)
           .filter(function(a) { return !HIDDEN_ACCESSORIES.includes(a.accessory_code); });
         var newAccCodes = newAccessories.map(function(a) { return a.accessory_code; });
         state.selectedAccessories = state.selectedAccessories.filter(function(code) {
           return newAccCodes.includes(code);
         });
+
+        // Black Edition dropped by the switch → restore the color picked before it
+        if (hadBlackEdition && !state.selectedAccessories.includes('black-edition')) {
+          var savedC = state._preBlackEditionColor;
+          var restoredC = savedC && newColors.find(function(c) { return c.color_code === savedC.color_code; });
+          if (restoredC) state.selectedColor = restoredC;
+          state._preBlackEditionColor = null;
+        }
 
         renderColors(root, state, data, setState);
         renderInteriors(root, state, data, setState);
@@ -1745,6 +1754,11 @@ function renderColors(root, state, data, setState) {
   const colors = getOptionsForVariant(data.colors, state.selectedVariant?.variant_code);
   container.innerHTML = '';
 
+  // Black Edition defines the exterior color — lock the picker while active
+  var beLocked = state.selectedAccessories.includes('black-edition');
+  if (beLocked) container.setAttribute('data-cfg-colors-locked', '');
+  else container.removeAttribute('data-cfg-colors-locked');
+
   colors.forEach((color) => {
     const el = template.cloneNode(true);
     el.setAttribute('data-cfg-swatch', color.color_code);
@@ -1766,13 +1780,14 @@ function renderColors(root, state, data, setState) {
     const price = el.querySelector('[data-cfg-swatch-price]');
     if (price) price.textContent = SHOW_PRICES && color.price > 0 ? '+' + formatPrice(color.price) + ' EUR' : '';
 
-    if (color.color_code === state.selectedColor?.color_code) {
+    if (!beLocked && color.color_code === state.selectedColor?.color_code) {
       el.setAttribute('data-color-active', '');
     } else {
       el.removeAttribute('data-color-active');
     }
 
     el.addEventListener('click', () => {
+      if (state.selectedAccessories.includes('black-edition')) return; // color fixed by Black Edition
       setState({ selectedColor: color }, 'color');
     });
 
@@ -1940,17 +1955,26 @@ function renderAccessories(root, state, data, setState) {
         if (idx >= 0) list.splice(idx, 1);
         else list.push(acc.accessory_code);
 
-        // Black Edition: auto-select/revert wheels when toggled
+        // Black Edition: auto-select/revert wheels + lock color when toggled
+        // (package defines the color — no separate color choice/surcharge)
         if (acc.accessory_code === 'black-edition') {
           var bAllWheels = getOptionsForVariant(data.wheels, state.selectedVariant?.variant_code);
+          var bColors = getOptionsForVariant(data.colors, state.selectedVariant?.variant_code);
           if (list.includes('black-edition')) {
             var beWheel = bAllWheels.find(function(w) { return /black-edition/.test(w.wheel_code); });
-            setState({ selectedAccessories: list, selectedWheels: beWheel || state.selectedWheels }, 'accessories');
+            // Remember current pick, reset to the included default so no color surcharge applies
+            state._preBlackEditionColor = state.selectedColor;
+            var defColor = bColors.find(function(c) { return c.is_default; }) || bColors[0];
+            setState({ selectedAccessories: list, selectedWheels: beWheel || state.selectedWheels, selectedColor: defColor || state.selectedColor }, 'accessories');
           } else {
             var stdWheel = bAllWheels.find(function(w) { return w.is_default; });
-            setState({ selectedAccessories: list, selectedWheels: stdWheel || null }, 'accessories');
+            var savedColor = state._preBlackEditionColor;
+            var restoredColor = (savedColor && bColors.find(function(c) { return c.color_code === savedColor.color_code; })) || state.selectedColor;
+            state._preBlackEditionColor = null;
+            setState({ selectedAccessories: list, selectedWheels: stdWheel || null, selectedColor: restoredColor }, 'accessories');
           }
           renderWheels(root, state, data, setState);
+          renderColors(root, state, data, setState);
           state.galleryMode = 'exterior';
           updateGallery(root, state);
           return;
@@ -2031,10 +2055,11 @@ function updateActiveStates(root, state) {
     else card.removeAttribute('data-cfg-active');
   });
 
-  // Color swatches
+  // Color swatches (none marked active while Black Edition defines the color)
+  var beColorLock = state.selectedAccessories.includes('black-edition');
   root.querySelectorAll('[data-cfg-swatch]').forEach((sw) => {
     const code = sw.getAttribute('data-cfg-swatch');
-    if (code === state.selectedColor?.color_code) sw.setAttribute('data-color-active', '');
+    if (!beColorLock && code === state.selectedColor?.color_code) sw.setAttribute('data-color-active', '');
     else sw.removeAttribute('data-color-active');
   });
 
@@ -2238,7 +2263,9 @@ function reconstructConfig(data, params) {
   var selectedWheels = wheels.find(function(w) { return w.wheel_code === wheelCode; }) || wheels[0];
   var accessories = data.accessories.filter(function(a) { return accCodes.includes(a.accessory_code); });
 
-  var totalEur = (variant.price || 0) + (color.price || 0) + (interior.price || 0) + (selectedWheels.price || 0);
+  // Black Edition includes the color — no separate color surcharge
+  var hasBE = accessories.some(function(a) { return a.accessory_code === 'black-edition'; });
+  var totalEur = (variant.price || 0) + (hasBE ? 0 : (color.price || 0)) + (interior.price || 0) + (selectedWheels.price || 0);
   accessories.forEach(function(a) { totalEur += a.price || 0; });
 
   return {
@@ -2257,6 +2284,8 @@ function renderSummary(root, config) {
   var heading = root.querySelector('[data-summary-heading]');
   if (heading) heading.textContent = 'Вашият ' + (config.model.model_name || '');
 
+  var hasBlackEdition = config.selectedAccessories.some(function(a) { return a.accessory_code === 'black-edition'; });
+
   // Car image — Black Edition hero or color-based render
   var carImg = root.querySelector('[data-summary-car-image]');
   if (carImg) {
@@ -2264,7 +2293,6 @@ function renderSummary(root, config) {
       g9: 'https://cdn.prod.website-files.com/6a041f81e8910a5a1669594c/6a3bdbe168c02486c7b836f3_g9-black-edition-MAIN.avif',
       g6: 'https://cdn.prod.website-files.com/6a041f81e8910a5a1669594c/6a3bdbe785f5872a728efd2d_g6-black-edition-main.avif'
     };
-    var hasBlackEdition = config.selectedAccessories.some(function(a) { return a.accessory_code === 'black-edition'; });
     var slug = config.model.model_slug;
     var url = '';
     if (hasBlackEdition && beGallery[slug]) {
@@ -2280,17 +2308,23 @@ function renderSummary(root, config) {
   // Variant line item
   setLineItem(root, 'variant', config.selectedVariant.variant_name, SHOW_PRICES ? formatPrice(config.selectedVariant.price) + ' EUR' : '');
 
-  // Color line item + swatch
-  var colorPrice = SHOW_PRICES && config.selectedColor.price > 0 ? '+' + formatPrice(config.selectedColor.price) + ' EUR' : '';
-  setLineItem(root, 'color', config.selectedColor.color_name, colorPrice);
-  var swatch = root.querySelector('[data-summary-color-swatch]');
-  if (swatch) {
-    if (config.selectedColor.swatch_image) {
-      swatch.style.backgroundImage = 'url(' + config.selectedColor.swatch_image + ')';
-      swatch.style.backgroundSize = 'cover';
-      swatch.style.backgroundPosition = 'center';
-    } else {
-      swatch.style.backgroundColor = config.selectedColor.color_hex;
+  // Color line item + swatch — hidden entirely for Black Edition (color is part of the package)
+  var colorItem = root.querySelector('[data-summary-item="color"]');
+  if (hasBlackEdition) {
+    if (colorItem) colorItem.style.display = 'none';
+  } else {
+    if (colorItem) colorItem.style.display = '';
+    var colorPrice = SHOW_PRICES && config.selectedColor.price > 0 ? '+' + formatPrice(config.selectedColor.price) + ' EUR' : '';
+    setLineItem(root, 'color', config.selectedColor.color_name, colorPrice);
+    var swatch = root.querySelector('[data-summary-color-swatch]');
+    if (swatch) {
+      if (config.selectedColor.swatch_image) {
+        swatch.style.backgroundImage = 'url(' + config.selectedColor.swatch_image + ')';
+        swatch.style.backgroundSize = 'cover';
+        swatch.style.backgroundPosition = 'center';
+      } else {
+        swatch.style.backgroundColor = config.selectedColor.color_hex;
+      }
     }
   }
 
