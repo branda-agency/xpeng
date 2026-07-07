@@ -309,6 +309,65 @@ function initMobileNav() {
 
 
 /* ============================================================
+   3b. NAV MEGA MENU — hover panels for model links (BG_R1_046)
+   ============================================================ */
+
+function initNavMega() {
+  var nav = document.querySelector('[data-menu-wrap]');
+  var mega = nav && nav.querySelector('[data-nav-mega]');
+  if (!nav || !mega) return;
+  var triggers = nav.querySelectorAll('[data-mega-trigger]');
+  if (!triggers.length) return;
+
+  var mq = window.matchMedia('(min-width: 992px) and (hover: hover)');
+  var closeTimer = null;
+
+  function open(model) {
+    if (closeTimer) clearTimeout(closeTimer);
+    nav.setAttribute('data-mega-open', model);
+  }
+
+  function close() {
+    if (closeTimer) clearTimeout(closeTimer);
+    closeTimer = null;
+    nav.removeAttribute('data-mega-open');
+  }
+
+  function scheduleClose() {
+    if (closeTimer) clearTimeout(closeTimer);
+    closeTimer = setTimeout(close, 180);
+  }
+
+  triggers.forEach(function(trigger) {
+    trigger.addEventListener('mouseenter', function() {
+      if (mq.matches) open(trigger.getAttribute('data-mega-trigger'));
+    });
+    trigger.addEventListener('mouseleave', scheduleClose);
+  });
+
+  mega.addEventListener('mouseenter', function() {
+    if (closeTimer) clearTimeout(closeTimer);
+  });
+  mega.addEventListener('mouseleave', scheduleClose);
+
+  // Close when the cursor moves to other nav items
+  nav.querySelectorAll('.nav__logo, .nav__link:not([data-mega-trigger]), .nav__dropdown, .nav__right').forEach(function(el) {
+    el.addEventListener('mouseenter', function() {
+      if (nav.hasAttribute('data-mega-open')) scheduleClose();
+    });
+  });
+
+  document.addEventListener('keydown', function(e) {
+    if (e.key === 'Escape') close();
+  });
+
+  window.addEventListener('scroll', function() {
+    if (nav.hasAttribute('data-mega-open')) close();
+  }, { passive: true });
+}
+
+
+/* ============================================================
    4. TEXT REVEALS
    ============================================================ */
 
@@ -3373,6 +3432,7 @@ function init() {
   initModal();
   initDrawer();
   initMobileNav();
+  initNavMega();
   initCategorySliders();
 
   mm.add('(prefers-reduced-motion: no-preference)', () => {
