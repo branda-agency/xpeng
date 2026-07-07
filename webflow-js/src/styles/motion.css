@@ -119,6 +119,41 @@
   animation: nav-mega-in 0.3s ease both;
 }
 
+/* Switching between models while open — swap instantly, no re-entry animation */
+[data-menu-wrap].is--mega-swap [data-mega-panel] {
+  animation: none;
+}
+
+/* Active-model indicator bar under the hovered trigger (DK reference) */
+[data-mega-trigger] {
+  position: relative;
+}
+
+[data-mega-trigger]::after {
+  content: '';
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: -1.25em;
+  height: 0.15em;
+  background-color: #A4CE4C;
+  transform: scaleX(0);
+  transition: transform 0.25s ease;
+}
+
+[data-menu-wrap][data-mega-open="g9"] [data-mega-trigger="g9"]::after,
+[data-menu-wrap][data-mega-open="g6"] [data-mega-trigger="g6"]::after,
+[data-menu-wrap][data-mega-open="p7-plus"] [data-mega-trigger="p7-plus"]::after {
+  transform: scaleX(1);
+}
+
+/* Keep the open model's link fully opaque (overrides .nav__link:hover dim) */
+[data-menu-wrap][data-mega-open="g9"] [data-mega-trigger="g9"],
+[data-menu-wrap][data-mega-open="g6"] [data-mega-trigger="g6"],
+[data-menu-wrap][data-mega-open="p7-plus"] [data-mega-trigger="p7-plus"] {
+  opacity: 1;
+}
+
 @keyframes nav-mega-in {
   from {
     opacity: 0;

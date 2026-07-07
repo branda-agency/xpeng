@@ -324,6 +324,13 @@ function initNavMega() {
 
   function open(model) {
     if (closeTimer) clearTimeout(closeTimer);
+    closeTimer = null;
+    // Already open → instant panel swap, no re-entry animation
+    if (nav.hasAttribute('data-mega-open')) {
+      nav.classList.add('is--mega-swap');
+    } else {
+      nav.classList.remove('is--mega-swap');
+    }
     nav.setAttribute('data-mega-open', model);
   }
 
@@ -331,11 +338,12 @@ function initNavMega() {
     if (closeTimer) clearTimeout(closeTimer);
     closeTimer = null;
     nav.removeAttribute('data-mega-open');
+    nav.classList.remove('is--mega-swap');
   }
 
   function scheduleClose() {
     if (closeTimer) clearTimeout(closeTimer);
-    closeTimer = setTimeout(close, 180);
+    closeTimer = setTimeout(close, 260);
   }
 
   triggers.forEach(function(trigger) {
