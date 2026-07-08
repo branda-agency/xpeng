@@ -775,6 +775,11 @@ function initHeroSlider() {
   let isAnimating = false;
   let peekIndex = -1;
 
+  // Strip srcset so images always load the original (Webflow responsive
+  // variants can be generated in a lossy format — e.g. palette PNG instead
+  // of AVIF — which renders black in some browsers).
+  wrapper.querySelectorAll('img').forEach(function(img) { img.removeAttribute('srcset'); img.removeAttribute('sizes'); });
+
   // Initial state: all slides off-screen right, first slide centered
   gsap.set(slides, { xPercent: 100, autoAlpha: 1 });
   gsap.set(slides[0], { xPercent: 0 });
