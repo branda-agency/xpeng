@@ -628,6 +628,52 @@ function initFieldValidation() {
 
 
 /* ============================================================
+   8a-ii. NEWSLETTER CONFIRMATION EMAIL (BG_R2_016)
+   On successful Webflow newsletter submit, fires a non-blocking
+   POST to a Google Apps Script that sends a branded confirmation
+   email to the subscriber from noreply@xpengauto.bg.
+   Requires: data-newsletter-confirm attr on the .w-form wrapper.
+   ============================================================ */
+
+var NEWSLETTER_ENDPOINT = 'https://script.google.com/macros/s/AKfycbxdBjzxlV3UtVodLMf8sKkTIG9E2GgUXvQ7F_6BXvLWo_9zmgKGRsY6L0D6B3Rsbq_v/exec';
+
+function initNewsletterConfirmation() {
+  if (!NEWSLETTER_ENDPOINT) return;
+
+  var wrappers = document.querySelectorAll('[data-newsletter-confirm]');
+  if (!wrappers.length) return;
+
+  wrappers.forEach(function(wrapper) {
+    var form = wrapper.querySelector('form');
+    var done = wrapper.querySelector('.w-form-done');
+    if (!form || !done) return;
+
+    var emailInput = form.querySelector('input[type="email"]');
+    if (!emailInput) return;
+
+    var lastEmail = '';
+
+    form.addEventListener('submit', function() {
+      lastEmail = emailInput.value.trim();
+    });
+
+    var observer = new MutationObserver(function() {
+      if (done.style.display === 'block' && lastEmail) {
+        fetch(NEWSLETTER_ENDPOINT, {
+          method: 'POST',
+          headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+          body: JSON.stringify({ email: lastEmail })
+        }).catch(function() {});
+        lastEmail = '';
+      }
+    });
+
+    observer.observe(done, { attributes: true, attributeFilter: ['style'] });
+  });
+}
+
+
+/* ============================================================
    8b. MODAL
    ============================================================ */
 
@@ -3476,6 +3522,7 @@ function init() {
   // Functional components — run regardless of motion preference
   initFormConsent();
   initFieldValidation();
+  initNewsletterConfirmation();
   initModal();
   initDrawer();
   initMobileNav();
