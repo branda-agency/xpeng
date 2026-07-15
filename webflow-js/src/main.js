@@ -588,16 +588,26 @@ function initFormConsent() {
 
 
 /* ============================================================
-   8b. FORM FIELD VALIDATION (BG_R2_002)
-   Phone and city accepted any input. Extends the forms' native
-   constraint validation (required already works this way) with
-   format/length rules and Bulgarian error messages.
+   8b. FORM FIELD VALIDATION (BG_R2_002 + BG_R2_008)
+   BG_R2_002: phone and city accepted any input. Extends the forms'
+   native constraint validation (required already works this way)
+   with format/length rules and Bulgarian error messages.
+   BG_R2_008: real-time feedback — validate each control on blur and
+   show an inline Bulgarian message the moment the user leaves an
+   invalid field, instead of only surfacing errors on submit.
    ============================================================ */
 
 function initFieldValidation() {
+  var MSG = {
+    required: 'Това поле е задължително.',
+    email: 'Моля, въведете валиден имейл адрес.'
+  };
+
+  // ---- BG_R2_002: attach format constraints + custom messages ----
   function wire(input, pattern, maxLen, message) {
     input.setAttribute('pattern', pattern);
     input.setAttribute('maxlength', String(maxLen));
+    input.__customMsg = message; // used by the real-time layer below
     input.addEventListener('invalid', function () {
       if (input.validity.patternMismatch) input.setCustomValidity(message);
     });
@@ -623,6 +633,70 @@ function initFieldValidation() {
       60,
       'Моля, въведете валидно име на град (само букви, мин. 2 знака).'
     );
+  });
+
+  // ---- BG_R2_008: real-time (on-blur) validation with inline messages ----
+  function messageFor(input) {
+    var v = input.validity;
+    if (v.valueMissing) return MSG.required;
+    if (v.typeMismatch) return input.type === 'email' ? MSG.email : (input.validationMessage || MSG.required);
+    if (v.customError) return input.validationMessage;
+    if (v.patternMismatch || v.tooShort) return input.__customMsg || (input.type === 'email' ? MSG.email : MSG.required);
+    return input.validationMessage || MSG.required;
+  }
+
+  function errorEl(input) {
+    var el = input.__errorEl;
+    if (el && el.isConnected) return el;
+    el = document.createElement('div');
+    el.className = 'field-error';
+    el.setAttribute('aria-live', 'polite');
+    el.style.cssText = 'color:#d00;font-size:0.8em;line-height:1.3;margin-top:0.35em;display:none';
+    if (input.parentNode) input.parentNode.insertBefore(el, input.nextSibling);
+    input.__errorEl = el;
+    return el;
+  }
+
+  function showError(input) {
+    var el = errorEl(input);
+    el.textContent = messageFor(input);
+    el.style.display = 'block';
+    input.classList.add('is-error');
+    input.style.borderColor = '#d00';
+    input.setAttribute('aria-invalid', 'true');
+  }
+
+  function clearError(input) {
+    if (input.__errorEl) { input.__errorEl.style.display = 'none'; input.__errorEl.textContent = ''; }
+    input.classList.remove('is-error');
+    input.style.borderColor = '';
+    input.removeAttribute('aria-invalid');
+  }
+
+  var CONTROLS = 'input:not([type="hidden"]):not([type="submit"]):not([type="checkbox"]):not([type="radio"]):not([type="search"]), select, textarea';
+
+  document.querySelectorAll('form').forEach(function (form) {
+    form.querySelectorAll(CONTROLS).forEach(function (input) {
+      // Validate when the user leaves the field.
+      input.addEventListener('blur', function () {
+        input.setCustomValidity('');
+        // Re-apply our custom pattern message so validationMessage is in Bulgarian.
+        if (input.__customMsg && input.value && input.validity.patternMismatch) {
+          input.setCustomValidity(input.__customMsg);
+        }
+        if (input.checkValidity()) clearError(input);
+        else showError(input);
+      });
+      // Once flagged, clear the moment the value becomes valid again.
+      var clearIfValid = function () {
+        if (!input.classList.contains('is-error')) return;
+        input.setCustomValidity('');
+        if (input.checkValidity()) clearError(input);
+        else { input.__errorEl && (input.__errorEl.textContent = messageFor(input)); }
+      };
+      input.addEventListener('input', clearIfValid);
+      if (input.tagName === 'SELECT') input.addEventListener('change', clearIfValid);
+    });
   });
 }
 
