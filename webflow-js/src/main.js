@@ -645,15 +645,23 @@ function initFieldValidation() {
     return input.validationMessage || MSG.required;
   }
 
-  // Each field sits in a horizontal flex row (.contact-form__row). Nearest such row.
-  function rowFor(input) {
-    var el = input.parentElement;
-    while (el && el !== document.body) {
-      var cs = getComputedStyle(el);
-      if (cs.display === 'flex' && cs.flexDirection.indexOf('row') === 0) return el;
-      el = el.parentElement;
+  // Fields are direct flex children of their row (single fields fill the row;
+  // first/last name share one row). Wrap the field in a column cell that occupies
+  // the SAME slot (width:100% + shrink, like the field itself), so the error stacks
+  // directly under THAT field — tight and per-field — without disturbing a sibling
+  // field or the row's spacing. Idempotent: each field is wrapped at most once.
+  function cellFor(input) {
+    if (input.__cell && input.__cell.isConnected) return input.__cell;
+    var cell = document.createElement('div');
+    cell.className = 'field-cell';
+    cell.style.cssText = 'display:flex;flex-direction:column;flex:0 1 auto;width:100%;min-width:0';
+    if (input.parentNode) {
+      input.parentNode.insertBefore(cell, input);
+      cell.appendChild(input);
+      input.style.width = '100%';
     }
-    return input.parentElement;
+    input.__cell = cell;
+    return cell;
   }
 
   function errorEl(input) {
@@ -662,26 +670,8 @@ function initFieldValidation() {
     el = document.createElement('div');
     el.className = 'field-error';
     el.setAttribute('aria-live', 'polite');
-    el.style.cssText = 'color:#d00;font-size:0.8em;line-height:1.3;display:none;flex-basis:100%;width:100%';
-
-    var row = rowFor(input);
-    var controls = row ? row.querySelectorAll('input:not([type="hidden"]):not([type="submit"]), select, textarea').length : 0;
-
-    if (row && getComputedStyle(row).display === 'flex' && controls <= 1) {
-      // Single-field row: wrap the message onto its own line, tight under the field.
-      // Zero the row-gap (it may equal a large column-gap) and space via margin only.
-      el.style.marginTop = '8px';
-      row.style.flexWrap = 'wrap';
-      row.style.rowGap = '0px';
-      row.appendChild(el);
-    } else if (row && row.parentNode) {
-      // Multi-field row (e.g. first/last name side by side): place below the whole row
-      // so the side-by-side fields are left untouched.
-      el.style.marginTop = '0.35em';
-      row.parentNode.insertBefore(el, row.nextSibling);
-    } else if (input.parentNode) {
-      input.parentNode.insertBefore(el, input.nextSibling);
-    }
+    el.style.cssText = 'color:#d00;font-size:0.8em;line-height:1.3;margin-top:8px;display:none';
+    cellFor(input).appendChild(el);
     input.__errorEl = el;
     return el;
   }
