@@ -645,14 +645,31 @@ function initFieldValidation() {
     return input.validationMessage || MSG.required;
   }
 
+  // Fields sit inside horizontal flex rows (.contact-form__row); inserting the
+  // message right after the input drops it BESIDE the field. Climb out of any
+  // non-wrapping row-flex ancestors so the error lands on its own line below.
+  function anchorFor(input) {
+    var el = input;
+    var parent = el.parentElement;
+    while (parent && parent !== document.body) {
+      var cs = getComputedStyle(parent);
+      var horizontalRow = cs.display === 'flex' && cs.flexDirection.indexOf('row') === 0 && cs.flexWrap === 'nowrap';
+      if (!horizontalRow) break;
+      el = parent;
+      parent = el.parentElement;
+    }
+    return el;
+  }
+
   function errorEl(input) {
     var el = input.__errorEl;
     if (el && el.isConnected) return el;
     el = document.createElement('div');
     el.className = 'field-error';
     el.setAttribute('aria-live', 'polite');
-    el.style.cssText = 'color:#d00;font-size:0.8em;line-height:1.3;margin-top:0.35em;display:none';
-    if (input.parentNode) input.parentNode.insertBefore(el, input.nextSibling);
+    el.style.cssText = 'color:#d00;font-size:0.8em;line-height:1.3;margin-top:0.35em;display:none;flex-basis:100%;width:100%';
+    var anchor = anchorFor(input);
+    if (anchor.parentNode) anchor.parentNode.insertBefore(el, anchor.nextSibling);
     input.__errorEl = el;
     return el;
   }
