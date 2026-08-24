@@ -717,6 +717,77 @@ function initFieldValidation() {
       if (input.tagName === 'SELECT') input.addEventListener('change', clearIfValid);
     });
   });
+
+  // ---- Required consent checkboxes (privacy / campaign rules) ----
+  // Webflow renders the real <input type="checkbox"> visually hidden
+  // (opacity:0; z-index:-1), so a native `required` bubble lands behind the custom
+  // box and in the browser's language. Take ownership: strip `required`, then block
+  // the submit ourselves with the same inline Bulgarian error used for text fields.
+  var CONSENT_MSG = 'Моля, отбележете, за да продължите.';
+
+  function consentRow(cb) {
+    return cb.closest('.w-checkbox') || cb.parentNode;
+  }
+
+  function consentErrorEl(cb) {
+    var el = cb.__errorEl;
+    if (el && el.isConnected) return el;
+    el = document.createElement('div');
+    el.className = 'field-error';
+    el.setAttribute('aria-live', 'polite');
+    el.style.cssText = 'color:#d00;font-size:0.8em;line-height:1.3;margin-top:8px;display:none';
+    var row = consentRow(cb);
+    row.parentNode.insertBefore(el, row.nextSibling);
+    cb.__errorEl = el;
+    return el;
+  }
+
+  function consentBox(cb) {
+    return consentRow(cb).querySelector('.w-checkbox-input');
+  }
+
+  function showConsentError(cb) {
+    var el = consentErrorEl(cb);
+    el.textContent = CONSENT_MSG;
+    el.style.display = 'block';
+    cb.setAttribute('aria-invalid', 'true');
+    var box = consentBox(cb);
+    if (box) { box.classList.add('is-error'); box.style.borderColor = '#d00'; }
+  }
+
+  function clearConsentError(cb) {
+    if (cb.__errorEl) { cb.__errorEl.style.display = 'none'; cb.__errorEl.textContent = ''; }
+    cb.removeAttribute('aria-invalid');
+    var box = consentBox(cb);
+    if (box) { box.classList.remove('is-error'); box.style.borderColor = ''; }
+  }
+
+  document.querySelectorAll('form').forEach(function (form) {
+    var required = [].slice.call(
+      form.querySelectorAll('input[type="checkbox"][required], input[type="checkbox"][data-required]')
+    );
+    if (!required.length) return;
+
+    required.forEach(function (cb) {
+      cb.removeAttribute('required'); // we own the message from here on
+      cb.setAttribute('aria-required', 'true');
+      cb.addEventListener('change', function () {
+        if (cb.checked) clearConsentError(cb);
+      });
+    });
+
+    // Capture phase on the form fires before Webflow's own (bubbling) submit handler.
+    form.addEventListener('submit', function (e) {
+      var missing = required.filter(function (cb) { return !cb.checked; });
+      if (!missing.length) return;
+      e.preventDefault();
+      e.stopPropagation();
+      e.stopImmediatePropagation();
+      missing.forEach(showConsentError);
+      var row = consentRow(missing[0]);
+      if (row.scrollIntoView) row.scrollIntoView({ block: 'center', behavior: 'smooth' });
+    }, true);
+  });
 }
 
 
