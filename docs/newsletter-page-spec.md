@@ -53,25 +53,28 @@ Page ID `6a8c2fb5e6194173a2899467`, slug `newsletter`. Построена дир
 плюс breakpoint override-и за medium/small. Не преизползвах `contact-page__*`, защото името
 щеше да лъже на тази страница.
 
-### Структура
+### Структура — 1:1 с формата от модала `modals-subs-conf`, без „Фамилия"
 ```
 section.newsletter
 └ div.container
   └ div.newsletter__wrap
     ├ div.newsletter__left > div.newsletter__image-wrap > img.newsletter__image
     └ div.newsletter__right
-      ├ h1.newsletter__title            „Абонирай се и спечели"
-      └ .contact-form__form.w-form      [data-newsletter-confirm]
-        └ form „Newsletter Form"        #wf-form-Newsletter-Form [data-consent-form]
-          ├ .contact-form__row > input  Име    (text, required)
-          ├ .contact-form__row > input  Имейл  (email, required)
-          ├ .contact-form__consent
-          │   ├ checkbox Privacy    (required, немаркиран)
-          │   └ checkbox Marketing  (опционален, немаркиран)
-          ├ .contact-form__disclaimer-row > .contact-form__disclaimer
-          │   └ p „…запознайте се с нашата <a>Политика за поверителност</a>"
-          └ .contact-form__btn-row > input[submit].btn „Абонирай се"
+      ├ h1.newsletter__title              „Абонирай се и спечели"
+      └ div.contact-form__content         ← същият wrapper като в модала
+        └ .contact-form__form.w-form      [data-newsletter-confirm]
+          └ form „Newsletter Form"        #wf-form-Newsletter-Form [data-consent-form]
+            ├ .contact-form__row > input  Име    (text, required)
+            ├ .contact-form__row > input  Имейл  (email, required)
+            ├ .contact-form__consent
+            │   ├ .contact-form__checkbox-field > checkbox Privacy   (required, немаркиран)
+            │   └ .contact-form__checkbox-field > checkbox Marketing (опционален, немаркиран)
+            └ .contact-form__btn-row > input[submit].btn „Абонирайте се"
 ```
+
+Всички класове са тези на модала (`contact-form__*`, `checkbox`, `label`, `btn`) — без
+комбо класове и без нови form стилове. Единствената разлика спрямо модала: две отметки
+вместо една, и няма поле „Фамилия".
 
 Success: „Благодарим ви! Записахме ви за бюлетина — проверете пощата си за потвърждение."
 Error: „Възникна грешка при изпращането. Моля, опитайте отново."
@@ -80,7 +83,7 @@ Form Name е **`Newsletter Form`** — различно от модала (`Subs
 чист CSV само за тази страница.
 
 ### Остава ръчно в Designer
-1. **Placeholder-ите на двете полета** (`*Име`, `*Имейл`) — Webflow MCP не позволява
+1. **Placeholder-ите на двете полета** (`Име`, `Имейл` — както в модала) — Webflow MCP не позволява
    писане на placeholder върху form input (нито като setting, нито като атрибут).
    Без тях полетата са празни, защото дизайнът на сайта не ползва видими label-и.
 2. **Снимката вляво** е временно тази от Contact us (asset `6a0dae9b2e82a693c1ec2f33`) —
