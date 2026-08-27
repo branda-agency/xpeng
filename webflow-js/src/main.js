@@ -848,8 +848,18 @@ function initModal() {
   var modals = group.querySelectorAll('[data-modal-name]');
   var triggers = document.querySelectorAll('[data-modal-target]');
 
+  // Webflow's `is--visible` combo class (.modal__card.is--visible { display: flex })
+  // outranks our attribute rule, so a card left visible in the Designer stays on
+  // screen for every modal. Strip it on init and drive visibility ourselves.
+  function hide(m) {
+    m.classList.remove('is--visible');
+    m.setAttribute('data-modal-status', 'not-active');
+  }
+
+  modals.forEach(hide);
+
   function closeAll() {
-    modals.forEach(function(m) { m.setAttribute('data-modal-status', 'not-active'); });
+    modals.forEach(hide);
     triggers.forEach(function(t) { t.setAttribute('data-modal-status', 'not-active'); });
     group.setAttribute('data-modal-group-status', 'not-active');
   }
@@ -859,7 +869,10 @@ function initModal() {
       var name = this.getAttribute('data-modal-target');
       closeAll();
       var modal = group.querySelector('[data-modal-name="' + name + '"]');
-      if (modal) modal.setAttribute('data-modal-status', 'active');
+      if (modal) {
+        modal.setAttribute('data-modal-status', 'active');
+        modal.classList.add('is--visible');
+      }
       this.setAttribute('data-modal-status', 'active');
       group.setAttribute('data-modal-group-status', 'active');
     });
