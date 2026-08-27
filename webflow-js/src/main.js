@@ -921,7 +921,7 @@ function initDrawer() {
    ============================================================ */
 
 const PRODUCT_SLUGS = ['g9', 'g6', 'p7-plus'];
-const CONFIGURATOR_SLUGS = ['g9', 'g6', 'p7-plus'];
+const CONFIGURATOR_SLUGS = ['g9', 'g6', 'p7-plus', 'l03'];
 
 /* Google Maps API key — replace with your own from Google Cloud Console */
 var GOOGLE_MAPS_KEY = 'AIzaSyAanOH24hj8hvGzwqXPHVX8ED_TBbayoi4';
@@ -1869,7 +1869,20 @@ function renderVariants(root, state, data, setState) {
 
     const specs = card.querySelector('[data-cfg-variant-specs]');
     if (specs && variant.energy_consumption) {
-      specs.textContent = 'Разход на енергия ' + variant.energy_consumption.replace('km', 'км') + ', CO₂ емисии: 0 г/км, CO₂ клас: A (Комбинирани стойности съгласно WLTP.)';
+      // CO₂ comes from the Sheet — range extenders are not 0 g/km and have no CO₂ class A.
+      // Rows without the columns (G9/G6/P7+) fall back to the BEV values.
+      var co2 = (variant.co2_emissions === '' || variant.co2_emissions == null) ? 0 : Number(variant.co2_emissions);
+      var co2Class = variant.co2_class;
+      // Blank column (G9/G6/P7+) → a zero-emission car is always class A; a range
+      // extender emits, so its class must be stated in the Sheet or stays out.
+      if (co2Class === undefined || co2Class === '') co2Class = co2 === 0 ? 'A' : '';
+      var usage = variant.energy_consumption.replace('km', 'км');
+      if (variant.fuel_consumption) {
+        usage += ' + ' + String(variant.fuel_consumption).replace('l/100km', 'л/100 км');
+      }
+      var line = 'Разход на енергия ' + usage + ', CO₂ емисии: ' + co2 + ' г/км';
+      if (co2Class) line += ', CO₂ клас: ' + co2Class;
+      specs.textContent = line + ' (Комбинирани стойности съгласно WLTP.)';
     }
 
     const price = card.querySelector('[data-cfg-variant-price]');
@@ -2351,7 +2364,10 @@ function updateGallery(root, state) {
     };
     if (state.selectedAccessories.includes('black-edition') && state.data) {
       var slug = state.data.model.model_slug;
-      if (beGallery[slug]) url = beGallery[slug];
+      // Newer models (L03) carry the Black Edition render on the accessory row itself,
+      // so no hardcoded entry is needed — fall back to it.
+      var beAcc = (state.data.accessories || []).find(function(a) { return a.accessory_code === 'black-edition'; });
+      url = beGallery[slug] || (beAcc && beAcc.image) || '';
     }
     // Normal: show exterior car render — pick alternate wheel image if larger wheels selected
     if (!url) {
@@ -2510,9 +2526,13 @@ function renderSummary(root, config) {
     };
     var slug = config.model.model_slug;
     var url = '';
-    if (hasBlackEdition && beGallery[slug]) {
-      url = beGallery[slug];
-    } else if (config.selectedColor) {
+    if (hasBlackEdition) {
+      // Newer models (L03) carry the Black Edition render on the accessory row itself,
+      // so no hardcoded entry is needed — fall back to it.
+      var beAcc = config.selectedAccessories.find(function(a) { return a.accessory_code === 'black-edition'; });
+      url = beGallery[slug] || (beAcc && beAcc.image) || '';
+    }
+    if (!url && config.selectedColor) {
       var wCode = (config.selectedWheels && config.selectedWheels.wheel_code) || '';
       var isLargeWheel = /2[01]/.test(wCode);
       url = (isLargeWheel && config.selectedColor.image_front_21) || config.selectedColor.image_front || '';

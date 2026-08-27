@@ -1,0 +1,3 @@
+model_slug	variant_code	accessory_code	accessory_name	price	description	image	sort_order
+l03	all	tow-hitch	Ръчен теглич	990	Максимална маса на ремарке 1500 кг със спирачки / 750 кг без спирачки | Вертикално натоварване на топката 75 кг | Стандартно за цялата гама	TODO:l03-towbar.webp	1
+l03	awd-ultra	black-edition	Black Edition	1200	Каросерия Midnight Black | 20" изцяло черни джанти (Goodyear) | Черни спирачни апарати | Черни огледала и рамки на стъклата | Черно предно лого	TODO:l03-black-edition-front.webp	2

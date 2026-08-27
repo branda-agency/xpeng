@@ -1,0 +1,10 @@
+model_slug	variant_code	interior_code	interior_name	price	is_default	image_thumb	image_full	sort_order
+l03	rwd-sr	dark-gray	Dark Gray	0	TRUE	TODO:l03-interior-swatch-dark-gray.webp	TODO:l03-interior-dark-gray.webp	1
+l03	powerx-lr	light-grey	Light Grey	0	TRUE	TODO:l03-interior-swatch-light-grey.webp	TODO:l03-interior-light-grey.webp	1
+l03	powerx-lr	dark-gray	Dark Gray	0	FALSE	TODO:l03-interior-swatch-dark-gray.webp	TODO:l03-interior-dark-gray.webp	2
+l03	rwd-lr	light-grey	Light Grey	0	TRUE	TODO:l03-interior-swatch-light-grey.webp	TODO:l03-interior-light-grey.webp	1
+l03	rwd-lr	dark-gray	Dark Gray	0	FALSE	TODO:l03-interior-swatch-dark-gray.webp	TODO:l03-interior-dark-gray.webp	2
+l03	awd	light-grey	Light Grey	0	TRUE	TODO:l03-interior-swatch-light-grey.webp	TODO:l03-interior-light-grey.webp	1
+l03	awd	dark-gray	Dark Gray	0	FALSE	TODO:l03-interior-swatch-dark-gray.webp	TODO:l03-interior-dark-gray.webp	2
+l03	awd-ultra	light-grey	Light Grey	0	TRUE	TODO:l03-interior-swatch-light-grey.webp	TODO:l03-interior-light-grey.webp	1
+l03	awd-ultra	dark-gray	Dark Gray	0	FALSE	TODO:l03-interior-swatch-dark-gray.webp	TODO:l03-interior-dark-gray.webp	2

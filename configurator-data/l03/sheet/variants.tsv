@@ -1,0 +1,6 @@
+model_slug	variant_code	variant_name	price	is_default	range_km	power_kw	torque_nm	acceleration	top_speed	battery_kwh	battery_type	dc_charge_power_kw	dc_charge_time	ac_charge_time	energy_consumption	drivetrain	suspension	delivery_time	sort_order	power_type	co2_emissions	co2_class	range_combined_km	fuel_consumption	fuel_tank_l
+l03	rwd-sr	RWD Standard Range	35600	TRUE	445	180	264	7.5s	180	58.3	LFP	193	20 min (10-80%)	6.8h (5-100%, 11 kW)	15.3 kWh/100km	RWD			1	BEV	0	A			
+l03	powerx-lr	PowerX Long Range	38600	FALSE	215	180	264	6.8s	180	37.25		123	20 min (10-80%)	6.5h (5-100%, 6,6 kW)	16.9 kWh/100km	RWD			2	REEV	24		1017	5.5 l/100km	42
+l03	rwd-lr	RWD Long Range	38600	FALSE	520	180	264	6.6s	180	71.2	LFP	236	20 min (10-80%)	8.3h (5-100%, 11 kW)	16.0 kWh/100km	RWD			3	BEV	0	A			
+l03	awd	AWD Performance	41600	FALSE	440	285	431	4.5s	180	71.2	LFP	236	20 min (10-80%)	8.3h (5-100%, 11 kW)	18.4 kWh/100km	AWD			4	BEV	0	A			
+l03	awd-ultra	AWD Performance Ultra	46600	FALSE	440	285	431	4.5s	180	71.2	LFP	236	20 min (10-80%)	8.3h (5-100%, 11 kW)	18.4 kWh/100km	AWD			5	BEV	0	A			
