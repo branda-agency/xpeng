@@ -61,7 +61,7 @@ Arctic White / Rock Gray / Midnight Black и единствен интериор
 
 ## Изображения
 
-52 файла в `assets/images/configurator/l03/` (общо 4,9 MB), конвертирани към webp:
+50 файла в `assets/images/configurator/l03/` (общо 4,9 MB), конвертирани към webp. 44 от тях са качени в Webflow Assets → **Configurator/l03** и се ползват от Sheet-а; останалите 6 (360° панорамите и двата допълнителни ъгъла на Black Edition) стоят само локално до фаза 2, както е и при G9.
 
 | Група | Брой | Формат |
 |---|---|---|
@@ -74,7 +74,7 @@ Arctic White / Rock Gray / Midnight Black и единствен интериор
 | Интериор — 360° панорами (front/back) | 4 | 3500×1750 |
 | Джанти | 3 | 192×192 |
 | Теглич | 1 | 1200×1200 |
-| Общо | **52** | |
+| Общо | **50** (44 качени в Webflow) | |
 
 360° панорамите не се ползват във фаза 1 — стоят готови за панорамния визуализатор
 (фаза 2), както при G9.
@@ -92,36 +92,30 @@ python3 build.py
 
 ---
 
-## Оставащи ръчни стъпки
+## Какво е изпълнено
 
-### 1. Качване на изображенията в Webflow
+Всичко по-долу е направено и проверено на staging (`xpengg.webflow.io/configurator/l03`).
 
-Качи всичките 52 файла от `assets/images/configurator/l03/` в **Webflow Assets →
-папка Configurator** и върни CDN URL-ите.
+### Webflow
 
-### 2. Попълване на cdn-map.json
+- Асет папка **Configurator/l03** (`6a8ffb7db2161d500dc35a44`), 44 файла качени.
+- Страница **L03 Configurator** — `/configurator/l03`, page ID `6a8ffc00590bbe27505d4853`,
+  дублирана от G9 конфигуратора, `data-configurator="l03"`, BG SEO/OG.
+- **5 spec drawer-а**: `specs-rwd-sr`, `specs-powerx-lr`, `specs-rwd-lr`, `specs-awd`,
+  `specs-awd-ultra`. Трите наследени от G9 са с изчистено съдържание и попълнени наново;
+  `powerx-lr` и `awd-ultra` са създадени от нула със същите класове.
 
-```json
-{
-  "l03-arctic-white-front.webp": "https://cdn.prod.website-files.com/6a041f81e8910a5a1669594c/…",
-  "...": "..."
-}
-```
+Асетите се качват през Data API-то (`create_asset` → presigned S3 POST), не през Designer-а —
+`asset_tool > upload_image_by_url` виси без отговор. Presigned policy-то е фиксиран темплейт,
+в който се мени само `key`, така че `configurator-data/l03/cdn-map.json` се попълва скриптово.
 
-След това `python3 build.py` — TSV-тата излизат с реалните URL-и.
+### Google Sheet
 
-### 3. Google Sheet
+Таб Variants е разширен с `power_type`, `co2_emissions`, `co2_class`, `range_combined_km`,
+`fuel_consumption`, `fuel_tank_l` (колони U–Z). Редовете на G9/G6/P7+ са празни там и `main.js`
+ги третира като BEV — изходът им е непроменен.
 
-Sheet: `1x7-MXtThVswesstv0mLuG8y8SB6wi4XlD9bUv27uJc8`
-
-Първо **добави новите колони в таб Variants** (след `sort_order`):
-`power_type`, `co2_emissions`, `co2_class`, `range_combined_km`, `fuel_consumption`,
-`fuel_tank_l`. Съществуващите редове на G9/G6/P7+ ги оставяш празни — `main.js` ги
-третира като BEV (0 г/км, клас A), точно както досега.
-
-После добави редовете от `sheet/*.tsv` **под** съществуващите, таб по таб:
-
-| Таб | Редове |
+| Таб | Добавени редове |
 |---|---|
 | Models | 1 |
 | Variants | 5 |
@@ -130,34 +124,22 @@ Sheet: `1x7-MXtThVswesstv0mLuG8y8SB6wi4XlD9bUv27uJc8`
 | Wheels | 6 |
 | Accessories | 2 |
 
-Накрая busni кеша:
-`…/exec?model=l03&refresh=true`
+### Проверено на staging
 
-### 4. Webflow страница
+- RWD Standard Range: 3 цвята, 1 интериор, 18" джанти, 35.600 €
+- Ultra: 20" джанти, рендерите се сменят на `-20` вариантите
+- Black Edition: цветът се заключва, джантите стават Black Edition, галерията показва
+  изцяло черния рендер, общо **47.800 €** — точно колкото е SKU-то `DSUB014WND2` в Германия
+- PowerX: «Разход на енергия 16.9 kWh/100км + 5.5 л/100 км, CO₂ емисии: 24 г/км», без CO₂ клас
+- G9 остава непроменен
 
-1. Дублирай `/configurator/g9` → `/configurator/l03` (папка `configurator`,
-   ID `6a0c722d9ab5db38f52b614c`).
-2. Смени `data-configurator="g9"` → `data-configurator="l03"` на root елемента.
-3. Смени `data-page` на `l03`.
-4. Създай **5 spec drawer-а** с `data-drawer-name`: `specs-rwd-sr`, `specs-powerx-lr`,
-   `specs-rwd-lr`, `specs-awd`, `specs-awd-ultra`. Съдържанието е готово в
-   `configurator-data/l03/spec-drawers-bg.html` (815 реда спецификация на български,
-   преведени от германския конфигуратор).
-5. Линк «Конфигуратор» от продуктовата страница на L03 → `/configurator/l03`.
+---
 
-### 5. Проверка
+## Оставащо
 
-- Смяна на версия: RWD SR показва 3 цвята и 1 интериор; останалите — 5 и 2.
-- Ultra: джантите стават 20", рендерът се сменя с 20" вариант.
-- Black Edition (само Ultra): цветът се заключва, джантите стават Black Edition,
-  галерията показва изцяло черния рендер, надценка 1200 €.
-- PowerX: редът под името показва «Разход на енергия 16,9 kWh/100 км + 5,5 л/100 км,
-  CO₂ емисии: 24 г/км» — **без** «CO₂ клас: A».
-- G9/G6/P7+ показват същия ред както преди (0 г/км, клас A).
-
-## Отворени въпроси към BAI
-
-1. Официална българска ценова листа за L03 (в момента са германските цени).
-2. Ще се внася ли PowerX (REEV) версията в България.
-3. Срок за доставка.
-4. CO₂ клас на PowerX версията — XPENG не го публикува; редът се крие, докато не дойде.
+1. **Публикуване на живо.** Сайтът е публикуван само на `xpengg.webflow.io`.
+   `xpengauto.bg` още не съдържа L03 страницата.
+2. **Няма продуктова страница за L03** (`/model/l03`) и L03 не е в навигацията —
+   конфигураторът е достъпен само на директен адрес.
+3. **Оставащо от BAI:** българска ценова листа, потвърждение дали PowerX се внася,
+   срок за доставка, CO₂ клас на PowerX.
