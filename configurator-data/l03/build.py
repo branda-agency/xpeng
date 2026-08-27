@@ -159,7 +159,9 @@ def build_interiors():
             rows.append([
                 SLUG, code, k, INT_NAME[k], s['carSpecificationPrice'],
                 'TRUE' if s['isDefault'] else 'FALSE',
-                img(f'l03-interior-swatch-{k}.webp'),
+                # Thumb = the real cabin shot, same as every other model. The fabric
+                # swatches XPENG ships read as grey blobs at card size.
+                img(f'l03-interior-{k}.webp'),
                 img(f'l03-interior-{k}.webp'),
                 i,
             ])
