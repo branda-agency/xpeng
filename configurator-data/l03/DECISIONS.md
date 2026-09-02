@@ -172,3 +172,13 @@ BAI: TBD. В XPENG DE 20" са стандарт за Ultra, няма рефер�
   `assets/images/configurator/l03/`, карта `cdn-map.json`.
 - Cache bust на API: `…/exec?model=l03&refresh=true` (Apps Script URL в
   `feedback_configurator_workflow.md`).
+
+## 5. Hero видео на /model/l03 (2026-09-02)
+
+- Източник: `0712_Xpeng_haiwai_15s20机场展台.mp4` (15 s, 1080p25, 48 MB, H.264 25 Mbps + AAC).
+- Кодирано: H.264 High, CRF 25, макс. 3,5 Mbps, 1920×1080, без аудио, faststart → **5,5 MB**
+  (`assets/Videos/c-l03.mp4`, untracked). Качено в Bunny storage zone `xpeng` → `https://xpeng.b-cdn.net/c-l03.mp4`.
+- Постер: първи кадър → AVIF 14 KB, Webflow asset `6a98135da79b3c4b43537a98` (`l03-poster.avif`).
+- Webflow: `<video class="model-hero__video">` на страница `6a97e69ad2cbd18a4aaaebd0` — `poster` и `<source src>`
+  сменени от P7+ към L03, `aria-label="XPENG L03"`. Публикувано на staging.
+- Отворено: 9:16 мобилна версия на клипа (както за G9/G6/P7+ в `assets/Videos/mobile/`) не е правена.
