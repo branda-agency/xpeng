@@ -3743,4 +3743,7 @@ function init() {
   });
 }
 
-document.addEventListener('DOMContentLoaded', init);
+// Cookiebot's auto-blocker can re-enable this script after DOMContentLoaded has already
+// fired (seen on xpengg.webflow.io), so only wait for the event while the DOM is still loading.
+if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', init);
+else init();
