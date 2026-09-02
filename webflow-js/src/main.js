@@ -933,7 +933,7 @@ function initDrawer() {
    9. PAGE ROUTER
    ============================================================ */
 
-const PRODUCT_SLUGS = ['g9', 'g6', 'p7-plus'];
+const PRODUCT_SLUGS = ['g9', 'g6', 'p7-plus', 'l03'];
 const CONFIGURATOR_SLUGS = ['g9', 'g6', 'p7-plus', 'l03'];
 
 /* Google Maps API key — replace with your own from Google Cloud Console */

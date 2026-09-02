@@ -1,7 +1,9 @@
 model_slug	variant_code	wheel_code	wheel_name	price	is_default	image_thumb	sort_order
-l03	rwd-sr	18-standard	18" джанти	0	TRUE	https://cdn.prod.website-files.com/6a041f81e8910a5a1669594c/6a8fffa8b2161d500dc56397_l03-wheel-18.webp	1
-l03	powerx-lr	18-standard	18" джанти	0	TRUE	https://cdn.prod.website-files.com/6a041f81e8910a5a1669594c/6a8fffa8b2161d500dc56397_l03-wheel-18.webp	1
-l03	rwd-lr	18-standard	18" джанти	0	TRUE	https://cdn.prod.website-files.com/6a041f81e8910a5a1669594c/6a8fffa8b2161d500dc56397_l03-wheel-18.webp	1
-l03	awd	18-standard	18" джанти	0	TRUE	https://cdn.prod.website-files.com/6a041f81e8910a5a1669594c/6a8fffa8b2161d500dc56397_l03-wheel-18.webp	1
-l03	awd-ultra	20-sport	20" джанти (Goodyear) и жълти спирачни апарати	0	TRUE	https://cdn.prod.website-files.com/6a041f81e8910a5a1669594c/6a8fffa8d9f6dfb20cb501b9_l03-wheel-20.webp	1
-l03	awd-ultra	20-black-edition	20" джанти Black Edition (Goodyear)	0	FALSE	https://cdn.prod.website-files.com/6a041f81e8910a5a1669594c/6a8fffa86f6416bae8ae9657_l03-wheel-20-black-edition.webp	2
+l03	rwd-sr	18-standard	18" алуминиеви джанти	0	TRUE	https://cdn.prod.website-files.com/6a041f81e8910a5a1669594c/6a8fffa8b2161d500dc56397_l03-wheel-18.webp	1
+l03	rwd-lr	18-standard	18" алуминиеви джанти	0	TRUE	https://cdn.prod.website-files.com/6a041f81e8910a5a1669594c/6a8fffa8b2161d500dc56397_l03-wheel-18.webp	1
+l03	rwd-lr-ultra	18-standard	18" алуминиеви джанти	0	TRUE	https://cdn.prod.website-files.com/6a041f81e8910a5a1669594c/6a8fffa8b2161d500dc56397_l03-wheel-18.webp	1
+l03	rwd-lr-ultra	20-sport	20" джанти с гуми висок клас и жълти спирачни апарати	0	FALSE	https://cdn.prod.website-files.com/6a041f81e8910a5a1669594c/6a8fffa8d9f6dfb20cb501b9_l03-wheel-20.webp	2
+l03	awd-ultra	18-standard	18" алуминиеви джанти	0	TRUE	https://cdn.prod.website-files.com/6a041f81e8910a5a1669594c/6a8fffa8b2161d500dc56397_l03-wheel-18.webp	1
+l03	awd-ultra	20-sport	20" джанти с гуми висок клас и жълти спирачни апарати	0	FALSE	https://cdn.prod.website-files.com/6a041f81e8910a5a1669594c/6a8fffa8d9f6dfb20cb501b9_l03-wheel-20.webp	2
+l03	awd-ultra	20-black-edition	20" джанти Black Edition	0	FALSE	https://cdn.prod.website-files.com/6a041f81e8910a5a1669594c/6a8fffa86f6416bae8ae9657_l03-wheel-20-black-edition.webp	3
+l03	powerx-lr	18-standard	18" алуминиеви джанти	0	TRUE	https://cdn.prod.website-files.com/6a041f81e8910a5a1669594c/6a8fffa8b2161d500dc56397_l03-wheel-18.webp	1
