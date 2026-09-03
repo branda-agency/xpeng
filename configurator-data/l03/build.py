@@ -11,7 +11,7 @@ fallback and every judgement call is written down in DECISIONS.md next to this f
 Emits:
   sheet/*.tsv                → paste-ready rows for the 6 Google Sheet tabs
   spec-drawers-bg.html       → Bulgarian spec sheets, one per variant (all in one file)
-  drawers/<variant_code>.html → the same, one fragment per Webflow drawer (h4 + ul only)
+  drawers/<variant_code>.html → the same, one fragment per Webflow drawer (p + h3/h4 + ul)
 
 Usage:  node xlsx-to-json.mjs && python3 build.py
 """
@@ -185,7 +185,9 @@ def build_accessories():
     return [
         header,
         [SLUG, 'all', 'tow-hitch', 'Теглич с ръчно управление', 990,
-         'Капацитет на теглича: 1500 кг (със спирачки) / 750 кг (без спирачки) | Опция за всички версии',
+         # Same wording as the G9/G6/P7+ tow hitch (BAI, 2026-09-03: identical info must read identically).
+         # BAI gives no vertical load for the L03, so that part of the G9 line is omitted.
+         '1 500 кг със спирачки / 750 кг без спирачки',
          img('l03-towbar.webp'), 1],
         [SLUG, 'awd-ultra', 'black-edition', 'Black Edition', 1200,
          'Елементи на екстериора в опушен черен цвят | Предни и задни спирачни апарати в черен цвят | '
@@ -202,18 +204,29 @@ VALUE_COLS = ['B', 'C', 'D', 'E', 'F']
 # Row labels that open a section (h4). Anything else that has no values in B..F is an unmarked
 # row in BAI's sheet (e.g. the sensor-count rows 55-66, seat-belt rows 190-193) and is skipped —
 # the script prints them so nothing disappears silently.
-SECTIONS = {
+# Section hierarchy of BAI's sheet, rendered as two heading levels since 2026-09-03 (BAI review:
+# "L03 must follow the layout logic of P7+ / G9" — bold, separated section titles):
+#   TOP_SECTIONS → <h3 class="drawer__section">, SUB_SECTIONS → <h4 class="drawer__subsection">.
+# Аудио / Климатик / Седалки sit under Интериор like on G9 and P7+; the three collision-avoidance
+# sub-sub-sections are merged into one "XPILOT ASSIST Безопасност" list exactly as G9/P7+ list them;
+# the "Опционални пакети" block is NOT rendered — options live in the configurator's
+# "Опционално оборудване" and "Джанти" steps (BAI, 2026-09-03).
+TOP_SECTIONS = [
     'Размери', 'Ефективност', 'XPILOT 2.5 (Система за подпомагане на водача)', 'XOS',
-    'Екстериор', 'Интериор', 'Аудио система', 'Климатик & Термопомпа', 'Първи ред седалки',
-    'Втори ред седалки', 'Безопасност', 'Опционални пакети', 'Цветове екстериор', 'Цветове интериор',
-    # sub-sections (rendered as the same h4 — the drawers keep one flat heading level)
+    'Екстериор', 'Интериор', 'Безопасност', 'Цветове екстериор', 'Цветове интериор',
+]
+SUB_SECTIONS = [
     'Хардуерна система', 'XPILOT ASSIST Шофиране', 'XPILOT ASSIST Паркиране', 'XPILOT ASSIST Безопасност',
-    'Система за предотвратяване на сблъсък отпред', 'Предотвратяване на странични сблъсъци',
-    'Предотвратяване на сблъсък отзад', 'Хардуер', 'Софтуер',
-    'Опция 1', 'Опция 2', 'Опция 3 (при избор на О3 при Ultra отпада О2)',
+    'Хардуер', 'Софтуер', 'Аудио система', 'Климатик & Термопомпа', 'Първи ред седалки', 'Втори ред седалки',
+]
+MERGE_INTO = {
+    'Система за предотвратяване на сблъсък отпред': 'XPILOT ASSIST Безопасност',
+    'Предотвратяване на странични сблъсъци': 'XPILOT ASSIST Безопасност',
+    'Предотвратяване на сблъсък отзад': 'XPILOT ASSIST Безопасност',
 }
-NO_OPTION_SUFFIX = {'Опционални пакети', 'Опция 1', 'Опция 2', 'Опция 3 (при избор на О3 при Ultra отпада О2)',
-                    'Цветове екстериор', 'Цветове интериор'}
+DROP_SECTIONS = {'Опционални пакети', 'Опция 1', 'Опция 2', 'Опция 3 (при избор на О3 при Ultra отпада О2)'}
+SECTIONS = set(TOP_SECTIONS) | set(SUB_SECTIONS) | set(MERGE_INTO) | DROP_SECTIONS
+NO_OPTION_SUFFIX = {'Цветове екстериор', 'Цветове интериор'}
 SKIP_LABELS = {'Версия', 'Цена'}
 
 # Spelling / typing slips in BAI's sheet, fixed verbatim (documented in DECISIONS.md).
@@ -314,10 +327,20 @@ def item_for(label, value, section):
 
 
 def build_drawer_items(code):
-    """[(section_title, [items])] for one variant, in BAI's row order; empty sections dropped."""
+    """[(level, title, [items])] for one variant, in BAI's row order (level 1 = h3, 2 = h4).
+    Empty sub-sections are dropped; a top section survives without own items if it has sub-sections."""
     col = COL_OF[code]
     comments = BAI.get('comments', {})
-    sections, current, skipped = [], None, []
+    sections, current, skipped, dropping = [], None, [], False
+
+    def open_section(level, title):
+        for sec in sections:            # merge targets may already exist
+            if sec[1] == title:
+                return sec
+        sec = [level, title, []]
+        sections.append(sec)
+        return sec
+
     for row in BAI['rows']:
         if row['r'] <= 3 or 'A' not in row:
             continue
@@ -326,38 +349,65 @@ def build_drawer_items(code):
             continue
         is_header, vals = row_values(row)
         if is_header:
-            if label in SECTIONS:
-                current = (label, [])
-                sections.append(current)
+            if label in DROP_SECTIONS:
+                current, dropping = None, True
+            elif label in TOP_SECTIONS:
+                current, dropping = open_section(1, label), False
+            elif label in SUB_SECTIONS:
+                current, dropping = open_section(2, label), False
+            elif label in MERGE_INTO:
+                current, dropping = open_section(2, MERGE_INTO[label]), False
             else:
                 skipped.append((row['r'], label))
             continue
+        if dropping:
+            continue
         if current is None:
-            current = ('Основни данни', [])
-            sections.append(current)
+            current = open_section(1, 'Основни данни')
         if (row['r'], col) in SUPPRESS_CELLS:
             continue
-        item = item_for(label, vals.get(col), current[0])
+        item = item_for(label, vals.get(col), current[1])
         if item is None:
             continue
         note = comments.get(f"A{row['r']}")
         if note:
             note = re.sub(r'^\s*(?:Admin\s*:?\s*)+', '', note).strip().rstrip('.')
             item += f' ({note})'
-        current[1].append(item)
+        current[2].append(item)
     if code == VARIANTS[0][0] and skipped:
         print('rows without marks in BAI sheet, skipped:',
               ', '.join(f'{r}:{l[:30]}' for r, l in skipped))
-    return [(t, items) for t, items in sections if items]
+    out = []
+    for i, (level, title, items) in enumerate(sections):
+        if items:
+            out.append((level, title, items))
+        elif level == 1 and i + 1 < len(sections) and sections[i + 1][0] == 2:
+            out.append((level, title, items))
+    return out
+
+
+def wltp_intro(code):
+    """The one-line WLTP summary that opens every G9 / P7+ drawer, built from VARIANT_SPECS."""
+    v = VARIANT_SPECS[code]
+    energy = v['energy'].replace('.', ',').replace('kWh/100km', 'kWh/100 km')
+    parts = [f'Разход на електроенергия {energy}']
+    if v.get('fuel_consumption'):
+        parts.append('Разход на гориво ' + v['fuel_consumption'].replace('.', ',').replace('l/100km', 'l/100 km'))
+    parts.append(f'Емисии CO₂ {v["co2"]} g/km')
+    if v.get('co2_class'):
+        parts.append(f'CO₂ клас {v["co2_class"]}')
+    return ' · '.join(parts) + ' (комбинирани стойности съгласно WLTP)'
 
 
 def drawer_fragment(code):
-    out = []
-    for title, items in build_drawer_items(code):
-        out.append(f'  <h4>{html.escape(title)}</h4>')
-        out.append('  <ul>')
-        out.extend(f'    <li>{html.escape(i)}</li>' for i in items)
-        out.append('  </ul>')
+    out = [f'  <p>{html.escape(wltp_intro(code))}</p>']
+    for level, title, items in build_drawer_items(code):
+        tag, cls = ('h3', 'drawer__section') if level == 1 else ('h4', 'drawer__subsection')
+        out.append(f'  <{tag} class="{cls}">{html.escape(title)}</{tag}>')
+        if items:
+            out.append('  <ul>')
+            out.extend(f'    <li>{html.escape(i)}</li>' for i in items)
+            out.append('  </ul>')
     return '\n'.join(out)
 
 
@@ -365,7 +415,7 @@ def build_drawers_html():
     parts = ['<!-- XPENG L03 — Bulgarian spec sheets, one per variant, generated by build.py from',
              '     BAI\'s Xpeng_L03_BG.xlsx (bai-specsheet.json). Do not edit by hand: change the',
              '     sheet / build.py and regenerate. Webflow drawer: [data-drawer-name="specs-<code>"]',
-             '     → h2.drawer__h2 (variant name) + div.drawer__text (the h4/ul below). -->']
+             '     → h2.drawer__h2 (variant name) + div.drawer__text (the p/h3/h4/ul below). -->']
     for code, name, _, _, _ in VARIANTS:
         parts.append(f'\n<!-- ================= specs-{code} — {name} ================= -->')
         parts.append(f'<div data-drawer-name="specs-{code}" data-drawer-status="not-active">')
@@ -396,7 +446,7 @@ def main():
         frag = drawer_fragment(code)
         with open(os.path.join(drawers_dir, f'{code}.html'), 'w') as f:
             f.write(frag + '\n')
-        print(f'drawers/{code}.html: {frag.count("<li>")} items, {frag.count("<h4>")} sections')
+        print(f'drawers/{code}.html: {frag.count("<li>")} items, {frag.count("<h3 ")} sections, {frag.count("<h4 ")} sub-sections')
     todo = sum(r.count('TODO:') for rows in tabs.values() for r in map(str, rows))
     print('TODO placeholders:', todo)
 
