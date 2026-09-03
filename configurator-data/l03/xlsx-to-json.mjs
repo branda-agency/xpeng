@@ -1,5 +1,6 @@
 #!/usr/bin/env node
-// Dumps BAI's Xpeng_L03_BG.xlsx (single sheet "Master_Specsheet L03") into bai-specsheet.json
+// Dumps BAI's Website_L03_BG.xlsx (2026-09-03) into bai-specsheet.json (sheet 1 "Технически характеристики")
+// and bai-options.json (sheet 2 "Опционално оборудване"). The 2026-09-02 file Xpeng_L03_BG.xlsx is kept for history.
 // so build.py can read it without an XML parser (Python's expat is broken on this Mac).
 // Output: { rows: [{ r, A, B, C, D, E, F }], merges: ["B5:F5", ...], comments: {A68: "..."} }
 import fs from 'node:fs';
@@ -8,7 +9,7 @@ import { execSync } from 'node:child_process';
 import os from 'node:os';
 
 const here = path.dirname(new URL(import.meta.url).pathname);
-const xlsx = path.join(here, 'Xpeng_L03_BG.xlsx');
+const xlsx = path.join(here, 'Website_L03_BG.xlsx');
 const tmp = fs.mkdtempSync(path.join(os.tmpdir(), 'l03xlsx-'));
 execSync(`unzip -o -q "${xlsx}" -d "${tmp}"`);
 
@@ -17,7 +18,8 @@ const ss = [];
 for (const m of fs.readFileSync(path.join(tmp, 'xl/sharedStrings.xml'), 'utf8').matchAll(/<si>([\s\S]*?)<\/si>/g)) {
   ss.push(dec([...m[1].matchAll(/<t[^>]*>([\s\S]*?)<\/t>/g)].map(t => t[1]).join('')));
 }
-const sheet = fs.readFileSync(path.join(tmp, 'xl/worksheets/sheet1.xml'), 'utf8');
+function dumpSheet(file) {
+const sheet = fs.readFileSync(path.join(tmp, `xl/worksheets/${file}`), 'utf8');
 const rows = {};
 for (const c of sheet.matchAll(/<c r="([A-Z]+)(\d+)"([^>]*?)(?:\/>|>([\s\S]*?)<\/c>)/g)) {
   const [, col, row, attrs, inner = ''] = c;
@@ -39,6 +41,9 @@ if (fs.existsSync(cx)) {
     comments[m[1]] = dec(m[0].replace(/<[^>]+>/g, ' ')).replace(/\s+/g, ' ').replace(/^\s*Admin Admin:\s*/, '').trim();
   }
 }
-const out = { source: 'Xpeng_L03_BG.xlsx (BAI, received 2026-09-02)', rows: Object.values(rows).sort((a, b) => a.r - b.r), merges, comments };
-fs.writeFileSync(path.join(here, 'bai-specsheet.json'), JSON.stringify(out, null, 1));
-console.log(`rows=${out.rows.length} merges=${merges.length} comments=${Object.keys(comments).length}`);
+  return { rows: Object.values(rows).sort((a, b) => a.r - b.r), merges, comments };
+}
+const specs = dumpSheet('sheet1.xml'), options = dumpSheet('sheet2.xml');
+fs.writeFileSync(path.join(here, 'bai-specsheet.json'), JSON.stringify({ source: 'Website_L03_BG.xlsx, sheet "Технически характеристики" (BAI, received 2026-09-03)', ...specs }, null, 1));
+fs.writeFileSync(path.join(here, 'bai-options.json'), JSON.stringify({ source: 'Website_L03_BG.xlsx, sheet "Опционално оборудване" (BAI, received 2026-09-03)', ...options }, null, 1));
+console.log(`specs rows=${specs.rows.length} merges=${specs.merges.length} comments=${Object.keys(specs.comments).length}; options rows=${options.rows.length}`);

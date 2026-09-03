@@ -1,9 +1,12 @@
 #!/usr/bin/env python3
 """
-XPENG L03 — configurator data builder (BAI spec sheet edition, 2026-09-02).
+XPENG L03 — configurator data builder (BAI spec sheet edition, 2026-09-03).
 
-Source of truth: BAI's Xpeng_L03_BG.xlsx ("Master_Specsheet L03"), dumped to
-bai-specsheet.json by `node xlsx-to-json.mjs` (Python's XML parser is broken on this Mac).
+Source of truth: BAI's Website_L03_BG.xlsx (Svetoslav Tabakov, 2026-09-03) — sheet
+"Технически характеристики" → the "Виж още" drawers, sheet "Опционално оборудване" → the
+configurator's options / colours / interiors / wheels. Dumped to bai-specsheet.json and
+bai-options.json by `node xlsx-to-json.mjs` (Python's XML parser is broken on this Mac).
+It supersedes Xpeng_L03_BG.xlsx (2026-09-02, "Master_Specsheet L03"), kept for history.
 XPENG's EU configurator payload (l03-xpeng-eu-raw.json) is used ONLY for what BAI's sheet
 does not carry — prices, option prices and the few PowerX values BAI marks TBD. Every such
 fallback and every judgement call is written down in DECISIONS.md next to this file.
@@ -159,9 +162,9 @@ def build_interiors():
 
 
 def build_wheels():
-    """BAI rows 125-126 + option О2 (row 204): 18" standard on every version, 20" wheels with
-    yellow calipers as an option on both Ultra versions (price TBD at BAI → 0 for now),
-    Black Edition wheels only via option О3 on AWD Performance Ultra."""
+    """BAI "Опционално оборудване" rows 34-35 + option о2 (row 17): 18" standard on every version, 20" sport
+    wheels with yellow calipers as an option on both Ultra versions (price TBD at BAI → 0 for now),
+    Black Edition wheels only via option о3 on AWD Performance Ultra. Names follow BAI's wording."""
     header = ['model_slug', 'variant_code', 'wheel_code', 'wheel_name', 'price', 'is_default',
               'image_thumb', 'sort_order']
     rows = [header]
@@ -170,16 +173,16 @@ def build_wheels():
                      img('l03-wheel-18.webp'), 1])
         if code in ULTRA:
             rows.append([SLUG, code, '20-sport',
-                         '20" джанти с гуми висок клас и жълти спирачни апарати', 0, 'FALSE',
+                         '20" алуминиеви спортни джанти и спирачни апарати в жълт цвят', 0, 'FALSE',
                          img('l03-wheel-20.webp'), 2])
         if code == 'awd-ultra':
-            rows.append([SLUG, code, '20-black-edition', '20" джанти Black Edition', 0, 'FALSE',
+            rows.append([SLUG, code, '20-black-edition', '20" Black Edition', 0, 'FALSE',
                          img('l03-wheel-20-black-edition.webp'), 3])
     return rows
 
 
 def build_accessories():
-    """Option prices come from XPENG DE (BAI: TBD). Descriptions are BAI's wording."""
+    """BAI "Опционално оборудване" rows 16-22. Option prices come from XPENG DE (BAI: TBD)."""
     header = ['model_slug', 'variant_code', 'accessory_code', 'accessory_name', 'price',
               'description', 'image', 'sort_order']
     return [
@@ -190,8 +193,10 @@ def build_accessories():
          '1 500 кг със спирачки / 750 кг без спирачки',
          img('l03-towbar.webp'), 1],
         [SLUG, 'awd-ultra', 'black-edition', 'Black Edition', 1200,
-         'Елементи на екстериора в опушен черен цвят | Предни и задни спирачни апарати в черен цвят | '
-         '20" джанти с гуми висок клас | При избор на Black Edition отпада опция О2 (20" джанти с жълти апарати)',
+         # BAI "Опционално оборудване" rows 19-22, in BAI's order; the note is BAI's rule for о2 vs о3.
+         'Черни 20" спортни джанти | Предни и задни спирачни апарати в черен цвят | '
+         'Елементи на екстериора в опушен черен цвят | При избор на Black Edition отпада опция о2 '
+         '(20" спортни джанти и спирачни апарати в жълт цвят)',
          img('l03-black-edition-front.webp'), 2],
     ]
 
@@ -204,30 +209,21 @@ VALUE_COLS = ['B', 'C', 'D', 'E', 'F']
 # Row labels that open a section (h4). Anything else that has no values in B..F is an unmarked
 # row in BAI's sheet (e.g. the sensor-count rows 55-66, seat-belt rows 190-193) and is skipped —
 # the script prints them so nothing disappears silently.
-# Section hierarchy of BAI's sheet, rendered as two heading levels since 2026-09-03 (BAI review:
-# "L03 must follow the layout logic of P7+ / G9" — bold, separated section titles):
-#   TOP_SECTIONS → <h3 class="drawer__section">, SUB_SECTIONS → <h4 class="drawer__subsection">.
-# Аудио / Климатик / Седалки sit under Интериор like on G9 and P7+; the three collision-avoidance
-# sub-sub-sections are merged into one "XPILOT ASSIST Безопасност" list exactly as G9/P7+ list them;
-# the "Опционални пакети" block is NOT rendered — options live in the configurator's
-# "Опционално оборудване" and "Джанти" steps (BAI, 2026-09-03).
+# Section hierarchy of BAI's "Технически характеристики" sheet (2026-09-03), rendered as two heading
+# levels: TOP_SECTIONS → <h3 class="drawer__section">, SUB_SECTIONS → <h4 class="drawer__subsection">.
+# The sheet is already laid out like the G9 / P7+ drawers (BAI review 2026-09-03): no "Размери", one flat
+# "Интериор", "Xmart OS хардуер и софтуер", options / colours moved to the second sheet.
+FIRST_DATA_ROW = 18            # rows 1-17 = XPENG logo, screenshot, "Раздел:" banner and the version header
 TOP_SECTIONS = [
-    'Размери', 'Ефективност', 'XPILOT 2.5 (Система за подпомагане на водача)', 'XOS',
-    'Екстериор', 'Интериор', 'Безопасност', 'Цветове екстериор', 'Цветове интериор',
+    'Ефективност', 'XPILOT 2.5 (Система за подпомагане на водача)', 'Xmart OS хардуер и софтуер',
+    'Екстериор', 'Интериор', 'Безопасност',
 ]
-SUB_SECTIONS = [
-    'Хардуерна система', 'XPILOT ASSIST Шофиране', 'XPILOT ASSIST Паркиране', 'XPILOT ASSIST Безопасност',
-    'Хардуер', 'Софтуер', 'Аудио система', 'Климатик & Термопомпа', 'Първи ред седалки', 'Втори ред седалки',
-]
-MERGE_INTO = {
-    'Система за предотвратяване на сблъсък отпред': 'XPILOT ASSIST Безопасност',
-    'Предотвратяване на странични сблъсъци': 'XPILOT ASSIST Безопасност',
-    'Предотвратяване на сблъсък отзад': 'XPILOT ASSIST Безопасност',
-}
-DROP_SECTIONS = {'Опционални пакети', 'Опция 1', 'Опция 2', 'Опция 3 (при избор на О3 при Ultra отпада О2)'}
+SUB_SECTIONS = ['Хардуерна система', 'XPILOT ASSIST Шофиране', 'XPILOT ASSIST Паркиране', 'XPILOT ASSIST Безопасност']
+MERGE_INTO = {}                # (2026-09-03 morning: the three collision sub-sub-sections; BAI merged them itself)
+DROP_SECTIONS = set()          # options are no longer in this sheet
 SECTIONS = set(TOP_SECTIONS) | set(SUB_SECTIONS) | set(MERGE_INTO) | DROP_SECTIONS
-NO_OPTION_SUFFIX = {'Цветове екстериор', 'Цветове интериор'}
-SKIP_LABELS = {'Версия', 'Цена'}
+NO_OPTION_SUFFIX = set()
+SKIP_LABELS = {'Версия', 'Цена', 'Раздел: технически характеристики'}
 
 # Spelling / typing slips in BAI's sheet, fixed verbatim (documented in DECISIONS.md).
 FIXES = [
@@ -246,8 +242,8 @@ FIXES = [
 ]
 INTEGER_LABELS = {'Максимална мощност (к.с.)'}
 # Cells in BAI's sheet that are evidently slips and are NOT rendered (listed in DECISIONS.md):
-#   D21 — front-motor torque 171 N·m on RWD Long Range Ultra, a 2WD car.
-SUPPRESS_CELLS = {(21, 'D')}
+#   D24 — front-motor torque 171 N·m on RWD Long Range Ultra, a 2WD car (was D21 in the 09-02 file).
+SUPPRESS_CELLS = {(24, 'D')}
 
 
 def norm(s):
@@ -323,7 +319,10 @@ def item_for(label, value, section):
         return label
     if v == '○':
         return label if section in NO_OPTION_SUFFIX else f'{label} (опция)'
-    return f'{label}: {fmt_value(value, label)}'
+    shown = fmt_value(value, label)
+    if re.match(rf'^{re.escape(shown)}\b', label):    # "2 броя температурни зони на климатика" | 2
+        return label
+    return f'{label}: {shown}'
 
 
 def build_drawer_items(code):
@@ -342,7 +341,7 @@ def build_drawer_items(code):
         return sec
 
     for row in BAI['rows']:
-        if row['r'] <= 3 or 'A' not in row:
+        if row['r'] < FIRST_DATA_ROW or 'A' not in row:
             continue
         label = norm(row['A'])
         if label in SKIP_LABELS:
