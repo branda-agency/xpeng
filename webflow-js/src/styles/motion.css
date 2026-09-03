@@ -354,7 +354,9 @@
   -webkit-user-drag: none;
 }
 
-[data-360="g9"] [data-rotate-frame] {
+/* g9-v2 and l03 frame sets already fill the frame like the 1.3x-scaled g6/p7plus sets */
+[data-360="g9"] [data-rotate-frame],
+[data-360="l03"] [data-rotate-frame] {
   transform: scale(1);
 }
 
