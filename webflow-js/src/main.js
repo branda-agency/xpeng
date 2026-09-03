@@ -1862,15 +1862,51 @@ function renderHeader(root, data) {
   if (priceEl) priceEl.textContent = SHOW_PRICES ? 'от ' + formatPrice(data.model.starting_price) + ' EUR' : '';
 }
 
+// Headings for the variant list when a model mixes power types (see renderVariants).
+const POWER_TYPE_LABELS = {
+  BEV: { title: 'Електрически', note: 'Изцяло електрическо задвижване' },
+  REEV: { title: 'Електрически с удължен пробег', note: 'Електромотор + бензинов генератор (REEV)' },
+};
+
 function renderVariants(root, state, data, setState) {
   const container = root.querySelector('[data-cfg-cards]');
   if (!container) return;
   const template = container.querySelector('[data-cfg-variant-card]');
   if (!template) return;
 
+  // Group cards by power type (Sheet column `power_type`: BEV / REEV) when a model
+  // mixes them — L03 has four electric versions and one range extender (PowerX).
+  // Models with a blank or single power type render a flat list as before.
+  const groupTemplate = container.querySelector('[data-cfg-variant-group]');
+  const powerTypes = [];
+  data.variants.forEach(function(v) {
+    var t = String(v.power_type || '').trim().toUpperCase();
+    if (t && powerTypes.indexOf(t) === -1) powerTypes.push(t);
+  });
+  const groupCards = !!groupTemplate && powerTypes.length > 1;
+  var lastPowerType = null;
+
   container.innerHTML = '';
 
   data.variants.forEach((variant) => {
+    if (groupCards) {
+      var powerType = String(variant.power_type || '').trim().toUpperCase();
+      if (powerType !== lastPowerType) {
+        var label = POWER_TYPE_LABELS[powerType] || { title: powerType, note: '' };
+        var group = groupTemplate.cloneNode(true);
+        group.setAttribute('data-cfg-variant-group', powerType.toLowerCase());
+        var groupTitle = group.querySelector('[data-cfg-group-title]');
+        var groupNote = group.querySelector('[data-cfg-group-note]');
+        if (groupTitle) groupTitle.textContent = label.title;
+        if (groupNote) {
+          groupNote.textContent = label.note;
+          groupNote.hidden = !label.note;
+        }
+        container.appendChild(group);
+        lastPowerType = powerType;
+      }
+    }
+
     const card = template.cloneNode(true);
     card.setAttribute('data-cfg-variant-card', variant.variant_code);
 
