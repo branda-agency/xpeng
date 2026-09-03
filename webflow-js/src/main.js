@@ -1864,8 +1864,8 @@ function renderHeader(root, data) {
 
 // Headings for the variant list when a model mixes power types (see renderVariants).
 const POWER_TYPE_LABELS = {
-  BEV: { title: 'Електрически', note: 'Изцяло електрическо задвижване' },
-  REEV: { title: 'Електрически с удължен пробег', note: 'Електромотор + бензинов генератор (REEV)' },
+  BEV: { title: 'Електрически', tag: 'BEV', note: 'Изцяло електрическо задвижване' },
+  REEV: { title: 'Електрически с удължен пробег', tag: 'REEV', note: 'Електромотор + бензинов генератор' },
 };
 
 function renderVariants(root, state, data, setState) {
@@ -1892,12 +1892,24 @@ function renderVariants(root, state, data, setState) {
     if (groupCards) {
       var powerType = String(variant.power_type || '').trim().toUpperCase();
       if (powerType !== lastPowerType) {
-        var label = POWER_TYPE_LABELS[powerType] || { title: powerType, note: '' };
+        var label = POWER_TYPE_LABELS[powerType] || { title: powerType, tag: '', note: '' };
         var group = groupTemplate.cloneNode(true);
         group.setAttribute('data-cfg-variant-group', powerType.toLowerCase());
         var groupTitle = group.querySelector('[data-cfg-group-title]');
         var groupNote = group.querySelector('[data-cfg-group-note]');
-        if (groupTitle) groupTitle.textContent = label.title;
+        var groupTag = group.querySelector('[data-cfg-group-tag]');
+        if (groupTitle) {
+          // The title holds a text node followed by the tag span — replace only the text.
+          var titleText = Array.prototype.find.call(groupTitle.childNodes, function(n) { return n.nodeType === 3; });
+          if (titleText) titleText.nodeValue = label.title;
+          else groupTitle.insertBefore(document.createTextNode(label.title), groupTitle.firstChild);
+        }
+        if (groupTag) {
+          groupTag.textContent = label.tag;
+          groupTag.hidden = !label.tag;
+          // Webflow combo class per type: configurator__group-tag--bev / --reev
+          groupTag.classList.add('configurator__group-tag--' + powerType.toLowerCase());
+        }
         if (groupNote) {
           groupNote.textContent = label.note;
           groupNote.hidden = !label.note;
