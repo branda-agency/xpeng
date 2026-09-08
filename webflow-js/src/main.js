@@ -936,11 +936,18 @@ function initDrawer() {
 const PRODUCT_SLUGS = ['g9', 'g6', 'p7-plus', 'l03'];
 const CONFIGURATOR_SLUGS = ['g9', 'g6', 'p7-plus', 'l03'];
 
+/* Base path — XPENG HQ serves the site at xpeng.com/bg/ through a reverse proxy that
+   strips "/bg" before hitting Webflow, so the browser URL carries the prefix but the
+   Webflow page slugs do not. Webflow's "href prefix" setting covers Designer links;
+   the router and every JS-generated internal URL must use the same prefix. */
+const BASE_PATH = /^\/bg(\/|$)/.test(window.location.pathname) ? '/bg' : '';
+function sitePath(path) { return BASE_PATH + path; }
+
 /* Google Maps API key — replace with your own from Google Cloud Console */
 var GOOGLE_MAPS_KEY = 'AIzaSyAanOH24hj8hvGzwqXPHVX8ED_TBbayoi4';
 
 function routePage() {
-  const path = window.location.pathname.replace(/^\/|\/$/g, '') || 'home';
+  const path = window.location.pathname.slice(BASE_PATH.length).replace(/^\/|\/$/g, '') || 'home';
   const segments = path.split('/');
   const slug = segments[segments.length - 1];
 
@@ -2503,7 +2510,7 @@ function bindContinueBtn(root, state) {
       totals: calculateTotal(state),
     }));
 
-    window.location.href = '/configurator/summary?' + params.toString();
+    window.location.href = sitePath('/configurator/summary') + '?' + params.toString();
   });
 }
 
@@ -2670,7 +2677,7 @@ function renderSummary(root, config) {
 
   // Test drive link
   var tdLink = root.querySelector('[data-summary-test-drive]');
-  if (tdLink) tdLink.href = '/test-drive?model=' + (config.model.model_slug || '');
+  if (tdLink) tdLink.href = sitePath('/test-drive') + '?model=' + (config.model.model_slug || '');
 
   // Pre-order button — disabled until Stripe is set up
   var preorderBtn = root.querySelector('[data-summary-preorder]');
@@ -3200,7 +3207,7 @@ function initFindUs() {
     var buttons = '';
     var hasExperience = store.services.some(function(s) { return s.type === 'experience' && s.status === 'open'; });
     if (hasExperience) {
-      buttons += '<button class="find-us-iw__btn" onclick="window.open(\'/test-drive\',\'_blank\')">ТЕСТ ДРАЙВ</button>';
+      buttons += '<button class="find-us-iw__btn" onclick="window.open(\'' + sitePath('/test-drive') + '\',\'_blank\')">ТЕСТ ДРАЙВ</button>';
     }
 
     return '<div class="find-us-iw">' +
@@ -3368,7 +3375,7 @@ function initFindUs() {
     /* Test drive button */
     var hasExperience = store.services.some(function(s) { return s.type === 'experience' && s.status === 'open'; });
     var tdBtn = hasExperience
-      ? '<a href="/test-drive" class="find-us__cta-button">Тест Драйв</a>'
+      ? '<a href="' + sitePath('/test-drive') + '" class="find-us__cta-button">Тест Драйв</a>'
       : '';
 
     return '<div class="find-us__store-card" data-store-index="' + index + '">' +
@@ -3581,7 +3588,7 @@ function initFindUs() {
     var hasExperience = store.services.some(function(s) { return s.type === 'experience' && s.status === 'open'; });
     var buttons = '';
     if (hasExperience) {
-      buttons = '<div class="find-us-mobile__buttons"><a href="/test-drive" class="find-us-mobile__cta-btn">Тест Драйв</a></div>';
+      buttons = '<div class="find-us-mobile__buttons"><a href="' + sitePath('/test-drive') + '" class="find-us-mobile__cta-btn">Тест Драйв</a></div>';
     }
 
     drawerBody.innerHTML =
