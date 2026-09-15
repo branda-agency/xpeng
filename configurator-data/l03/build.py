@@ -406,6 +406,13 @@ def build_drawer_items(code):
     if code == VARIANTS[0][0] and skipped:
         print('rows without marks in BAI sheet, skipped:',
               ', '.join(f'{r}:{l[:30]}' for r, l in skipped))
+    if code in ULTRA:
+        # Deck slide 2 puts ", Escape ( само при AWD )" under the "AWD Performance / LR Ultra" column, i.e. on
+        # both Ultra drawers — the sheet marks Escape only in the AWD column, hence the "(само при AWD)".
+        for sec in sections:
+            for i, it in enumerate(sec[2]):
+                if it.startswith('Режими на движение:') and not it.endswith(ESCAPE_SUFFIX):
+                    sec[2][i] = it + ESCAPE_SUFFIX
     out = []
     for i, (level, title, items) in enumerate(sections):
         if items:
