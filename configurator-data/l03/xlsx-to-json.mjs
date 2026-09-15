@@ -1,7 +1,9 @@
 #!/usr/bin/env node
-// Dumps BAI's Website_L03_BG.xlsx (2026-09-03) into bai-specsheet.json (sheet 1 "Технически характеристики")
-// and bai-options.json (sheet 2 "Опционално оборудване"). The 2026-09-02 file Xpeng_L03_BG.xlsx is kept for history.
-// so build.py can read it without an XML parser (Python's expat is broken on this Mac).
+// Dumps BAI's spreadsheets into bai-specsheet.json (sheet "Технически характеристики") and bai-options.json
+// (sheet "Опционално оборудване") so build.py can read them without an XML parser (Python's expat is broken
+// on this Mac). Since 2026-09-15 the specs come from Website_L03_BG_comments_1509.xlsx (Svetoslav Tabakov's
+// corrected copy — only that one sheet, red cells = changes), the options still from Website_L03_BG.xlsx
+// (2026-09-03), which the new file does not carry. Xpeng_L03_BG.xlsx (2026-08-31) is kept for history.
 // Output: { rows: [{ r, A, B, C, D, E, F }], merges: ["B5:F5", ...], comments: {A68: "..."} }
 import fs from 'node:fs';
 import path from 'node:path';
@@ -9,16 +11,21 @@ import { execSync } from 'node:child_process';
 import os from 'node:os';
 
 const here = path.dirname(new URL(import.meta.url).pathname);
-const xlsx = path.join(here, 'Website_L03_BG.xlsx');
-const tmp = fs.mkdtempSync(path.join(os.tmpdir(), 'l03xlsx-'));
-execSync(`unzip -o -q "${xlsx}" -d "${tmp}"`);
+const SPECS_XLSX = 'Website_L03_BG_comments_1509.xlsx';
+const OPTIONS_XLSX = 'Website_L03_BG.xlsx';
 
 const dec = s => s.replace(/&lt;/g, '<').replace(/&gt;/g, '>').replace(/&quot;/g, '"').replace(/&apos;/g, "'").replace(/&amp;/g, '&');
-const ss = [];
-for (const m of fs.readFileSync(path.join(tmp, 'xl/sharedStrings.xml'), 'utf8').matchAll(/<si>([\s\S]*?)<\/si>/g)) {
-  ss.push(dec([...m[1].matchAll(/<t[^>]*>([\s\S]*?)<\/t>/g)].map(t => t[1]).join('')));
+function unzipXlsx(name) {
+  const tmp = fs.mkdtempSync(path.join(os.tmpdir(), 'l03xlsx-'));
+  execSync(`unzip -o -q "${path.join(here, name)}" -d "${tmp}"`);
+  const ss = [];
+  for (const m of fs.readFileSync(path.join(tmp, 'xl/sharedStrings.xml'), 'utf8').matchAll(/<si>([\s\S]*?)<\/si>/g)) {
+    ss.push(dec([...m[1].matchAll(/<t[^>]*>([\s\S]*?)<\/t>/g)].map(t => t[1]).join('')));
+  }
+  return { tmp, ss };
 }
-function dumpSheet(file) {
+function dumpSheet(xlsxName, file) {
+const { tmp, ss } = unzipXlsx(xlsxName);
 const sheet = fs.readFileSync(path.join(tmp, `xl/worksheets/${file}`), 'utf8');
 const rows = {};
 for (const c of sheet.matchAll(/<c r="([A-Z]+)(\d+)"([^>]*?)(?:\/>|>([\s\S]*?)<\/c>)/g)) {
@@ -43,7 +50,7 @@ if (fs.existsSync(cx)) {
 }
   return { rows: Object.values(rows).sort((a, b) => a.r - b.r), merges, comments };
 }
-const specs = dumpSheet('sheet1.xml'), options = dumpSheet('sheet2.xml');
-fs.writeFileSync(path.join(here, 'bai-specsheet.json'), JSON.stringify({ source: 'Website_L03_BG.xlsx, sheet "Технически характеристики" (BAI, received 2026-09-03)', ...specs }, null, 1));
-fs.writeFileSync(path.join(here, 'bai-options.json'), JSON.stringify({ source: 'Website_L03_BG.xlsx, sheet "Опционално оборудване" (BAI, received 2026-09-03)', ...options }, null, 1));
+const specs = dumpSheet(SPECS_XLSX, 'sheet1.xml'), options = dumpSheet(OPTIONS_XLSX, 'sheet2.xml');
+fs.writeFileSync(path.join(here, 'bai-specsheet.json'), JSON.stringify({ source: `${SPECS_XLSX}, sheet "Технически характеристики" (BAI, received 2026-09-15)`, ...specs }, null, 1));
+fs.writeFileSync(path.join(here, 'bai-options.json'), JSON.stringify({ source: `${OPTIONS_XLSX}, sheet "Опционално оборудване" (BAI, received 2026-09-03)`, ...options }, null, 1));
 console.log(`specs rows=${specs.rows.length} merges=${specs.merges.length} comments=${Object.keys(specs.comments).length}; options rows=${options.rows.length}`);

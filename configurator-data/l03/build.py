@@ -1,12 +1,15 @@
 #!/usr/bin/env python3
 """
-XPENG L03 — configurator data builder (BAI spec sheet edition, 2026-09-03).
+XPENG L03 — configurator data builder (BAI spec sheet edition, 2026-09-15).
 
-Source of truth: BAI's Website_L03_BG.xlsx (Svetoslav Tabakov, 2026-09-03) — sheet
-"Технически характеристики" → the "Виж още" drawers, sheet "Опционално оборудване" → the
-configurator's options / colours / interiors / wheels. Dumped to bai-specsheet.json and
-bai-options.json by `node xlsx-to-json.mjs` (Python's XML parser is broken on this Mac).
-It supersedes Xpeng_L03_BG.xlsx (2026-09-02, "Master_Specsheet L03"), kept for history.
+Source of truth: BAI's Website_L03_BG_comments_1509.xlsx (Svetoslav Tabakov, 2026-09-15 — his
+own 2026-09-03 file with 36 corrected cells) — sheet "Технически характеристики" → the "Виж още"
+drawers; the options / colours / interiors / wheels still come from sheet "Опционално оборудване"
+of Website_L03_BG.xlsx (2026-09-03), which the new file does not carry. Both are dumped to
+bai-specsheet.json / bai-options.json by `node xlsx-to-json.mjs` (Python's XML parser is broken
+on this Mac). Xpeng_L03_BG.xlsx (2026-08-31, "Master_Specsheet L03") is kept for history.
+BAI's review deck of the same day (Коментари конфигуратор 1509.pptx) adds the changes that are
+not in the sheet — see DECISIONS.md §1.15.
 XPENG's EU configurator payload (l03-xpeng-eu-raw.json) is used ONLY for what BAI's sheet
 does not carry — prices, option prices and the few PowerX values BAI marks TBD. Every such
 fallback and every judgement call is written down in DECISIONS.md next to this file.
@@ -169,14 +172,15 @@ def build_wheels():
               'image_thumb', 'sort_order']
     rows = [header]
     for code, _, _, _, _ in VARIANTS:
-        rows.append([SLUG, code, '18-standard', '18" алуминиеви джанти', 0, 'TRUE',
+        # 2026-09-15 (deck slides 3-4): "алуминиеви" dropped from the wheel step, Black Edition gets "джанти".
+        rows.append([SLUG, code, '18-standard', '18" джанти', 0, 'TRUE',
                      img('l03-wheel-18.webp'), 1])
         if code in ULTRA:
             rows.append([SLUG, code, '20-sport',
-                         '20" алуминиеви спортни джанти и спирачни апарати в жълт цвят', 0, 'FALSE',
+                         '20" спортни джанти и спирачни апарати в жълт цвят', 0, 'FALSE',
                          img('l03-wheel-20.webp'), 2])
         if code == 'awd-ultra':
-            rows.append([SLUG, code, '20-black-edition', '20" Black Edition', 0, 'FALSE',
+            rows.append([SLUG, code, '20-black-edition', '20" Black Edition джанти', 0, 'FALSE',
                          img('l03-wheel-20-black-edition.webp'), 3])
     return rows
 
@@ -193,10 +197,10 @@ def build_accessories():
          '1 500 кг със спирачки / 750 кг без спирачки',
          img('l03-towbar.webp'), 1],
         [SLUG, 'awd-ultra', 'black-edition', 'Black Edition', 1200,
-         # BAI "Опционално оборудване" rows 19-22, in BAI's order; the note is BAI's rule for о2 vs о3.
+         # BAI "Опционално оборудване" rows 19-21, in BAI's order. Row 22 ("При избор на Black Edition отпада
+         # опция о2 …") was their note to us, not part of the package — dropped 2026-09-15 (deck slide 3).
          'Черни 20" спортни джанти | Предни и задни спирачни апарати в черен цвят | '
-         'Елементи на екстериора в опушен черен цвят | При избор на Black Edition отпада опция о2 '
-         '(20" спортни джанти и спирачни апарати в жълт цвят)',
+         'Елементи на екстериора в опушен черен цвят',
          img('l03-black-edition-front.webp'), 2],
     ]
 
@@ -215,10 +219,12 @@ VALUE_COLS = ['B', 'C', 'D', 'E', 'F']
 # "Интериор", "Xmart OS хардуер и софтуер", options / colours moved to the second sheet.
 FIRST_DATA_ROW = 18            # rows 1-17 = XPENG logo, screenshot, "Раздел:" banner and the version header
 TOP_SECTIONS = [
-    'Ефективност', 'XPILOT 2.5 (Система за подпомагане на водача)', 'Xmart OS хардуер и софтуер',
+    'Ефективност', 'XPILOT (система за подпомагане на водача)', 'Xmart OS хардуер и софтуер',
     'Екстериор', 'Интериор', 'Безопасност',
 ]
-SUB_SECTIONS = ['Хардуерна система', 'XPILOT ASSIST Шофиране', 'XPILOT ASSIST Паркиране', 'XPILOT ASSIST Безопасност']
+# 2026-09-15: "Хардуерна система" is gone — BAI struck it and "XPILOT 2.5 (…)" together and replaced both
+# with the single heading above (deck slide 2; cell A54 is blank in the new sheet).
+SUB_SECTIONS = ['XPILOT ASSIST Шофиране', 'XPILOT ASSIST Паркиране', 'XPILOT ASSIST Безопасност']
 MERGE_INTO = {}                # (2026-09-03 morning: the three collision sub-sub-sections; BAI merged them itself)
 DROP_SECTIONS = set()          # options are no longer in this sheet
 SECTIONS = set(TOP_SECTIONS) | set(SUB_SECTIONS) | set(MERGE_INTO) | DROP_SECTIONS
@@ -233,16 +239,38 @@ FIXES = [
     ('Мултимедиен  екран', 'Мултимедиен екран'), ('R18с теглич', 'R18 с теглич'),
     ('( виж О2, ред 192 )', ''),   # the ○ mark already renders '(опция)'
     ('Опция 3 ( при избор на О3 при Ultra, отпада О2)', 'Опция 3 (при избор на О3 при Ultra отпада О2)'),
-    ('Ускорение 0~100км/ч. (сек.)', 'Ускорение 0–100 км/ч (сек.)'),
-    ('при 11kW（ч）', 'при 11 kW (ч)'), ('（', ' ('), ('）', ')'),
+    # 2026-09-15: BAI's own label, verbatim — it is the format they want on G6/G9/P7+ too.
+    ('11kW', '11 kW'), ('（', ' ('), ('）', ')'),
     ('OneBox спирачната система', 'Спирачна система OneBox'),
     ('Дължина x Широчина x Височина', 'Дължина × широчина × височина'),
-    ('Кoлони', 'Колони'), ('euro 6e', 'Euro 6e'), ('1.5Т', '1,5 л турбо'),
+    ('Кoлони', 'Колони'), ('euro 6e', 'Euro 6e'),
     ('Graphite Gray', 'Phantom Purple'),   # see COLORS comment / DECISIONS.md
+    # 2026-09-15 sheet: Svetoslav's instructions typed into the label cells themselves. Stripped here so
+    # the file stays exactly as received (DECISIONS.md §1.15 quotes every one of them).
+    (' Така да бъде изписано за G6,G9,P7+. В момента е различен формат', ''),
+    (' Моля "диаметър" да бъде изписан също за G6 ( 11.6 ) ,G9 ( 11.8) , P7+. "Радиус" не е точния параметър.', ''),
+    (' така трябва да се изпише в конфигуратора', ''),
+    (' ( коментара ми трябва да се махне от конфигуратора в сайта )', ''),
+    (' Моля така да бъде изписано за G6,G9,P7+', ''),
+    (' - може да се изтрие от всички модели. Има го в "Безопасност"', ''),   # → DROP_LABELS
+    ('; Оправете', ''),
+    ('прибиране/ подгряване / памет/ наклон', 'прибиране / подгряване / памет / наклон'),   # "Оправете" = even spacing
 ]
 INTEGER_LABELS = {'Максимална мощност (к.с.)'}
+# Rows BAI asked to drop on 2026-09-15: "Auto Hold" duplicates the Безопасност row ("може да се изтрие от
+# всички модели"); "Highway NGP" is struck through on deck slide 2 in both versions (the sheet still marks it
+# ● — the deck is the later, explicit instruction; flagged back to BAI).
+DROP_LABELS = {'Функция "Auto Hold"', 'Highway NGP Intelligent Driving Assist'}
+# Rows whose label already carries the value, to be shown exactly as BAI wrote them ("така трябва да се
+# изпише в конфигуратора"): the F-cell (1.5Т / 42) only says the row applies to PowerX.
+LABEL_ONLY = {'Бензинов агрегат 1.5T', 'Обем на резервоар за гориво: 42 литра'}
+# Two sheet rows BAI wants as one line (deck slide 2): the Escape row is struck and ", Escape ( само при AWD )"
+# is written after the Slippery line — so on the drawers that have the Escape mark (both Ultras).
+ESCAPE_ROW = 'Режими на движение: Escape'
+ESCAPE_SUFFIX = ', Escape (само при AWD)'
 # Cells in BAI's sheet that are evidently slips and are NOT rendered (listed in DECISIONS.md):
 #   D24 — front-motor torque 171 N·m on RWD Long Range Ultra, a 2WD car (was D21 in the 09-02 file).
+#   (BAI blanked it themselves on 2026-09-15; kept so the 09-03 file still builds.)
 SUPPRESS_CELLS = {(24, 'D')}
 
 
@@ -315,7 +343,7 @@ def item_for(label, value, section):
     v = norm(value) if value is not None else ''
     if v in ('', '—', '-', '–', 'TBD'):
         return None
-    if v == '●':
+    if v == '●' or label in LABEL_ONLY:
         return label
     if v == '○':
         return label if section in NO_OPTION_SUFFIX else f'{label} (опция)'
@@ -329,7 +357,8 @@ def build_drawer_items(code):
     """[(level, title, [items])] for one variant, in BAI's row order (level 1 = h3, 2 = h4).
     Empty sub-sections are dropped; a top section survives without own items if it has sub-sections."""
     col = COL_OF[code]
-    comments = BAI.get('comments', {})
+    # Cell comments (the "Admin: Планиран старт в Европа през Q1 2027…" note on NGP) are no longer rendered:
+    # BAI 2026-09-15, "коментара ми трябва да се махне от конфигуратора в сайта".
     sections, current, skipped, dropping = [], None, [], False
 
     def open_section(level, title):
@@ -344,7 +373,7 @@ def build_drawer_items(code):
         if row['r'] < FIRST_DATA_ROW or 'A' not in row:
             continue
         label = norm(row['A'])
-        if label in SKIP_LABELS:
+        if label in SKIP_LABELS or label in DROP_LABELS:
             continue
         is_header, vals = row_values(row)
         if is_header:
@@ -368,10 +397,11 @@ def build_drawer_items(code):
         item = item_for(label, vals.get(col), current[1])
         if item is None:
             continue
-        note = comments.get(f"A{row['r']}")
-        if note:
-            note = re.sub(r'^\s*(?:Admin\s*:?\s*)+', '', note).strip().rstrip('.')
-            item += f' ({note})'
+        if item == ESCAPE_ROW:
+            modes = [i for i, it in enumerate(current[2]) if it.startswith('Режими на движение:')]
+            if modes:
+                current[2][modes[-1]] += ESCAPE_SUFFIX
+                continue
         current[2].append(item)
     if code == VARIANTS[0][0] and skipped:
         print('rows without marks in BAI sheet, skipped:',
@@ -398,6 +428,13 @@ def wltp_intro(code):
     return ' · '.join(parts) + ' (комбинирани стойности съгласно WLTP)'
 
 
+def li_html(item):
+    """Escaped <li> text; the space before a trailing abbreviation "(ACC)" becomes &nbsp; so the abbreviation
+    never wraps onto its own line (BAI, deck slide 6)."""
+    s = html.escape(item)
+    return re.sub(r' (\([A-Z0-9][A-Za-z0-9.\-]{0,7}\))$', r'&nbsp;\1', s)
+
+
 def drawer_fragment(code):
     out = [f'  <p>{html.escape(wltp_intro(code))}</p>']
     for level, title, items in build_drawer_items(code):
@@ -405,14 +442,14 @@ def drawer_fragment(code):
         out.append(f'  <{tag} class="{cls}">{html.escape(title)}</{tag}>')
         if items:
             out.append('  <ul>')
-            out.extend(f'    <li>{html.escape(i)}</li>' for i in items)
+            out.extend(f'    <li>{li_html(i)}</li>' for i in items)
             out.append('  </ul>')
     return '\n'.join(out)
 
 
 def build_drawers_html():
     parts = ['<!-- XPENG L03 — Bulgarian spec sheets, one per variant, generated by build.py from',
-             '     BAI\'s Xpeng_L03_BG.xlsx (bai-specsheet.json). Do not edit by hand: change the',
+             '     BAI\'s Website_L03_BG_comments_1509.xlsx (bai-specsheet.json). Do not edit by hand: change the',
              '     sheet / build.py and regenerate. Webflow drawer: [data-drawer-name="specs-<code>"]',
              '     → h2.drawer__h2 (variant name) + div.drawer__text (the p/h3/h4/ul below). -->']
     for code, name, _, _, _ in VARIANTS:
