@@ -244,6 +244,7 @@ FIXES = [
     ('OneBox спирачната система', 'Спирачна система OneBox'),
     ('Дължина x Широчина x Височина', 'Дължина × широчина × височина'),
     ('Кoлони', 'Колони'), ('euro 6e', 'Euro 6e'),
+    ('(FCТА)', '(FCTA)'),   # Cyrillic Т/А typed inside the Latin abbreviation (2026-09-16 sweep)
     ('Graphite Gray', 'Phantom Purple'),   # see COLORS comment / DECISIONS.md
     # 2026-09-15 sheet: Svetoslav's instructions typed into the label cells themselves. Stripped here so
     # the file stays exactly as received (DECISIONS.md §1.15 quotes every one of them).
@@ -265,9 +266,12 @@ DROP_LABELS = {'Функция "Auto Hold"', 'Highway NGP Intelligent Driving As
 # изпише в конфигуратора"): the F-cell (1.5Т / 42) only says the row applies to PowerX.
 LABEL_ONLY = {'Бензинов агрегат 1.5T', 'Обем на резервоар за гориво: 42 литра'}
 # Two sheet rows BAI wants as one line (deck slide 2): the Escape row is struck and ", Escape ( само при AWD )"
-# is written after the Slippery line — so on the drawers that have the Escape mark (both Ultras).
+# is written after the Slippery line. "( само при AWD )" is Svetoslav's note on the correction, not text —
+# it says WHERE Escape applies (the sheet marks the Escape row only in the AWD column). So only the drawer
+# that carries the Escape mark (AWD Performance Ultra) gets ", Escape" appended. (2026-09-16 fix: the
+# 09-15 build rendered the note itself and put Escape on RWD LR Ultra too.)
 ESCAPE_ROW = 'Режими на движение: Escape'
-ESCAPE_SUFFIX = ', Escape (само при AWD)'
+ESCAPE_SUFFIX = ', Escape'
 # Cells in BAI's sheet that are evidently slips and are NOT rendered (listed in DECISIONS.md):
 #   D24 — front-motor torque 171 N·m on RWD Long Range Ultra, a 2WD car (was D21 in the 09-02 file).
 #   (BAI blanked it themselves on 2026-09-15; kept so the 09-03 file still builds.)
@@ -406,13 +410,6 @@ def build_drawer_items(code):
     if code == VARIANTS[0][0] and skipped:
         print('rows without marks in BAI sheet, skipped:',
               ', '.join(f'{r}:{l[:30]}' for r, l in skipped))
-    if code in ULTRA:
-        # Deck slide 2 puts ", Escape ( само при AWD )" under the "AWD Performance / LR Ultra" column, i.e. on
-        # both Ultra drawers — the sheet marks Escape only in the AWD column, hence the "(само при AWD)".
-        for sec in sections:
-            for i, it in enumerate(sec[2]):
-                if it.startswith('Режими на движение:') and not it.endswith(ESCAPE_SUFFIX):
-                    sec[2][i] = it + ESCAPE_SUFFIX
     out = []
     for i, (level, title, items) in enumerate(sections):
         if items:
