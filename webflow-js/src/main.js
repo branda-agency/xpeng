@@ -2906,74 +2906,52 @@ function buildCategorySlider(sections) {
    Docs: docs/find-us-spec.md
    ============================================================ */
 
-/* --- Placeholder store data (replace with real BAI locations) --- */
+/* --- Store data: dealerships supplied by BAI (2026-10-01).
+   Opening hours are not confirmed yet, so `hours` stays empty and the card
+   hides the block. Plovdiv has no street number ("6-ти километър"); its
+   coordinates are the dealer group's own map pin for that address. --- */
 var FIND_US_STORES = [
   {
-    id: 'bai-sofia',
-    name: 'XPENG Sofia — BAI Automotive',
-    address: 'бул. Цариградско шосе 100, 1784 София',
+    id: 'sofia',
+    name: 'XPENG София',
+    address: 'бул. Царица Йоанна 49, 1324 София',
     city: 'София',
-    lat: 42.6605,
-    lng: 23.3953,
-    phone: '+359 2 123 4567',
-    email: 'info@xpeng.bg',
+    lat: 42.714454,
+    lng: 23.263874,
+    phone: '02 80 888',
+    email: 'boyko.shatev@gauto.bg',
     coverImage: '',
     services: [
       {
         type: 'experience',
         label: 'Шоурум',
         status: 'open',
-        phone: '+359 2 123 4567',
-        email: 'showroom@xpeng.bg',
-        link: '',
-        hours: {
-          monday: '09:00-18:00',
-          tuesday: '09:00-18:00',
-          wednesday: '09:00-18:00',
-          thursday: '09:00-18:00',
-          friday: '09:00-18:00',
-          saturday: '10:00-16:00',
-          sunday: ''
-        }
-      },
-      {
-        type: 'service',
-        label: 'Сервиз',
-        status: 'coming_soon',
-        phone: '',
-        email: '',
+        phone: '02 80 888',
+        email: 'boyko.shatev@gauto.bg',
         link: '',
         hours: {}
       }
     ]
   },
   {
-    id: 'bai-plovdiv',
-    name: 'XPENG Plovdiv — BAI Automotive',
-    address: 'бул. Марица 100, 4000 Пловдив',
+    id: 'plovdiv',
+    name: 'XPENG Пловдив',
+    address: 'бул. Пазарджишко шосе, 6-ти километър, Пловдив',
     city: 'Пловдив',
-    lat: 42.1354,
-    lng: 24.7453,
-    phone: '+359 32 123 456',
-    email: 'plovdiv@xpeng.bg',
+    lat: 42.152329,
+    lng: 24.678151,
+    phone: '0896 887 943',
+    email: 'chavdar.semerdjiev@gauto.bg',
     coverImage: '',
     services: [
       {
         type: 'experience',
         label: 'Шоурум',
         status: 'open',
-        phone: '+359 32 123 456',
-        email: 'plovdiv@xpeng.bg',
+        phone: '0896 887 943',
+        email: 'chavdar.semerdjiev@gauto.bg',
         link: '',
-        hours: {
-          monday: '09:00-18:00',
-          tuesday: '09:00-18:00',
-          wednesday: '09:00-18:00',
-          thursday: '09:00-18:00',
-          friday: '09:00-18:00',
-          saturday: '10:00-14:00',
-          sunday: ''
-        }
+        hours: {}
       }
     ]
   }
@@ -3399,7 +3377,7 @@ function initFindUs() {
     }
 
     if (svc.phone) {
-      html += '<a href="tel:' + svc.phone.replace(/\s/g, '') + '" class="find-us__store-phone">' +
+      html += '<a href="tel:' + svc.phone.replace(/[^\d+]/g, '') + '" class="find-us__store-phone">' +
         '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72c.127.96.361 1.903.7 2.81a2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45c.907.339 1.85.573 2.81.7A2 2 0 0 1 22 16.92z"/></svg> ' +
         svc.phone +
       '</a>';
