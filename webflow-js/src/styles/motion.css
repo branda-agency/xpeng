@@ -898,50 +898,118 @@
 
 /* ============================================================
    FIND US — Store Locator
-   Animations & transitions only. Layout lives in Webflow.
+   Motion and JS-driven states only. Layout lives in Webflow.
+   ============================================================ */
+
+/* Filter dropdown */
+.find-us__select-menu.is-open {
+  transform-origin: 0 0;
+  animation: find-us-menu-in 0.2s cubic-bezier(0.23, 1, 0.32, 1);
+}
+
+@keyframes find-us-menu-in {
+  from { opacity: 0; transform: scaleY(0.8); }
+  to { opacity: 1; transform: scaleY(1); }
+}
+
+.find-us__select-arrow,
+.find-us__hours-arrow {
+  transition: transform 0.3s ease;
+}
+
+/* Service tabs, buttons */
+.find-us__label,
+.find-us-iw__label,
+.find-us-iw__button {
+  transition: all 0.3s;
+}
+
+.find-us__m-button:active,
+.find-us__button:active {
+  background-color: #3b3c48;
+}
+
+/* Mobile drawer: closed until JS opens it */
+.find-us-drawer__content {
+  visibility: hidden;
+  transform: translateY(100%);
+  transition: transform 0.3s ease-out, visibility 0s 0.3s;
+}
+
+.find-us-drawer__content.is-open {
+  visibility: visible;
+  transform: translateY(0);
+  transition: transform 0.3s ease-out, visibility 0s;
+}
+
+.find-us-drawer__handle:active {
+  cursor: grabbing;
+}
+
+.find-us__search-input::-webkit-search-cancel-button {
+  appearance: none;
+}
+
+/* Designer shows the drawer open; the closed state above must not apply there. */
+.wf-design-mode .find-us-drawer__content,
+.w-editor .find-us-drawer__content {
+  visibility: visible;
+  transform: none;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .find-us__select-menu.is-open { animation: none; }
+  .find-us-drawer__content,
+  .find-us-drawer__content.is-open { transition: none; }
+}
+
+
+/* ============================================================
+   FIND US (legacy) — pre-rebuild page structure
+   Scoped to .find-us--legacy, which initFindUsLegacy adds. Delete with it.
    ============================================================ */
 
 /* --- Info Window (Google Maps popup) --- */
-.find-us-iw {
+.find-us--legacy .find-us-iw {
   max-width: 22em;
   font-family: inherit;
 }
 
-.find-us-iw__img {
+.find-us--legacy .find-us-iw__img {
   width: 100%;
   border-radius: 0.25em;
   overflow: hidden;
   margin-bottom: 0.75em;
 }
 
-.find-us-iw__img img {
+.find-us--legacy .find-us-iw__img img {
   width: 100%;
   height: 10em;
   object-fit: cover;
   display: block;
 }
 
-.find-us-iw__name {
+.find-us--legacy .find-us-iw__name {
   font-weight: 700;
   font-size: 0.9375em;
   margin-bottom: 0.25em;
   color: #0A0A1A;
 }
 
-.find-us-iw__address {
+.find-us--legacy .find-us-iw__address {
   font-size: 0.8125em;
   color: #666;
   margin-bottom: 0.625em;
 }
 
-.find-us-iw__pills {
+.find-us--legacy .find-us-iw__pills {
   display: flex;
   gap: 0.375em;
   flex-wrap: wrap;
   margin-bottom: 0.625em;
 }
 
-.find-us-iw__pill {
+.find-us--legacy .find-us-iw__pill {
   display: inline-block;
   font-size: 0.6875em;
   padding: 0.25em 0.625em;
@@ -951,18 +1019,18 @@
   transition: background-color 0.2s ease, border-color 0.2s ease;
 }
 
-.find-us-iw__pill.is-active {
+.find-us--legacy .find-us-iw__pill.is-active {
   background-color: #0A0A1A;
   color: #fff;
   border-color: #0A0A1A;
 }
 
-.find-us-iw__pill.is-coming-soon {
+.find-us--legacy .find-us-iw__pill.is-coming-soon {
   opacity: 0.5;
   border-style: dashed;
 }
 
-.find-us-iw__contact {
+.find-us--legacy .find-us-iw__contact {
   display: flex;
   align-items: center;
   gap: 0.375em;
@@ -971,17 +1039,17 @@
   margin-bottom: 0.25em;
 }
 
-.find-us-iw__contact svg {
+.find-us--legacy .find-us-iw__contact svg {
   flex-shrink: 0;
 }
 
-.find-us-iw__buttons {
+.find-us--legacy .find-us-iw__buttons {
   display: flex;
   gap: 0.5em;
   margin-top: 0.75em;
 }
 
-.find-us-iw__btn {
+.find-us--legacy .find-us-iw__btn {
   flex: 1;
   padding: 0.5em 1em;
   font-size: 0.75em;
@@ -995,14 +1063,14 @@
   transition: background-color 0.25s ease;
 }
 
-.find-us-iw__btn:hover {
+.find-us--legacy .find-us-iw__btn:hover {
   background: #333;
 }
 
 
 /* --- Service pills (sidebar + mobile) --- */
-.find-us__service-pill,
-.find-us-mobile__pill {
+.find-us--legacy .find-us__service-pill,
+.find-us--legacy .find-us-mobile__pill {
   display: inline-block;
   font-size: 0.75em;
   padding: 0.25em 0.75em;
@@ -1013,49 +1081,49 @@
   transition: background-color 0.2s ease, border-color 0.2s ease, color 0.2s ease;
 }
 
-.find-us__service-pill.is-active,
-.find-us-mobile__pill.is-active {
+.find-us--legacy .find-us__service-pill.is-active,
+.find-us--legacy .find-us-mobile__pill.is-active {
   background-color: #0A0A1A;
   color: #fff;
   border-color: #0A0A1A;
 }
 
-.find-us__service-pill.is-coming-soon,
-.find-us-mobile__pill.is-coming-soon {
+.find-us--legacy .find-us__service-pill.is-coming-soon,
+.find-us--legacy .find-us-mobile__pill.is-coming-soon {
   opacity: 0.5;
   border-style: dashed;
   cursor: default;
 }
 
-.find-us__service-pill:not(.is-coming-soon):hover {
+.find-us--legacy .find-us__service-pill:not(.is-coming-soon):hover {
   background-color: #f5f5f5;
 }
 
 
 /* --- Store card hover (sidebar) --- */
-.find-us__store-card {
+.find-us--legacy .find-us__store-card {
   cursor: pointer;
   transition: background-color 0.2s ease;
 }
 
-.find-us__store-card:hover {
+.find-us--legacy .find-us__store-card:hover {
   background-color: #f8f8f8;
 }
 
 
 /* --- Hours toggle arrow --- */
-.find-us__toggle-arrow {
+.find-us--legacy .find-us__toggle-arrow {
   display: inline-block;
   transition: transform 0.25s ease;
   margin-left: 0.25em;
   vertical-align: middle;
 }
 
-.find-us__toggle-arrow.is-expanded {
+.find-us--legacy .find-us__toggle-arrow.is-expanded {
   transform: rotate(180deg);
 }
 
-.find-us__hours-toggle {
+.find-us--legacy .find-us__hours-toggle {
   cursor: pointer;
   font-size: 0.75em;
   color: #0A0A1A;
@@ -1064,36 +1132,36 @@
   margin-top: 0.375em;
 }
 
-.find-us__hours-toggle:hover {
+.find-us--legacy .find-us__hours-toggle:hover {
   text-decoration: underline;
 }
 
-.find-us__hours-title {
+.find-us--legacy .find-us__hours-title {
   font-weight: 600;
   font-size: 0.8125em;
   margin-top: 0.625em;
   margin-bottom: 0.25em;
 }
 
-.find-us__hours-today,
-.find-us__hours-day-row {
+.find-us--legacy .find-us__hours-today,
+.find-us--legacy .find-us__hours-day-row {
   display: flex;
   justify-content: space-between;
   font-size: 0.8125em;
   padding: 0.125em 0;
 }
 
-.find-us__hours-day {
+.find-us--legacy .find-us__hours-day {
   color: #666;
 }
 
-.find-us__hours-time {
+.find-us--legacy .find-us__hours-time {
   color: #0A0A1A;
 }
 
 
 /* --- CTA button (sidebar) --- */
-.find-us__cta-button {
+.find-us--legacy .find-us__cta-button {
   display: inline-block;
   margin-top: 0.75em;
   padding: 0.5em 1.25em;
@@ -1109,18 +1177,18 @@
   transition: background-color 0.25s ease;
 }
 
-.find-us__cta-button:hover {
+.find-us--legacy .find-us__cta-button:hover {
   background: #333;
   color: #fff;
 }
 
 
 /* --- Mobile drawer --- */
-.find-us-drawer__content {
+.find-us--legacy .find-us-drawer__content {
   transition: height 0.3s ease;
 }
 
-.find-us-drawer__bar {
+.find-us--legacy .find-us-drawer__bar {
   width: 2.5em;
   height: 0.25em;
   background: #ccc;
@@ -1128,16 +1196,16 @@
   margin: 0 auto;
 }
 
-.find-us-mobile__store-card {
+.find-us--legacy .find-us-mobile__store-card {
   cursor: pointer;
   transition: background-color 0.2s ease;
 }
 
-.find-us-mobile__store-card:active {
+.find-us--legacy .find-us-mobile__store-card:active {
   background-color: #f5f5f5;
 }
 
-.find-us-mobile__cta-btn {
+.find-us--legacy .find-us-mobile__cta-btn {
   display: block;
   width: 100%;
   padding: 0.75em;
@@ -1154,12 +1222,12 @@
   transition: background-color 0.25s ease;
 }
 
-.find-us-mobile__cta-btn:hover {
+.find-us--legacy .find-us-mobile__cta-btn:hover {
   background: #333;
   color: #fff;
 }
 
-.find-us-mobile__filter-option {
+.find-us--legacy .find-us-mobile__filter-option {
   padding: 0.875em 1em;
   border-bottom: 0.0625em solid #f0f0f0;
   cursor: pointer;
@@ -1167,22 +1235,22 @@
   transition: background-color 0.15s ease;
 }
 
-.find-us-mobile__filter-option:active {
+.find-us--legacy .find-us-mobile__filter-option:active {
   background-color: #f5f5f5;
 }
 
 
 /* --- Google Maps InfoWindow override (remove default padding/border) --- */
-.gm-style-iw {
+.find-us--legacy .gm-style-iw {
   padding: 0 !important;
 }
 
-.gm-style-iw-d {
+.find-us--legacy .gm-style-iw-d {
   overflow: auto !important;
   max-height: 24em !important;
 }
 
-.gm-ui-hover-effect {
+.find-us--legacy .gm-ui-hover-effect {
   top: 0.25em !important;
   right: 0.25em !important;
 }

@@ -2973,9 +2973,865 @@ var MARKER_ACTIVE = 'https://a-cdn.xpeng.com//website/_next/static/media/marker-
 var STORE_COVER_FALLBACK = 'https://a-cdn.xpeng.com/www/public/static/img/store-cover.53b1ff54.jpg';
 
 
+/* --- Marker icons: webflow-js/public/find-us, served by Cloudflare Pages --- */
+var FIND_US_ASSETS = 'https://xpeng-de2.pages.dev/find-us/';
+var FIND_US_MARKERS = {
+  small: { url: FIND_US_ASSETS + 'marker-small.svg', w: 31, h: 31 },
+  normal: { url: FIND_US_ASSETS + 'marker.svg', w: 44, h: 44 },
+  active: { url: FIND_US_ASSETS + 'marker-active.svg', w: 74, h: 75 }
+};
+
+var FIND_US_DAYS = [
+  { key: 'monday', label: 'Понеделник', schema: 'Monday' },
+  { key: 'tuesday', label: 'Вторник', schema: 'Tuesday' },
+  { key: 'wednesday', label: 'Сряда', schema: 'Wednesday' },
+  { key: 'thursday', label: 'Четвъртък', schema: 'Thursday' },
+  { key: 'friday', label: 'Петък', schema: 'Friday' },
+  { key: 'saturday', label: 'Събота', schema: 'Saturday' },
+  { key: 'sunday', label: 'Неделя', schema: 'Sunday' }
+];
+
+var FIND_US_TEXT = {
+  all: 'Всички',
+  comingSoon: ' (Очаквайте скоро)',
+  expand: 'Покажи всички',
+  collapse: 'Скрий',
+  empty: 'Няма намерени обекти в този район.',
+  noResult: 'Няма резултати за това търсене.'
+};
+
+/* The page is built natively in Webflow: every card, popup and drawer row is a
+   Designer element. This module clones those elements as templates, fills them
+   with store data and wires the behaviour of xpeng.com/find-us on top. */
 function initFindUs() {
+  var root = document.querySelector('[data-find-us]');
+  if (!root) return;
+
+  var cardTpl = root.querySelector('[data-find-us-store]');
+  /* Old page structure (before the Designer rebuild). Remove this branch together
+     with initFindUsLegacy once the rebuilt page is published on the live domain. */
+  if (!cardTpl) { initFindUsLegacy(); return; }
+
+  function q(sel, ctx) { return (ctx || root).querySelector(sel); }
+  function qa(sel, ctx) { return Array.prototype.slice.call((ctx || root).querySelectorAll(sel)); }
+  function setField(ctx, name, text) {
+    var el = q('[data-find-us-field="' + name + '"]', ctx);
+    if (el) el.textContent = text;
+    return el;
+  }
+
+  /* --- Refs --- */
+  var mapEl = q('[data-find-us-map]');
+  var seoEl = q('[data-find-us-seo]');
+  var loadingEl = q('[data-find-us-loading]');
+  var searchInput = q('[data-find-us-search]');
+  var listEl = q('[data-find-us-store-list]');
+  var emptyEl = q('[data-find-us-empty]');
+  var iwEl = q('[data-find-us-iw]');
+  var drawerEl = q('[data-find-us-drawer-content]');
+  var drawerHandle = q('[data-find-us-drawer-handle]');
+  var drawerClose = q('[data-find-us-drawer-close]');
+  var mOptionsEl = q('[data-find-us-m-options]');
+  var mListEl = q('[data-find-us-m-list]');
+  var mEmptyEl = q('[data-find-us-m-empty]');
+  var mDetailEl = q('[data-find-us-m-detail]');
+  var mDetailScroll = q('[data-find-us-m-detail-scroll]');
+  var mButtons = q('[data-find-us-m-buttons]');
+
+  /* --- Templates (taken out of the page, cloned per store) --- */
+  cardTpl.remove();
+  var iwTpl = iwEl ? iwEl.firstElementChild : null;
+  var mOptionTpl = mOptionsEl ? q('[data-find-us-m-option]', mOptionsEl) : null;
+  if (mOptionTpl) mOptionTpl.remove();
+
+  /* --- State --- */
+  var map = null;
+  var overlay = null;
+  var markers = {};
+  var stores = FIND_US_STORES.slice();
+  var filters = { region: '', type: '', keyword: '' };
+  var selectedSvc = {};
+  var expandedHours = {};
+  var activeId = null;
+  var iwStore = null;
+  var iwSvc = 0;
+  var mobileStore = null;
+  var drawerMode = 'stores';
+  var drawerHeights = { list: 'mid', detail: 'mid' };
+  var locationCoords = null;
+  var mq = window.matchMedia('(max-width: 991px)');
+  var isMobile = mq.matches;
+
+  /* --- Page chrome --- */
+  document.body.style.height = '100vh';
+  document.body.style.overflow = 'hidden';
+  var nav = document.querySelector('[data-menu-wrap]');
+  if (nav) nav.classList.add('is--scrolling');
+
+
+  /* ============================================
+     Store helpers
+     ============================================ */
+
+  function defaultSvcIndex(store) {
+    for (var i = 0; i < store.services.length; i++) {
+      if (store.services[i].status === 'open') return i;
+    }
+    return store.services.length ? 0 : -1;
+  }
+
+  function svcIndex(store) {
+    var i = selectedSvc[store.id];
+    return (i >= 0 && i < store.services.length) ? i : defaultSvcIndex(store);
+  }
+
+  function hasHours(svc) {
+    return !!svc && !!svc.hours && FIND_US_DAYS.some(function(d) { return svc.hours[d.key]; });
+  }
+
+  function todayDay() {
+    return FIND_US_DAYS[(new Date().getDay() + 6) % 7];
+  }
+
+  function hasTestDrive(store) {
+    return store.services.some(function(s) { return s.type === 'experience' && s.status === 'open'; });
+  }
+
+  function distanceKm(a, b) {
+    var rad = Math.PI / 180;
+    var dLat = (b.lat - a.lat) * rad;
+    var dLng = (b.lng - a.lng) * rad;
+    var h = Math.sin(dLat / 2) * Math.sin(dLat / 2) +
+      Math.cos(a.lat * rad) * Math.cos(b.lat * rad) * Math.sin(dLng / 2) * Math.sin(dLng / 2);
+    return 6371 * 2 * Math.atan2(Math.sqrt(h), Math.sqrt(1 - h));
+  }
+
+  function openDirections(store) {
+    var url = 'https://www.google.com/maps/dir/?api=1&destination=' + store.lat + ',' + store.lng;
+    if (locationCoords) url += '&origin=' + locationCoords.lat + ',' + locationCoords.lng;
+    window.open(url, '_blank', 'noopener,noreferrer');
+  }
+
+  function filterStores() {
+    var kw = filters.keyword.trim().toLowerCase();
+    var kwTight = kw.replace(/\s+/g, '');
+    return FIND_US_STORES.filter(function(store) {
+      if (filters.region && store.city !== filters.region) return false;
+      if (filters.type && !store.services.some(function(s) { return s.type === filters.type; })) return false;
+      if (!kw) return true;
+      var hay = [store.name, store.address, store.city].join(' ').toLowerCase();
+      return hay.indexOf(kw) !== -1 || hay.replace(/\s+/g, '').indexOf(kwTight) !== -1;
+    });
+  }
+
+
+  /* ============================================
+     Template fillers (shared by card, popup, mobile detail)
+     ============================================ */
+
+  function fillLabels(ctx, store, selected, onPick) {
+    var wrap = q('[data-find-us-labels]', ctx);
+    var tpl = wrap ? q('[data-find-us-label]', wrap) : null;
+    if (!tpl) return;
+    wrap.innerHTML = '';
+    store.services.forEach(function(svc, i) {
+      var el = tpl.cloneNode(true);
+      var open = svc.status === 'open';
+      el.textContent = svc.label + (open ? '' : FIND_US_TEXT.comingSoon);
+      el.classList.remove('is-selected', 'is-disabled', 'is-coming');
+      if (open) {
+        el.classList.toggle('is-selected', i === selected);
+      } else {
+        el.classList.add('is-disabled');
+        el.classList.toggle('is-coming', i === selected);
+      }
+      el.addEventListener('click', function(e) {
+        e.stopPropagation();
+        onPick(i);
+      });
+      wrap.appendChild(el);
+    });
+  }
+
+  function fillContacts(ctx, svc) {
+    var emailRow = q('[data-find-us-email]', ctx);
+    var phoneRow = q('[data-find-us-phone]', ctx);
+    if (emailRow) {
+      if (svc && svc.email) setField(emailRow, 'email', svc.email);
+      else emailRow.remove();
+    }
+    if (phoneRow) {
+      if (svc && svc.phone) {
+        setField(phoneRow, 'phone', svc.phone);
+        if (phoneRow.tagName === 'A') {
+          phoneRow.setAttribute('href', 'tel:' + svc.phone.replace(/[^\d+]/g, ''));
+          phoneRow.addEventListener('click', function(e) { e.stopPropagation(); });
+        }
+      } else {
+        phoneRow.remove();
+      }
+    }
+  }
+
+  function fillHours(ctx, store, svc) {
+    var hoursEl = q('[data-find-us-hours]', ctx);
+    if (!hoursEl) return;
+    if (!hasHours(svc)) { hoursEl.remove(); return; }
+
+    var expanded = !!expandedHours[store.id];
+    var today = todayDay();
+    var todayEl = q('[data-find-us-hours-today]', hoursEl);
+    var weekEl = q('[data-find-us-hours-week]', hoursEl);
+    var rowTpl = weekEl ? q('[data-find-us-hours-row]', weekEl) : null;
+    var toggle = q('[data-find-us-hours-toggle]', hoursEl);
+    var arrow = q('[data-find-us-hours-arrow]', hoursEl);
+
+    if (todayEl) {
+      var showToday = !expanded && !!svc.hours[today.key];
+      todayEl.classList.toggle('is-hidden', !showToday);
+      if (showToday) {
+        setField(todayEl, 'today-day', today.label);
+        setField(todayEl, 'today-time', svc.hours[today.key]);
+      }
+    }
+
+    if (weekEl && rowTpl) {
+      weekEl.innerHTML = '';
+      FIND_US_DAYS.forEach(function(d) {
+        if (!svc.hours[d.key]) return;
+        var row = rowTpl.cloneNode(true);
+        setField(row, 'row-day', d.label);
+        setField(row, 'row-time', svc.hours[d.key]);
+        weekEl.appendChild(row);
+      });
+      weekEl.classList.toggle('is-open', expanded);
+    }
+
+    setField(hoursEl, 'toggle-text', expanded ? FIND_US_TEXT.collapse : FIND_US_TEXT.expand);
+    if (arrow) arrow.classList.toggle('is-expanded', expanded);
+    if (toggle) {
+      toggle.addEventListener('click', function(e) {
+        e.stopPropagation();
+        expandedHours[store.id] = !expanded;
+        refreshStore(store);
+      });
+    }
+  }
+
+  /* The link itself is native (Webflow page link, so the /bg href prefix applies);
+     only the dealer is appended. */
+  function fillTestDrive(link, store) {
+    var base = (link.getAttribute('href') || '').split('?')[0];
+    link.setAttribute('href', base + '?dealer=' + encodeURIComponent(store.id));
+    if (isMobile) link.removeAttribute('target');
+    else link.setAttribute('target', '_blank');
+    link.addEventListener('click', function(e) { e.stopPropagation(); });
+  }
+
+  function fillButtons(ctx, store) {
+    var wrap = q('[data-find-us-buttons]', ctx);
+    if (!wrap) return;
+    var link = q('[data-find-us-test-drive]', wrap);
+    if (!link || !hasTestDrive(store)) { wrap.remove(); return; }
+    fillTestDrive(link, store);
+  }
+
+  function fillImage(ctx, store) {
+    var img = q('[data-find-us-image]', ctx);
+    if (!img || !store.coverImage) return;
+    img.removeAttribute('srcset');
+    img.setAttribute('src', store.coverImage);
+    img.setAttribute('alt', store.name);
+  }
+
+
+  /* ============================================
+     Store cards (desktop list, mobile list, mobile detail)
+     ============================================ */
+
+  function buildCard(store, ctx) {
+    var card = cardTpl.cloneNode(true);
+    var sel = svcIndex(store);
+    var svc = store.services[sel];
+    card.setAttribute('data-find-us-store', store.id);
+
+    setField(card, 'name', store.name);
+    setField(card, 'address', store.address);
+    fillLabels(card, store, sel, function(i) {
+      selectedSvc[store.id] = i;
+      refreshStore(store);
+    });
+    fillContacts(card, svc);
+    fillHours(card, store, svc);
+
+    var img = q('[data-find-us-image]', card);
+    var navIcon = q('[data-find-us-nav]', card);
+    var line = q('[data-find-us-line]', card);
+    var buttons = q('[data-find-us-buttons]', card);
+
+    if (ctx === 'detail') {
+      card.classList.add('is-detail');
+      if (img) { img.classList.add('is-visible'); fillImage(card, store); }
+      if (navIcon) navIcon.classList.add('is-visible');
+      if (line) line.remove();
+      if (buttons) buttons.remove();
+      var address = q('[data-find-us-address]', card);
+      if (address) {
+        address.style.cursor = 'pointer';
+        address.addEventListener('click', function(e) {
+          e.stopPropagation();
+          openDirections(store);
+        });
+      }
+    } else {
+      if (img) img.remove();
+      if (navIcon) navIcon.remove();
+      fillButtons(card, store);
+      card.addEventListener('click', function() { onCardClick(store); });
+    }
+    return card;
+  }
+
+  function refreshStore(store) {
+    [[listEl, 'list'], [mListEl, 'mlist']].forEach(function(pair) {
+      var old = pair[0] ? q('[data-find-us-store="' + store.id + '"]', pair[0]) : null;
+      if (old) old.replaceWith(buildCard(store, pair[1]));
+    });
+    if (mobileStore === store) renderDetail(store);
+  }
+
+  function renderLists() {
+    var none = !stores.length;
+    var emptyText = filters.keyword.trim() ? FIND_US_TEXT.noResult : FIND_US_TEXT.empty;
+
+    if (listEl) {
+      listEl.innerHTML = '';
+      stores.forEach(function(s) { listEl.appendChild(buildCard(s, 'list')); });
+      listEl.hidden = none;
+    }
+    if (mListEl) {
+      mListEl.innerHTML = '';
+      stores.forEach(function(s) { mListEl.appendChild(buildCard(s, 'mlist')); });
+    }
+    if (emptyEl) {
+      emptyEl.classList.toggle('is-visible', none);
+      setField(emptyEl, 'empty-text', emptyText);
+    }
+    if (mEmptyEl) setField(mEmptyEl, 'empty-text', emptyText);
+  }
+
+  function onCardClick(store) {
+    if (isMobile) {
+      activeId = store.id;
+      updateMarkerIcons();
+      if (map) map.panTo({ lat: store.lat, lng: store.lng });
+      openDetail(store);
+    } else {
+      selectStore(store);
+    }
+  }
+
+
+  /* ============================================
+     Filters — desktop dropdowns, mobile drawer lists
+     ============================================ */
+
+  var selects = {};
+
+  function initSelect(key, options) {
+    var el = q('[data-find-us-select="' + key + '"]');
+    if (!el) return;
+    var menu = q('[data-find-us-select-menu]', el);
+    var optionTpl = menu ? q('[data-find-us-option]', menu) : null;
+    var label = q('[data-find-us-select-label]', el);
+    var trigger = q('[data-find-us-select-trigger]', el);
+    var s = selects[key] = {
+      el: el,
+      menu: menu,
+      label: label,
+      arrow: q('[data-find-us-select-arrow]', el),
+      placeholder: label ? label.textContent : '',
+      options: [{ value: '', label: FIND_US_TEXT.all }].concat(options)
+    };
+
+    if (menu && optionTpl) {
+      menu.innerHTML = '';
+      s.options.forEach(function(opt) {
+        var node = optionTpl.cloneNode(true);
+        node.textContent = opt.label;
+        node.setAttribute('data-find-us-option', opt.value);
+        node.addEventListener('click', function(e) {
+          e.stopPropagation();
+          setFilter(key, opt);
+        });
+        menu.appendChild(node);
+      });
+    }
+
+    if (trigger) {
+      trigger.addEventListener('click', function(e) {
+        e.stopPropagation();
+        if (isMobile) openDrawerOptions(key);
+        else toggleMenu(key);
+      });
+      trigger.addEventListener('keydown', function(e) {
+        if (e.key !== 'Enter' && e.key !== ' ') return;
+        e.preventDefault();
+        trigger.click();
+      });
+    }
+  }
+
+  function toggleMenu(key) {
+    Object.keys(selects).forEach(function(k) {
+      var menu = selects[k].menu;
+      if (!menu) return;
+      var open = k === key && !menu.classList.contains('is-open');
+      menu.classList.toggle('is-open', open);
+      qa('[data-find-us-option]', menu).forEach(function(node) {
+        node.classList.toggle('is-active', node.getAttribute('data-find-us-option') === filters[k]);
+      });
+    });
+  }
+
+  function setFilter(key, opt) {
+    var s = selects[key];
+    filters[key] = opt.value;
+    if (s.label) {
+      var text = opt.value ? opt.label : s.placeholder;
+      s.label.textContent = isMobile ? text.toUpperCase() : text;
+    }
+    toggleMenu(null);
+    applyFilters(true);
+  }
+
+  function applyFilters(fit) {
+    stores = filterStores();
+    closeIw();
+    activeId = null;
+    mobileStore = null;
+    renderMarkers();
+    renderLists();
+
+    if (fit && map && stores.length) {
+      var bounds = new google.maps.LatLngBounds();
+      stores.forEach(function(s) { bounds.extend({ lat: s.lat, lng: s.lng }); });
+      map.fitBounds(bounds);
+      if (stores.length === 1) map.setZoom(11);
+    }
+
+    if (isMobile) {
+      showDrawerMode('stores');
+      setDrawerOpen(true);
+    }
+  }
+
+
+  /* ============================================
+     Map, markers, popup
+     ============================================ */
+
+  function loadGoogleMaps(cb) {
+    if (window.google && window.google.maps) { cb(); return; }
+    var script = document.createElement('script');
+    script.src = 'https://maps.googleapis.com/maps/api/js?key=' + GOOGLE_MAPS_KEY + '&v=weekly&language=bg&callback=__findUsMapsReady';
+    script.async = true;
+    window.__findUsMapsReady = function() { cb(); };
+    script.onerror = function() {
+      console.error('[Find Us] Failed to load Google Maps API');
+      hideLoading();
+    };
+    document.head.appendChild(script);
+  }
+
+  function hideLoading() {
+    if (loadingEl) loadingEl.classList.add('is-hidden');
+  }
+
+  function initMap() {
+    map = new google.maps.Map(mapEl, {
+      zoom: FIND_US_DEFAULT_ZOOM,
+      center: FIND_US_DEFAULT_CENTER,
+      mapTypeControl: false,
+      fullscreenControl: false,
+      zoomControl: false,
+      streetViewControl: false,
+      keyboardShortcuts: false,
+      gestureHandling: 'greedy',
+      panControl: true
+    });
+    map.addListener('zoom_changed', updateMarkerIcons);
+    google.maps.event.addListenerOnce(map, 'tilesloaded', hideLoading);
+    setTimeout(hideLoading, 4000);
+
+    if (iwEl) {
+      overlay = new google.maps.OverlayView();
+      overlay.onAdd = function() {
+        this.getPanes().floatPane.appendChild(iwEl);
+        google.maps.OverlayView.preventMapHitsAndGesturesFrom(iwEl);
+      };
+      overlay.draw = function() {
+        var projection = this.getProjection();
+        if (!iwStore || !projection) return;
+        var point = projection.fromLatLngToDivPixel(new google.maps.LatLng(iwStore.lat, iwStore.lng));
+        iwEl.style.left = point.x + 'px';
+        iwEl.style.top = (point.y - markerIcon(iwStore).scaledSize.height) + 'px';
+      };
+      overlay.onRemove = function() {};
+      overlay.setMap(map);
+    }
+  }
+
+  function markerIcon(store) {
+    var zoom = map ? map.getZoom() : FIND_US_DEFAULT_ZOOM;
+    var m = zoom < 10 ? FIND_US_MARKERS.small
+      : (store.id === activeId ? FIND_US_MARKERS.active : FIND_US_MARKERS.normal);
+    return { url: m.url, scaledSize: new google.maps.Size(m.w, m.h) };
+  }
+
+  function renderMarkers() {
+    if (!map) return;
+    Object.keys(markers).forEach(function(id) { markers[id].setMap(null); });
+    markers = {};
+    stores.forEach(function(store) {
+      var marker = new google.maps.Marker({
+        position: { lat: store.lat, lng: store.lng },
+        map: map,
+        icon: markerIcon(store),
+        title: store.name
+      });
+      marker.addListener('click', function() { onMarkerClick(store); });
+      markers[store.id] = marker;
+    });
+  }
+
+  function updateMarkerIcons() {
+    stores.forEach(function(store) {
+      if (markers[store.id]) markers[store.id].setIcon(markerIcon(store));
+    });
+    if (overlay && iwStore) overlay.draw();
+  }
+
+  function onMarkerClick(store) {
+    if (isMobile) {
+      activeId = store.id;
+      map.panTo({ lat: store.lat, lng: store.lng });
+      map.setZoom(11);
+      updateMarkerIcons();
+      openDetail(store);
+    } else {
+      selectStore(store);
+    }
+  }
+
+  /* Desktop: popup above the pin; the map centre is shifted so the pin clears the panel. */
+  function selectStore(store) {
+    activeId = store.id;
+    updateMarkerIcons();
+    openIw(store);
+    setTimeout(function() {
+      if (!map) return;
+      map.panTo({ lat: store.lat + 0.08, lng: store.lng - 0.1 });
+      map.setZoom(11);
+      updateMarkerIcons();
+    }, 100);
+  }
+
+  /* The popup sits inside Google's map panes, outside the page's font cascade. */
+  function syncIwFont() {
+    if (!iwEl) return;
+    var body = getComputedStyle(document.body);
+    iwEl.style.fontSize = body.fontSize;
+    iwEl.style.fontFamily = body.fontFamily;
+    iwEl.style.lineHeight = body.lineHeight;
+    iwEl.style.color = body.color;
+  }
+
+  function openIw(store) {
+    if (!iwEl || !iwTpl) return;
+    iwStore = store;
+    iwSvc = defaultSvcIndex(store);
+    renderIw();
+    syncIwFont();
+    iwEl.classList.add('is-open');
+    if (overlay) overlay.draw();
+  }
+
+  function renderIw() {
+    var store = iwStore;
+    var box = iwTpl.cloneNode(true);
+    var svc = store.services[iwSvc];
+
+    setField(box, 'name', store.name);
+    setField(box, 'address', store.address);
+    fillImage(box, store);
+    fillLabels(box, store, iwSvc, function(i) {
+      iwSvc = i;
+      renderIw();
+    });
+    fillContacts(box, svc);
+    fillButtons(box, store);
+
+    var address = q('[data-find-us-address]', box);
+    if (address) address.addEventListener('click', function() { openDirections(store); });
+    var close = q('[data-find-us-iw-close]', box);
+    if (close) close.addEventListener('click', function() {
+      closeIw();
+      activeId = null;
+      updateMarkerIcons();
+    });
+
+    iwEl.replaceChild(box, iwEl.firstElementChild);
+  }
+
+  function closeIw() {
+    iwStore = null;
+    if (iwEl) iwEl.classList.remove('is-open');
+  }
+
+  function initGeolocation() {
+    if (!navigator.geolocation) return;
+    navigator.geolocation.getCurrentPosition(function(pos) {
+      if (!pos || !pos.coords) return;
+      locationCoords = { lat: pos.coords.latitude, lng: pos.coords.longitude };
+      FIND_US_STORES.sort(function(a, b) {
+        return distanceKm(locationCoords, a) - distanceKm(locationCoords, b);
+      });
+      stores = filterStores();
+      renderLists();
+      /* Centre on the visitor only when a store would still be in view. */
+      if (map && FIND_US_STORES.length && distanceKm(locationCoords, FIND_US_STORES[0]) < 100) {
+        map.setCenter(locationCoords);
+      }
+    }, function() { /* denied or unavailable — keep the default centre */ });
+  }
+
+
+  /* ============================================
+     Mobile drawer
+     ============================================ */
+
+  function setDrawerOpen(open) {
+    if (drawerEl) drawerEl.classList.toggle('is-open', open);
+  }
+
+  function drawerHeightKey() {
+    return drawerMode === 'detail' ? 'detail' : 'list';
+  }
+
+  function applyDrawerHeight() {
+    if (!drawerEl) return;
+    var h = drawerHeights[drawerHeightKey()];
+    drawerEl.classList.toggle('is-min', h === 'min');
+    drawerEl.classList.toggle('is-max', h === 'max');
+  }
+
+  function showDrawerMode(mode) {
+    drawerMode = mode;
+    var none = !stores.length;
+    var options = mode === 'region' || mode === 'type';
+    if (mOptionsEl) mOptionsEl.classList.toggle('is-visible', options);
+    if (mListEl) mListEl.classList.toggle('is-hidden', mode !== 'stores' || none);
+    if (mEmptyEl) mEmptyEl.classList.toggle('is-visible', mode === 'stores' && none);
+    if (mDetailEl) mDetailEl.classList.toggle('is-visible', mode === 'detail');
+    Object.keys(selects).forEach(function(k) {
+      if (selects[k].arrow) selects[k].arrow.classList.toggle('is-rotated', isMobile && mode === k);
+    });
+    applyDrawerHeight();
+  }
+
+  function openDrawerOptions(key) {
+    var s = selects[key];
+    if (!s || !mOptionsEl || !mOptionTpl) return;
+    mOptionsEl.innerHTML = '';
+    s.options.forEach(function(opt) {
+      var node = mOptionTpl.cloneNode(true);
+      node.textContent = opt.label;
+      node.addEventListener('click', function() { setFilter(key, opt); });
+      mOptionsEl.appendChild(node);
+    });
+    mobileStore = null;
+    showDrawerMode(key);
+    setDrawerOpen(true);
+  }
+
+  function renderDetail(store) {
+    if (!mDetailScroll) return;
+    mDetailScroll.innerHTML = '';
+    mDetailScroll.appendChild(buildCard(store, 'detail'));
+    if (mButtons) {
+      var link = q('[data-find-us-test-drive]', mButtons);
+      var show = !!link && hasTestDrive(store);
+      mButtons.style.display = show ? '' : 'none';
+      if (show) fillTestDrive(link, store);
+    }
+  }
+
+  /* The list is swapped for the detail without a slide-out, then the drawer slides up again. */
+  function openDetail(store) {
+    if (!drawerEl) return;
+    mobileStore = store;
+    renderDetail(store);
+    drawerEl.style.transition = 'none';
+    setDrawerOpen(false);
+    void drawerEl.offsetHeight;
+    drawerEl.style.transition = '';
+    showDrawerMode('detail');
+    requestAnimationFrame(function() { setDrawerOpen(true); });
+  }
+
+  function initDrawer() {
+    if (!drawerEl) return;
+
+    if (drawerClose) {
+      drawerClose.addEventListener('click', function() {
+        var wasDetail = drawerMode === 'detail';
+        setDrawerOpen(false);
+        setTimeout(function() {
+          if (wasDetail) {
+            mobileStore = null;
+            activeId = null;
+            updateMarkerIcons();
+            showDrawerMode('stores');
+            setDrawerOpen(true);
+          } else {
+            showDrawerMode('');
+          }
+        }, 300);
+      });
+    }
+
+    if (drawerHandle) {
+      var startY = 0;
+      var startHeight = 'mid';
+      drawerHandle.addEventListener('touchstart', function(e) {
+        startY = e.touches[0].clientY;
+        startHeight = drawerHeights[drawerHeightKey()];
+      }, { passive: true });
+      drawerHandle.addEventListener('touchmove', function(e) {
+        var y = e.touches[0].clientY;
+        var delta = startY - y;
+        if (Math.abs(delta) <= 50) return;
+        var next = delta > 0
+          ? (startHeight === 'min' ? 'mid' : startHeight === 'mid' ? 'max' : null)
+          : (startHeight === 'max' ? 'mid' : startHeight === 'mid' ? 'min' : null);
+        if (next) {
+          drawerHeights[drawerHeightKey()] = next;
+          applyDrawerHeight();
+        }
+        startY = y;
+        startHeight = drawerHeights[drawerHeightKey()];
+      }, { passive: true });
+    }
+  }
+
+
+  /* ============================================
+     SEO markup (hidden Schema.org)
+     ============================================ */
+
+  function renderSeo() {
+    if (!seoEl) return;
+    seoEl.innerHTML = FIND_US_STORES.map(function(store) {
+      var hours = store.services.map(function(svc) {
+        if (!hasHours(svc)) return '';
+        return '<div itemprop="openingHoursSpecification" itemscope itemtype="https://schema.org/OpeningHoursSpecification">' +
+          FIND_US_DAYS.map(function(d) {
+            return svc.hours[d.key]
+              ? '<div><meta itemprop="dayOfWeek" content="https://schema.org/' + d.schema + '"><span>' + svc.hours[d.key] + '</span></div>'
+              : '';
+          }).join('') + '</div>';
+      }).join('');
+
+      return '<div itemscope itemtype="https://schema.org/LocalBusiness">' +
+        '<h3 itemprop="name">' + store.name + '</h3>' +
+        '<div itemprop="address" itemscope itemtype="https://schema.org/PostalAddress">' +
+          '<span itemprop="streetAddress">' + store.address + '</span>' +
+        '</div>' +
+        '<div><span itemprop="email">' + store.email + '</span></div>' +
+        '<div><span itemprop="telephone">' + store.phone + '</span></div>' +
+        '<div>' + store.services.map(function(s) { return '<span>' + s.label + '</span>'; }).join('') + '</div>' +
+        hours +
+        '<div itemprop="geo" itemscope itemtype="https://schema.org/GeoCoordinates">' +
+          '<meta itemprop="latitude" content="' + store.lat + '">' +
+          '<meta itemprop="longitude" content="' + store.lng + '">' +
+        '</div>' +
+      '</div>';
+    }).join('');
+  }
+
+
+  /* ============================================
+     Init
+     ============================================ */
+
+  var cities = [];
+  FIND_US_STORES.forEach(function(s) {
+    if (s.city && cities.indexOf(s.city) === -1) cities.push(s.city);
+  });
+  initSelect('region', cities.sort().map(function(c) { return { value: c, label: c }; }));
+  initSelect('type', FIND_US_SERVICE_TYPES);
+
+  if (searchInput) {
+    searchInput.addEventListener('input', function() {
+      filters.keyword = searchInput.value;
+      applyFilters(false);
+    });
+    if (searchInput.form) {
+      /* The field lives in a native Webflow form block; it must never submit. */
+      searchInput.form.addEventListener('submit', function(e) {
+        e.preventDefault();
+        e.stopPropagation();
+        searchInput.blur();
+      });
+    }
+  }
+
+  document.addEventListener('click', function() { toggleMenu(null); });
+  document.addEventListener('keydown', function(e) {
+    if (e.key === 'Escape') toggleMenu(null);
+  });
+
+  function onBreakpoint() {
+    isMobile = mq.matches;
+    toggleMenu(null);
+    closeIw();
+    activeId = null;
+    mobileStore = null;
+    updateMarkerIcons();
+    renderLists();
+    showDrawerMode('stores');
+    setDrawerOpen(isMobile);
+  }
+  if (mq.addEventListener) mq.addEventListener('change', onBreakpoint);
+  else mq.addListener(onBreakpoint);
+  window.addEventListener('resize', syncIwFont);
+
+  initDrawer();
+  renderLists();
+  renderSeo();
+  showDrawerMode('stores');
+  setDrawerOpen(isMobile);
+
+  loadGoogleMaps(function() {
+    initMap();
+    renderMarkers();
+    initGeolocation();
+
+    var preselect = new URLSearchParams(window.location.search).get('store');
+    var store = preselect && FIND_US_STORES.filter(function(s) { return s.id === preselect; })[0];
+    if (store) google.maps.event.addListenerOnce(map, 'idle', function() { onMarkerClick(store); });
+  });
+}
+
+
+/* Legacy renderer for the pre-rebuild page structure (JS-built cards, Google InfoWindow).
+   Its styles are scoped under .find-us--legacy in motion.css. Delete once the rebuilt
+   page is live. */
+function initFindUsLegacy() {
   var container = document.querySelector('[data-find-us]');
   if (!container) return;
+  container.classList.add('find-us--legacy');
 
   /* --- Refs --- */
   var mapEl = container.querySelector('[data-find-us-map]');
