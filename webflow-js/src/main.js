@@ -3455,6 +3455,7 @@ function initFindUs() {
       mapTypeControl: false,
       fullscreenControl: false,
       zoomControl: false,
+      cameraControl: false,
       streetViewControl: false,
       keyboardShortcuts: false,
       gestureHandling: 'greedy',
