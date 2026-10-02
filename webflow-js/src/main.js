@@ -3237,12 +3237,14 @@ function initFindUs() {
     fillTestDrive(link, store);
   }
 
+  /* The template image is only a Designer placeholder: a store without its own photo shows none. */
   function fillImage(ctx, store) {
     var img = q('[data-find-us-image]', ctx);
-    if (!img || !store.coverImage) return;
+    if (!img || !store.coverImage) return false;
     img.removeAttribute('srcset');
     img.setAttribute('src', store.coverImage);
     img.setAttribute('alt', store.name);
+    return true;
   }
 
 
@@ -3272,7 +3274,7 @@ function initFindUs() {
 
     if (ctx === 'detail') {
       card.classList.add('is-detail');
-      if (img) { img.classList.add('is-visible'); fillImage(card, store); }
+      if (img && fillImage(card, store)) img.classList.add('is-visible');
       if (navIcon) navIcon.classList.add('is-visible');
       if (line) line.remove();
       if (buttons) buttons.remove();
@@ -3566,7 +3568,11 @@ function initFindUs() {
 
     setField(box, 'name', store.name);
     setField(box, 'address', store.address);
-    fillImage(box, store);
+    if (!fillImage(box, store)) {
+      var img = q('[data-find-us-image]', box);
+      if (img) img.parentElement.remove();
+      box.classList.add('is-no-image');
+    }
     fillLabels(box, store, iwSvc, function(i) {
       iwSvc = i;
       renderIw();
