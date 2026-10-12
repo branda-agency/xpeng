@@ -43,11 +43,22 @@
 `insert_component_instance` не приема компонент-инстанция като котва → append към `.main`
 и после подреждане с `move_element` append в желания ред.
 
+## Решения на Георги (2026-10-12, следобед)
+- Тест драйв: бутонът в hero е **скрит** (формата няма радио G9L). Конфигураторът също скрит.
+- Nav + Footer: G9L добавен (desktop линк `data-mega-trigger="g9l"` + mega панел `data-mega-panel="g9l"`
+  с картинка g9l-exterior, мобилен drawer група, footer линк). CSS правилата за mega в motion.css
+  (commit 67106cf).
+- Home карусел: 5-и слайд `data-360="g9l"` (36 кадъра в Bunny `360/g9l/`, upscale ×1.97 от HQ sprite-а;
+  кадър k = sprite кадър (27−k) mod 36, за да започва от фронт и да върти като G9), статично
+  `g9l_product_side_home.avif` (от рендера Waving Green, 2660×1010, кола 1949 px) asset
+  `6accaa7d62c56ce95d0d429f`, компонент `G9L-mark` `311f5eda-54d3-7101-b24f-c1a721694fd6`, info item
+  `d9891cca-…6b5c`, таб `1e8c3db2-…069b`, слайд `902bdd95-…0588`. motion.css: g9l в изключението за
+  scale(1) (commit 877e160). Rotate-frame/cursor са DOM `<i>`→`img` (WHTML `<img>` губи data-атрибутите).
+- Видеа: остават кадри (AI Seat, RWS); mp4 файловете са в scratchpad, не са качени в Bunny.
+- Текстове: първо ги преглежда колежката за copy (Алето) по таблицата EN/BG
+  https://claude.ai/artifact/LthiTDRZfqmNzDH3qFe9zU, после BAI; **продукционен publish след одобрение**.
+
 ## Отворени точки
-- Тест драйв формата няма радио за G9L (JS пада на G9).
-- Rotate car / Home карусел слайд за G9L – не са правени.
-- G9L не е в навигацията (както L03).
-- Видеата „AI Seat“ (40 s, 4K) и „Rear-Wheel Steering“ (29 s, 4K) са свалени локално
-  (scratchpad), използвани само като кадри; могат да се качат в Bunny при нужда.
-- Преводът е мой (BG) по английския текст на HQ; HQ прави „final wording check-out“ – да мине през BAI.
-- Конфигуратор: HQ линк „G9L Configuration Content-EU“ (wiki `WUlYw76QHi4UTbkGWpzcui14nNd`).
+- Конфигуратор G9L: HQ линк „G9L Configuration Content-EU“ (wiki `WUlYw76QHi4UTbkGWpzcui14nNd`) — чака нива/цени.
+- Радио G9L в тест драйв формата, когато BAI потвърди тест автомобили.
+- Мобилен преглед на страницата не е правен в браузър (resize на прозореца не смени viewport-а).
