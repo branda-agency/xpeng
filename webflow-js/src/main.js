@@ -933,7 +933,7 @@ function initDrawer() {
    9. PAGE ROUTER
    ============================================================ */
 
-const PRODUCT_SLUGS = ['g9', 'g6', 'p7-plus', 'l03'];
+const PRODUCT_SLUGS = ['g9', 'g6', 'p7-plus', 'l03', 'g9l'];
 const CONFIGURATOR_SLUGS = ['g9', 'g6', 'p7-plus', 'l03'];
 
 /* Base path — XPENG HQ serves the site at xpeng.com/bg/ through a reverse proxy that
