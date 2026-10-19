@@ -901,6 +901,20 @@ const CONFIGURATOR_SLUGS = ['g9', 'g6', 'p7-plus', 'l03'];
 const BASE_PATH = /^\/bg(\/|$)/.test(window.location.pathname) ? '/bg' : '';
 function sitePath(path) { return BASE_PATH + path; }
 
+/* TEMPORARY (2026-10-19): Webflow's href prefix cannot be switched on until the next
+   site publish (pending BAI design approvals), so until then prefix the Designer links
+   at runtime. Idempotent: skips hrefs that already carry /bg, protocol-relative URLs
+   and anchors. Remove once Site settings → Publishing → href prefix = /bg is live. */
+function applyBasePathToLinks() {
+  if (!BASE_PATH) return;
+  document.querySelectorAll('a[href^="/"]').forEach(function(a) {
+    var href = a.getAttribute('href');
+    if (href.indexOf('//') === 0) return;
+    if (/^\/bg(\/|$|\?|#)/.test(href)) return;
+    a.setAttribute('href', BASE_PATH + href);
+  });
+}
+
 /* Google Maps API key — replace with your own from Google Cloud Console */
 var GOOGLE_MAPS_KEY = 'AIzaSyAanOH24hj8hvGzwqXPHVX8ED_TBbayoi4';
 
@@ -4572,6 +4586,7 @@ function init() {
   const isDesktop = window.innerWidth > 991;
 
   // Functional components — run regardless of motion preference
+  applyBasePathToLinks();
   initFormConsent();
   initFieldValidation();
   initModal();
