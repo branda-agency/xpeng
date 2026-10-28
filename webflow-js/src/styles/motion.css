@@ -1275,3 +1275,10 @@
   user-select: none;
 }
 
+
+/* ============================================================
+   SPECS TABLE — brochure download row hover
+   ============================================================ */
+.specs-table__doc {
+  transition: color 0.2s ease;
+}
