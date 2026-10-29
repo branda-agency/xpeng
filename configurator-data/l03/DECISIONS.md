@@ -361,6 +361,15 @@ Escape" зачертан, `, Escape ( само при AWD )` дописан сл
    PowerX Long Range" (листът на BAI казва „RWD Plus SR / RWD Plus LR / REEV Plus").
 `build.py` (`build_wheels`, `build_accessories`, `ULTRA`) генерира същото; проверено с `?refresh=true`.
 
+**Тест на staging след свалянето на паролата (Георги, 2026-10-29):** картите показват новите цени и групите
+BEV/REEV; RWD LR Ultra — 20" по подразбиране, рендер `-20`, Midnight Black +950 → 45 940; Black Edition →
+джанти BE, заключен цвят, BE рендер, 46 190; AWD Ultra — същото, BE 49 690; SR/LR/PowerX — 18", без BE,
+36 990 / 39 990 / 39 490. Обобщението (RWD LR Ultra + BE + теглич = 47 180) показваше Black Edition два
+пъти: конфигураторът подаваше към summary всички редове с този `accessory_code`, а вече има по един ред на
+Ultra версия. Поправено в `main.js` (continue handler и `reconstructConfig` филтрират през
+`getOptionsForVariant`), commits `5fecda4` / `7f16ec4`. Линкът на L03 в модала „Изберете модел" излизаше `#`
+(element builder-ът не беше записал страницата) — зададен с `set_link`, повторно публикуван staging.
+
 ---
 
 ## 2. Висящи решения (чакат BAI / Георги)
