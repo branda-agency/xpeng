@@ -2476,7 +2476,9 @@ function bindContinueBtn(root, state) {
       selectedColor: state.selectedColor,
       selectedInterior: state.selectedInterior,
       selectedWheels: state.selectedWheels,
-      selectedAccessories: state.data.accessories.filter((a) =>
+      // Scoped to the variant like the accessories step itself — the L03 Black Edition exists as one row
+      // per Ultra variant, and the summary lists whatever is handed over here.
+      selectedAccessories: getOptionsForVariant(state.data.accessories, state.selectedVariant?.variant_code).filter((a) =>
         state.selectedAccessories.includes(a.accessory_code)
       ),
       totals: calculateTotal(state),
