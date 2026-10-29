@@ -35,14 +35,15 @@ CDN = json.load(open(CDN_PATH)) if os.path.exists(CDN_PATH) else {}
 SLUG = 'l03'
 
 # ------------------------------------------------------------------ line-up (BAI order)
-# variant_code, display name, BAI column, price (EUR), XPENG DE version code (None = not sold in DE)
+# variant_code, display name, BAI column, price (EUR incl. 20% VAT, BAI price list 2026-10-29 — DECISIONS §1.17),
+# XPENG DE version code (None = not sold in DE)
 # Names use XPENG's casing ("Ultra"), BAI writes "ULTRA" — see DECISIONS.md.
 VARIANTS = [
-    ('rwd-sr',       'RWD Standard Range',    'B', 35600, 'DSAB'),
-    ('rwd-lr',       'RWD Long Range',        'C', 38600, 'DSBB'),
-    ('rwd-lr-ultra', 'RWD Long Range Ultra',  'D', 42600, None),   # price = pending decision
-    ('awd-ultra',    'AWD Performance Ultra', 'E', 46600, 'DSUB'),
-    ('powerx-lr',    'PowerX Long Range',     'F', 38600, 'DSFB'),
+    ('rwd-sr',       'RWD Standard Range',    'B', 36990, 'DSAB'),
+    ('rwd-lr',       'RWD Long Range',        'C', 39990, 'DSBB'),
+    ('rwd-lr-ultra', 'RWD Long Range Ultra',  'D', 44990, None),
+    ('awd-ultra',    'AWD Performance Ultra', 'E', 48490, 'DSUB'),
+    ('powerx-lr',    'PowerX Long Range',     'F', 39490, 'DSFB'),
 ]
 ULTRA = {'rwd-lr-ultra', 'awd-ultra'}   # 18" standard, 20" as option О2 (BAI rows 125-126, 204)
 
