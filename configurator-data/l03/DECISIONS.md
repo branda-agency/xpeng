@@ -347,15 +347,19 @@ Escape" зачертан, `, Escape ( само при AWD )` дописан сл
 - Production (www.xpengauto.bg) непроменен — там L03 няма нито един линк към конфигуратора. Следващият
   publish към custom домейните ще качи всичко това, затова до знака на Георги не се публикува production.
 
-**Нерешено от листа (чака Георги/BAI, не е пипано):**
-1. **D03 REEV Ultra — 42 990** — шеста версия (PowerX Ultra), която конфигураторът няма; няма спецификации от BAI.
-2. „Джанти 20" с цветни апарати не са опция, а стандарт за Ultra Long Range и Ultra Performance" — в конфигуратора
-   двете Ultra са с 18" стандарт + 20" опция О2 (§1.5, по предишния лист на BAI). Ако се приложи: Ultra само с
-   `20-sport` по подразбиране, без ред `18-standard`; чекмеджетата вече са на R20.
-3. „Black Edition — само за Ultra RWD & AWD" — в конфигуратора BE е само на awd-ultra (§1.5). Ако се приложи:
-   редове black-edition (Accessories) и `20-black-edition` (Wheels) и за rwd-lr-ultra; рендерите са общи.
-4. Имената в листа са „RWD Plus SR / RWD Plus LR / REEV Plus" — конфигураторът пази „RWD Standard Range / RWD
-   Long Range / PowerX Long Range" до изрично решение.
+**Решения на Георги по отворените точки от листа (2026-10-29, същия ден):**
+1. **D03 REEV Ultra — 42 990** — не се добавя, докато няма такава версия (BAI не е давал спецификации).
+2. **20" джанти = стандарт на двете Ultra** (листът: „не са опция, а стандарт за Ultra Long Range и Ultra
+   Performance"). Sheet → Wheels: редовете `18-standard` на rwd-lr-ultra / awd-ultra са махнати, `20-sport` е
+   `is_default TRUE` (sort 1); L03 вече има 7 реда (14–20), ред 21 изчистен. Рендерът на 20" идва от
+   `image_front_21` (main.js: wheel_code с 20/21), страничен/заден изглед остават 18" (няма колона, както в §1.5).
+   Опция О2 (§1.5, §2.3) отпада — няма какво да се цени.
+3. **Black Edition и на RWD LR Ultra** (листът: „само за Ultra RWD & AWD"). Sheet → Accessories ред 10 =
+   копие на реда за awd-ultra с `variant_code rwd-lr-ultra`; Wheels → `20-black-edition` и за rwd-lr-ultra
+   (sort 2). Без нови изображения — рендерите на BE и джантите са общи за двете версии.
+4. **Имената остават** „RWD Standard Range / RWD Long Range / RWD Long Range Ultra / AWD Performance Ultra /
+   PowerX Long Range" (листът на BAI казва „RWD Plus SR / RWD Plus LR / REEV Plus").
+`build.py` (`build_wheels`, `build_accessories`, `ULTRA`) генерира същото; проверено с `?refresh=true`.
 
 ---
 
@@ -377,7 +381,7 @@ Gray (+ Black Edition), „six distinctive exterior colours". Най-вероя�
 Purple** (build.py: `FIXES` замества „Graphite Gray" → „Phantom Purple"). Ако BAI потвърди
 Graphite Gray, трябва да поискаме рендери от HQ — не съществуват.
 
-### 2.3 Цена на опция О2 (20" джанти + жълти апарати на Ultra)
+### 2.3 Цена на опция О2 (20" джанти + жълти апарати на Ultra) — **отпада 2026-10-29: 20" са стандарт на Ultra (§1.17)**
 BAI: TBD. В XPENG DE 20" са стандарт за Ultra, няма референтна цена. В Sheet стои **0**.
 Сменя се в Sheet → Wheels, редовете `20-sport`.
 

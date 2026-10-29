@@ -45,7 +45,7 @@ VARIANTS = [
     ('awd-ultra',    'AWD Performance Ultra', 'E', 48490, 'DSUB'),
     ('powerx-lr',    'PowerX Long Range',     'F', 39490, 'DSFB'),
 ]
-ULTRA = {'rwd-lr-ultra', 'awd-ultra'}   # 18" standard, 20" as option О2 (BAI rows 125-126, 204)
+ULTRA = {'rwd-lr-ultra', 'awd-ultra'}   # 20" standard + Black Edition option (BAI price list 2026-10-29, §1.17)
 
 # Per-variant technical data as BAI states it. Power/torque are BAI's per-motor peak figures;
 # AWD torque is rear 280 + front 171. PowerX range/consumption/fuel are XPENG DE values
@@ -166,44 +166,47 @@ def build_interiors():
 
 
 def build_wheels():
-    """BAI "Опционално оборудване" rows 34-35 + option о2 (row 17): 18" standard on every version, 20" sport
-    wheels with yellow calipers as an option on both Ultra versions (price TBD at BAI → 0 for now),
-    Black Edition wheels only via option о3 on AWD Performance Ultra. Names follow BAI's wording."""
+    """BAI "Опционално оборудване" rows 34-35 + BAI price list 2026-10-29 (DECISIONS §1.17): 18" standard on
+    the non-Ultra versions; 20" sport wheels with yellow calipers are STANDARD (not option о2) on both Ultra
+    versions; Black Edition wheels via option о3 on both Ultra versions. Names follow BAI's wording."""
     header = ['model_slug', 'variant_code', 'wheel_code', 'wheel_name', 'price', 'is_default',
               'image_thumb', 'sort_order']
     rows = [header]
     for code, _, _, _, _ in VARIANTS:
         # 2026-09-15 (deck slides 3-4): "алуминиеви" dropped from the wheel step, Black Edition gets "джанти".
-        rows.append([SLUG, code, '18-standard', '18" джанти', 0, 'TRUE',
-                     img('l03-wheel-18.webp'), 1])
         if code in ULTRA:
             rows.append([SLUG, code, '20-sport',
-                         '20" спортни джанти и спирачни апарати в жълт цвят', 0, 'FALSE',
-                         img('l03-wheel-20.webp'), 2])
-        if code == 'awd-ultra':
+                         '20" спортни джанти и спирачни апарати в жълт цвят', 0, 'TRUE',
+                         img('l03-wheel-20.webp'), 1])
             rows.append([SLUG, code, '20-black-edition', '20" Black Edition джанти', 0, 'FALSE',
-                         img('l03-wheel-20-black-edition.webp'), 3])
+                         img('l03-wheel-20-black-edition.webp'), 2])
+        else:
+            rows.append([SLUG, code, '18-standard', '18" джанти', 0, 'TRUE',
+                         img('l03-wheel-18.webp'), 1])
     return rows
 
 
 def build_accessories():
-    """BAI "Опционално оборудване" rows 16-22. Option prices come from XPENG DE (BAI: TBD)."""
+    """BAI "Опционално оборудване" rows 16-22; prices confirmed by BAI's price list 2026-10-29, which also puts
+    Black Edition on both Ultra versions ("само за Ultra RWD & AWD")."""
     header = ['model_slug', 'variant_code', 'accessory_code', 'accessory_name', 'price',
               'description', 'image', 'sort_order']
-    return [
+    rows = [
         header,
         [SLUG, 'all', 'tow-hitch', 'Теглич с ръчно управление', 990,
          # Same wording as the G9/G6/P7+ tow hitch (BAI, 2026-09-03: identical info must read identically).
          # BAI gives no vertical load for the L03, so that part of the G9 line is omitted.
          '1 500 кг със спирачки / 750 кг без спирачки',
          img('l03-towbar.webp'), 1],
-        [SLUG, 'awd-ultra', 'black-edition', 'Black Edition', 1200,
+    ]
+    for code in ULTRA:
+        rows.append([SLUG, code, 'black-edition', 'Black Edition', 1200,
          # BAI "Опционално оборудване" rows 19-21, in BAI's order. Row 22 ("При избор на Black Edition отпада
          # опция о2 …") was their note to us, not part of the package — dropped 2026-09-15 (deck slide 3).
          'Черни 20" спортни джанти | Предни и задни спирачни апарати в черен цвят | '
          'Елементи на екстериора в опушен черен цвят',
-         img('l03-black-edition-front.webp'), 2],
-    ]
+         img('l03-black-edition-front.webp'), 2])
+    return rows
 
 
 # ---------------------------------------------------------------- spec drawers from BAI's sheet
