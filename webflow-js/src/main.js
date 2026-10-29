@@ -2532,7 +2532,9 @@ function reconstructConfig(data, params) {
   var color = colors.find(function(c) { return c.color_code === colorCode; }) || colors[0];
   var interior = interiors.find(function(i) { return i.interior_code === interiorCode; }) || interiors[0];
   var selectedWheels = wheels.find(function(w) { return w.wheel_code === wheelCode; }) || wheels[0];
-  var accessories = data.accessories.filter(function(a) { return accCodes.includes(a.accessory_code); });
+  // Variant-scoped like the configurator itself: an accessory that exists as separate rows per variant
+  // (L03 Black Edition on both Ultras) must resolve to one item, not one per row.
+  var accessories = getOptionsForVariant(data.accessories, variant.variant_code).filter(function(a) { return accCodes.includes(a.accessory_code); });
 
   // Black Edition includes the color — no separate color surcharge
   var hasBE = accessories.some(function(a) { return a.accessory_code === 'black-edition'; });
