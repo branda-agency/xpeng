@@ -9,7 +9,7 @@
 (за Google Sheet), `spec-drawers-bg.html` + `drawers/*.html` (за Webflow чекмеджетата).
 Скриптът печата кои редове от таблицата са пропуснати като немаркирани.
 
-Автор: Georgi. Последна актуализация: 2026-10-29.
+Автор: Georgi. Последна актуализация: 2026-11-09.
 
 ---
 
@@ -378,6 +378,44 @@ Ultra версия. Поправено в `main.js` (continue handler и `recons
 hero-то. API-то сервира новите цени и редовете за джанти/Black Edition. Не е пипан href prefix `/bg`
 (виж бележката за HQ UAT) — отделна стъпка.
 
+### 1.18 Black Edition само на AWD Performance Ultra (2026-11-02)
+
+BAI (съобщение в чата, 2026-11-02): „при RWD Long Range Ultra за L03 не трябва да има Black Edition — само
+при AWD Performance Ultra". Това отменя т. 3 от §1.17 (ценовата листа казваше „само за Ultra RWD & AWD").
+
+- Sheet → Accessories: редът `rwd-lr-ultra / black-edition` (ред 10) е изтрит (остава само `awd-ultra`, ред 9);
+  Wheels: редът `rwd-lr-ultra / 20-black-edition` (ред 17) е изтрит (L03 остава с 6 реда, 14–19). Направено през
+  Chrome на 2026-11-02 (extension-ът трябва да е вписан с акаунта на сесията — тук georgitsonevvv).
+- `build.py`: ново множество `BLACK_EDITION = {'awd-ultra'}` за аксесоара и BE джантата; `ULTRA` остава само
+  за 20" стандарт и рендерите `-20`. `sheet/accessories.tsv` и `sheet/wheels.tsv` регенерирани, чекмеджетата
+  са без промяна.
+- Без промяна в `main.js` и без Webflow publish — конфигураторът чете редовете от API-то. Проверено с
+  `?refresh=true` и без него: за rwd-lr-ultra API-то връща само `20-sport` и теглича; `black-edition` и
+  `20-black-edition` остават само за awd-ultra.
+
+### 1.19 Тест драйв за L03 — само XPENG София (2026-11-09)
+
+Георги (2026-11-09): Дженеръс София вече има тестов L03, Пловдив още няма и не е ясно кога ще има.
+Заявки за тест драйв на L03 се приемат, но засега само към шоурума в София.
+
+- Webflow (`/test-drive`): четвърто радио „L03" в `td-form__radio-row` (стойност `L03`, id `L03`, група
+  „Choose a model", required) — копие на P7+ картата през временен компонент (headless builder-ът прави
+  радио без custom стила и с `name="radio"`, затова копието). Нов комбо клас `radio-card.is--l03` с фон
+  `l03_product_side_home` (asset `6a991cafc437b9dd9becac58`, `background-size: 133% auto`, защото
+  рендерът е по-широк от тъмбнейлите на другите модели). Четирите карти се свиват до ~200px в
+  `container.is--small`; на мобилен са в колона както досега.
+- Webflow, включена видимост: Nav мега карта „Тест Драйв" (`/test-drive?model=l03`), подлинк в drawer-а на
+  L03, бутон „Заявете тестдрайв" в hero на `/model/l03` (линкът му сочеше `?model=p7-plus`, поправен на
+  `?model=l03`).
+- `main.js` → `initTestDrivePage()`: `slugToValue.l03 = 'L03'`; `sofiaOnlyModels = { L03: true }` — при избран
+  L03 опцията „XPENG Пловдив" в селектора „Дилърство" се скрива (hidden + disabled) и стойността става
+  „XPENG София"; при смяна на модела опцията се връща. Селекторът не се disable-ва, за да се подаде полето
+  (иначе Apps Script-ът праща заявката без дилър към marketing@). Бонус: `?dealer=<store id>` от Find Us
+  (`sofia` / `plovdiv`) вече предварително избира дилърството; при `?model=l03` София печели.
+- Apps Script без промяна — моделът влиза само в subject-а, маршрутът е по името на дилърството.
+- Публикувано: Cloudflare (commit `f125dfb`), Webflow staging + production (`xpengauto.bg`, `www`) на
+  2026-11-09. **Когато Пловдив получи L03:** махни `L03` от `sofiaOnlyModels`, build, push — без Webflow publish.
+
 ---
 
 ## 2. Висящи решения (чакат BAI / Георги)
@@ -409,14 +447,12 @@ BAI: TBD. В XPENG DE 20" са стандарт за Ultra, няма рефер�
   `energy_consumption`.
 - Цени на теглич (990 €) и Black Edition (1 200 €).
 
-### 2.5 Тест драйв формата
-Формата на `/test-drive` има радио бутони само за G6, G9, P7+. За предварително избиране на L03
-от конфигуратора трябва да се добави радио „L03" във Webflow формата и запис в `slugToValue`
-в `initTestDrivePage()` (main.js). Не е правено.
+### 2.5 Тест драйв формата — **решено 2026-11-09 (§1.19)**
+Радио „L03" е добавено; заявките за L03 отиват само към XPENG София, докато Пловдив няма тестова кола.
 
 ### 2.6 Продуктова страница и навигация — **решено 2026-10-29 (§1.17)**
 `/model/l03`, L03 в навигацията и линковете към конфигуратора са публикувани на xpengauto.bg.
-Остават скрити само бутоните „Заявете тестдрайв" за L03 (формата няма L03 радио, §2.5).
+Бутоните „Заявете тестдрайв" за L03 са включени на 2026-11-09 (§1.19).
 
 ---
 
@@ -435,7 +471,7 @@ BAI: TBD. В XPENG DE 20" са стандарт за Ultra, няма рефер�
 
 ## 4. Къде живее какво
 - Google Sheet `1x7-MXtThVswesstv0mLuG8y8SB6wi4XlD9bUv27uJc8` — L03 редове: Models 5,
-  Variants 11–15, Colors 24–48, Interiors 14–23, Wheels 14–21, Accessories 8–9.
+  Variants 11–15, Colors 24–48, Interiors 14–23, Wheels 14–19, Accessories 8–9 (§1.18).
 - Webflow page `/configurator/l03` (id `6a8ffc00590bbe27505d4853`), чекмеджета
   `[data-drawer-name="specs-<variant_code>"]`, всяко = `h2.drawer__h2` + `div.drawer__text`
   (`p` WLTP ред + `h3.drawer__section` / `h4.drawer__subsection` + `ul`).
