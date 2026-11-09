@@ -2476,8 +2476,8 @@ function bindContinueBtn(root, state) {
       selectedColor: state.selectedColor,
       selectedInterior: state.selectedInterior,
       selectedWheels: state.selectedWheels,
-      // Scoped to the variant like the accessories step itself — the L03 Black Edition exists as one row
-      // per Ultra variant, and the summary lists whatever is handed over here.
+      // Scoped to the variant like the accessories step itself — an accessory may exist as one row per
+      // variant (L03 Black Edition did, on both Ultras, until 2026-11-02), and the summary lists whatever is handed over here.
       selectedAccessories: getOptionsForVariant(state.data.accessories, state.selectedVariant?.variant_code).filter((a) =>
         state.selectedAccessories.includes(a.accessory_code)
       ),
@@ -2535,7 +2535,7 @@ function reconstructConfig(data, params) {
   var interior = interiors.find(function(i) { return i.interior_code === interiorCode; }) || interiors[0];
   var selectedWheels = wheels.find(function(w) { return w.wheel_code === wheelCode; }) || wheels[0];
   // Variant-scoped like the configurator itself: an accessory that exists as separate rows per variant
-  // (L03 Black Edition on both Ultras) must resolve to one item, not one per row.
+  // (L03 Black Edition on both Ultras until 2026-11-02) must resolve to one item, not one per row.
   var accessories = getOptionsForVariant(data.accessories, variant.variant_code).filter(function(a) { return accCodes.includes(a.accessory_code); });
 
   // Black Edition includes the color — no separate color surcharge
@@ -2691,8 +2691,16 @@ function initTestDrivePage() {
   if (!root) return;
 
   // Map configurator slugs to Webflow radio values
-  var slugToValue = { 'g9': 'G9', 'g6': 'G6', 'p7-plus': 'P7+' };
+  var slugToValue = { 'g9': 'G9', 'g6': 'G6', 'p7-plus': 'P7+', 'l03': 'L03' };
   var radios = root.querySelectorAll('input[name="Choose-a-model"]');
+
+  /* Dealer select (values = dealership names, the routing key shared with FIND_US_STORES and the
+     Apps Script DEALERS map). Find Us links arrive with ?dealer=<store id>. */
+  var dealerSelect = root.querySelector('[data-test-drive-dealer]');
+  var dealerIdToName = { 'sofia': 'XPENG София', 'plovdiv': 'XPENG Пловдив' };
+  /* Models with a demo car in Sofia only — Plovdiv has no L03 yet (BAI, 2026-11-09). Remove the
+     entry once Plovdiv gets one; the select then offers both dealerships again. */
+  var sofiaOnlyModels = { 'L03': true };
 
   function selectModel(slug) {
     var value = slugToValue[slug];
@@ -2707,11 +2715,31 @@ function initTestDrivePage() {
         if (radioVisual) radioVisual.classList.remove('w--redirected-checked');
       }
     });
+    syncDealers();
   }
 
-  // Pre-select from URL param or default to G9
+  /* Hide the dealerships that cannot offer the selected model. The select stays enabled so the
+     field is still submitted (a disabled select would reach the Apps Script without a dealer). */
+  function syncDealers() {
+    if (!dealerSelect) return;
+    var checked = root.querySelector('input[name="Choose-a-model"]:checked');
+    var sofiaOnly = !!(checked && sofiaOnlyModels[checked.value]);
+    Array.prototype.forEach.call(dealerSelect.options, function(opt) {
+      if (!opt.value) return;
+      var allowed = !sofiaOnly || opt.value === dealerIdToName.sofia;
+      opt.hidden = !allowed;
+      opt.disabled = !allowed;
+    });
+    if (sofiaOnly) dealerSelect.value = dealerIdToName.sofia;
+  }
+
+  radios.forEach(function(radio) { radio.addEventListener('change', syncDealers); });
+
+  // Pre-select from URL params (?model= from configurator/nav, ?dealer= from Find Us) or default to G9
   var params = new URLSearchParams(window.location.search);
   var preselected = params.get('model');
+  var dealerParam = params.get('dealer');
+  if (dealerSelect && dealerParam && dealerIdToName[dealerParam]) dealerSelect.value = dealerIdToName[dealerParam];
   if (preselected && slugToValue[preselected]) {
     selectModel(preselected);
   } else {
