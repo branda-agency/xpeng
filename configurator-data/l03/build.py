@@ -45,7 +45,8 @@ VARIANTS = [
     ('awd-ultra',    'AWD Performance Ultra', 'E', 48490, 'DSUB'),
     ('powerx-lr',    'PowerX Long Range',     'F', 39490, 'DSFB'),
 ]
-ULTRA = {'rwd-lr-ultra', 'awd-ultra'}   # 20" standard + Black Edition option (BAI price list 2026-10-29, §1.17)
+ULTRA = {'rwd-lr-ultra', 'awd-ultra'}   # 20" standard (BAI price list 2026-10-29, §1.17)
+BLACK_EDITION = {'awd-ultra'}           # option о3 only on AWD Performance Ultra (BAI, 2026-11-02, §1.18)
 
 # Per-variant technical data as BAI states it. Power/torque are BAI's per-motor peak figures;
 # AWD torque is rear 280 + front 171. PowerX range/consumption/fuel are XPENG DE values
@@ -168,7 +169,8 @@ def build_interiors():
 def build_wheels():
     """BAI "Опционално оборудване" rows 34-35 + BAI price list 2026-10-29 (DECISIONS §1.17): 18" standard on
     the non-Ultra versions; 20" sport wheels with yellow calipers are STANDARD (not option о2) on both Ultra
-    versions; Black Edition wheels via option о3 on both Ultra versions. Names follow BAI's wording."""
+    versions; Black Edition wheels via option о3 on AWD Performance Ultra only (BAI, 2026-11-02, §1.18).
+    Names follow BAI's wording."""
     header = ['model_slug', 'variant_code', 'wheel_code', 'wheel_name', 'price', 'is_default',
               'image_thumb', 'sort_order']
     rows = [header]
@@ -178,8 +180,9 @@ def build_wheels():
             rows.append([SLUG, code, '20-sport',
                          '20" спортни джанти и спирачни апарати в жълт цвят', 0, 'TRUE',
                          img('l03-wheel-20.webp'), 1])
-            rows.append([SLUG, code, '20-black-edition', '20" Black Edition джанти', 0, 'FALSE',
-                         img('l03-wheel-20-black-edition.webp'), 2])
+            if code in BLACK_EDITION:
+                rows.append([SLUG, code, '20-black-edition', '20" Black Edition джанти', 0, 'FALSE',
+                             img('l03-wheel-20-black-edition.webp'), 2])
         else:
             rows.append([SLUG, code, '18-standard', '18" джанти', 0, 'TRUE',
                          img('l03-wheel-18.webp'), 1])
@@ -187,8 +190,9 @@ def build_wheels():
 
 
 def build_accessories():
-    """BAI "Опционално оборудване" rows 16-22; prices confirmed by BAI's price list 2026-10-29, which also puts
-    Black Edition on both Ultra versions ("само за Ultra RWD & AWD")."""
+    """BAI "Опционално оборудване" rows 16-22; prices confirmed by BAI's price list 2026-10-29. Black Edition is
+    offered on AWD Performance Ultra only — BAI's 2026-11-02 correction of their price list's "само за Ultra RWD
+    & AWD" (DECISIONS §1.18)."""
     header = ['model_slug', 'variant_code', 'accessory_code', 'accessory_name', 'price',
               'description', 'image', 'sort_order']
     rows = [
@@ -199,7 +203,7 @@ def build_accessories():
          '1 500 кг със спирачки / 750 кг без спирачки',
          img('l03-towbar.webp'), 1],
     ]
-    for code in ULTRA:
+    for code in BLACK_EDITION:
         rows.append([SLUG, code, 'black-edition', 'Black Edition', 1200,
          # BAI "Опционално оборудване" rows 19-21, in BAI's order. Row 22 ("При избор на Black Edition отпада
          # опция о2 …") was their note to us, not part of the package — dropped 2026-09-15 (deck slide 3).

@@ -8,7 +8,7 @@ Webflow + Cloudflare Pages + Vite
 
 ## Live URLs
 - **Webflow staging:** `https://xpengg.webflow.io/`
-- **Cloudflare CDN:** `https://xpeng-bg.pages.dev/`
+- **Cloudflare CDN:** `https://xpeng-de2.pages.dev/`
 - **Production:** `xpeng.com/bg` (HQ manages DNS, reverse proxy to Webflow)
 
 ## Brand Values
@@ -71,7 +71,7 @@ Webflow (Design + GSAP)  →  GitHub (Code)  →  Cloudflare Pages (CDN)
 ### IDs & Config
 - **Webflow subdomain:** `xpengg.webflow.io`
 - **GitHub repo:** `branda-agency/xpeng`
-- **Cloudflare Pages:** `xpeng-bg.pages.dev`
+- **Cloudflare Pages:** `xpeng-de2.pages.dev`
 - **Cloudflare account:** Eyas.team@gmail.com
 
 ### Vite Project (`webflow-js/`)
@@ -82,11 +82,11 @@ Webflow (Design + GSAP)  →  GitHub (Code)  →  Cloudflare Pages (CDN)
 ### Webflow Custom Code
 **Head:**
 ```html
-<link rel="stylesheet" href="https://xpeng-bg.pages.dev/motion.css">
+<link rel="stylesheet" href="https://xpeng-de2.pages.dev/motion.css">
 ```
 **Footer:**
 ```html
-<script src="https://xpeng-bg.pages.dev/main.js"></script>
+<script src="https://xpeng-de2.pages.dev/main.js"></script>
 ```
 
 ### Local Dev (swap in Webflow custom code for testing)
