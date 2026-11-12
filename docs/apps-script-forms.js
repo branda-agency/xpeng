@@ -35,7 +35,8 @@ var MAIN_INBOX = 'marketing@xpengauto.bg';
    and the store names in FIND_US_STORES (webflow-js/src/main.js). */
 var DEALERS = {
   'XPENG София': 'boyko.shatev@gauto.bg',
-  'XPENG Пловдив': 'chavdar.semerdjiev@gauto.bg'
+  'XPENG Пловдив': 'chavdar.semerdjiev@gauto.bg',
+  'XPENG Варна': 'info@bulauto.com'
 };
 
 /* Order of the rows in the lead email; anything else the form sends is appended. */

@@ -2697,10 +2697,14 @@ function initTestDrivePage() {
   /* Dealer select (values = dealership names, the routing key shared with FIND_US_STORES and the
      Apps Script DEALERS map). Find Us links arrive with ?dealer=<store id>. */
   var dealerSelect = root.querySelector('[data-test-drive-dealer]');
-  var dealerIdToName = { 'sofia': 'XPENG София', 'plovdiv': 'XPENG Пловдив' };
-  /* Models with a demo car in Sofia only — Plovdiv has no L03 yet (BAI, 2026-11-09). Remove the
-     entry once Plovdiv gets one; the select then offers both dealerships again. */
-  var sofiaOnlyModels = { 'L03': true };
+  var dealerIdToName = { 'sofia': 'XPENG София', 'plovdiv': 'XPENG Пловдив', 'varna': 'XPENG Варна' };
+  /* Demo cars per dealership (radio values). A dealership missing from the map offers every model.
+     Plovdiv has no L03 yet (BAI, 2026-11-09); Varna opened with G6 and G9 only (BAI, 2026-11-12).
+     Add the model to the list (or drop the entry) once the dealership gets the car. */
+  var dealerModels = {
+    'XPENG Пловдив': ['G9', 'G6', 'P7+'],
+    'XPENG Варна': ['G9', 'G6']
+  };
 
   function selectModel(slug) {
     var value = slugToValue[slug];
@@ -2723,14 +2727,19 @@ function initTestDrivePage() {
   function syncDealers() {
     if (!dealerSelect) return;
     var checked = root.querySelector('input[name="Choose-a-model"]:checked');
-    var sofiaOnly = !!(checked && sofiaOnlyModels[checked.value]);
+    var model = checked ? checked.value : '';
+    var available = [];
     Array.prototype.forEach.call(dealerSelect.options, function(opt) {
       if (!opt.value) return;
-      var allowed = !sofiaOnly || opt.value === dealerIdToName.sofia;
+      var models = dealerModels[opt.value];
+      var allowed = !model || !models || models.indexOf(model) !== -1;
       opt.hidden = !allowed;
       opt.disabled = !allowed;
+      if (allowed) available.push(opt.value);
     });
-    if (sofiaOnly) dealerSelect.value = dealerIdToName.sofia;
+    /* A single dealership left is fixed; a choice that no longer offers the model is cleared. */
+    if (available.length === 1) dealerSelect.value = available[0];
+    else if (dealerSelect.value && available.indexOf(dealerSelect.value) === -1) dealerSelect.value = '';
   }
 
   radios.forEach(function(radio) { radio.addEventListener('change', syncDealers); });
@@ -2910,10 +2919,11 @@ function buildCategorySlider(sections) {
    Docs: docs/find-us-spec.md
    ============================================================ */
 
-/* --- Store data: dealerships supplied by BAI (2026-10-01).
+/* --- Store data: dealerships supplied by BAI (2026-10-01; Varna 2026-11-12).
    Opening hours are not confirmed yet, so `hours` stays empty and the card
    hides the block. Plovdiv has no street number ("6-ти километър"); its
-   coordinates are the dealer group's own map pin for that address. --- */
+   coordinates are the dealer group's own map pin for that address. Varna's
+   are the OpenStreetMap pin of the showroom at Vladislav Varnenchik 262. --- */
 var FIND_US_STORES = [
   {
     id: 'sofia',
@@ -2954,6 +2964,28 @@ var FIND_US_STORES = [
         status: 'open',
         phone: '0896 887 943',
         email: 'chavdar.semerdjiev@gauto.bg',
+        link: '',
+        hours: {}
+      }
+    ]
+  },
+  {
+    id: 'varna',
+    name: 'XPENG Варна',
+    address: 'бул. Владислав Варненчик 262, Варна',
+    city: 'Варна',
+    lat: 43.223110,
+    lng: 27.870746,
+    phone: '052 808 808',
+    email: 'info@bulauto.com',
+    coverImage: '',
+    services: [
+      {
+        type: 'experience',
+        label: 'Шоурум',
+        status: 'open',
+        phone: '052 808 808',
+        email: 'info@bulauto.com',
         link: '',
         hours: {}
       }
