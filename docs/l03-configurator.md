@@ -145,6 +145,6 @@ python3 build.py
 2. **Оставащо от BAI:** потвърждение дали PowerX се внася, срок за доставка, CO₂ клас на PowerX.
 3. **Тест драйв за L03 (2026-11-09).** Формата има радио „L03"; бутоните „Заявете тестдрайв" на `/model/l03`
    и в менюто са включени. Заявките за L03 отиват само към XPENG София (Пловдив още няма тестова кола) —
-   `sofiaOnlyModels` в `initTestDrivePage()`; при L03 Пловдив се скрива от селектора. DECISIONS §1.19.
+   `dealerModels` в `initTestDrivePage()` (до 2026-11-12 `sofiaOnlyModels`); при L03 Пловдив и Варна се скриват от селектора. DECISIONS §1.19, §1.20.
 4. **href prefix `/bg` + redirect** (HQ UAT т. 2) не е направен с този publish; JS patch-ът
    `applyBasePathToLinks()` още носи UAT.
